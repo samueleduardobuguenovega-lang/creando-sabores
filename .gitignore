@@ -15,6 +15,9 @@ respaldo-*.sql
 respaldo-*.tgz
 respaldos/
 
+# Índice local del analizador de código (codebase-memory): pesa y no le sirve a nadie más
+.codebase-memory/
+
 # Sistema operativo y editores
 .DS_Store
 Thumbs.db

@@ -10,9 +10,9 @@ npm-debug.log*
 app/uploads/
 uploads/
 
-# Respaldos
-*.sql
-*.tgz
+# Respaldos (ojo: no usar *.sql — se llevaría app/src/schema.sql)
+respaldo-*.sql
+respaldo-*.tgz
 respaldos/
 
 # Sistema operativo y editores

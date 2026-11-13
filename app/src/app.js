@@ -19,6 +19,10 @@ function crearApp() {
   app.set('views', path.join(__dirname, '..', 'views'));
   app.disable('x-powered-by');
 
+  // Detrás del proxy del hosting (Render, Cloud Run) las cookies "secure" solo
+  // se envían si Express confía en el proxy: sin esto el login no persiste.
+  if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
+
   app.use(express.urlencoded({ extended: false }));
   app.use(express.static(path.join(__dirname, '..', 'public')));
 

@@ -195,3 +195,4 @@ Detalle operativo en `docs/plan-trabajo.md`.
 ## 6. Log
 
 - **2026-11-13** — Repositorio creado. T1–T4 implementadas por Samuel con 37 pruebas de integración en verde (auth, talleres, panel, usuarios, módulos pendientes). Documento ODD creado; issues abiertas para T5–T12. Base de referencia tomada del prototipo de noviembre 2026 (misma decisión de stack: Express + PostgreSQL).
+- **2026-11-13** — Listo para publicar: `render.yaml` (servicio + base en un clic), arranque en contenedor que crea el esquema y siembra datos, y `trust proxy` para que la sesión funcione detrás de HTTPS. Firebase Hosting queda descartado para el servidor: exige Blaze con tarjeta (ver `docs/despliegue.md`).

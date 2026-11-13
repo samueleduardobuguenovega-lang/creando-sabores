@@ -1,0 +1,35 @@
+# Publicación en Render con un clic.
+# Un "Blueprint" en Render lee este archivo del repositorio y crea la base y el
+# servicio juntos: no hay que configurar nada a mano.
+
+services:
+  - type: web
+    name: creando-sabores
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: creando-sabores-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+      # Siembra los datos de ejemplo en el primer arranque. Después de la
+      # primera vez se puede dejar en 1: el seed no duplica si ya hay usuarios.
+      - key: SEMBRAR
+        value: "1"
+      - key: CLAVE_ADMIN
+        sync: false
+      - key: CLAVE_DOCENTE
+        sync: false
+
+databases:
+  - name: creando-sabores-db
+    plan: free
+    databaseName: creando_sabores
+    user: creando

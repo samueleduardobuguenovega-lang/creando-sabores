@@ -121,6 +121,7 @@ El detalle de cada tarea, con lo que hay que cumplir para darla por terminada, e
 - [`docs/requerimientos.md`](docs/requerimientos.md) — trazabilidad SRS → código → prueba.
 - [`docs/modelo-datos.md`](docs/modelo-datos.md) — diagrama, decisiones y relación con el del SRS.
 - [`docs/plan-trabajo.md`](docs/plan-trabajo.md) — reparto, ramas, hitos y forma de entrega.
+- [`docs/despliegue.md`](docs/despliegue.md) — cómo publicarlo (y por qué Firebase Hosting solo no alcanza).
 - [`docs/manual-usuario.md`](docs/manual-usuario.md) — uso por rol.
 - [`docs/operacion.md`](docs/operacion.md) — despliegue, respaldo y restauración.
 

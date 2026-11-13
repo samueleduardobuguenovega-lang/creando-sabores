@@ -7,12 +7,13 @@ COPY app/package.json app/package-lock.json ./
 RUN npm ci --omit=dev
 
 COPY app/ ./
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 # Los archivos subidos viven fuera de public/ y se montan como volumen.
-RUN mkdir -p /app/uploads
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && mkdir -p /app/uploads
 
 ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["docker-entrypoint.sh"]

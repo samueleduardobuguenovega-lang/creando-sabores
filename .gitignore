@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+npm-debug.log*
+
+# Configuración local
+.env
+.env.*
+
+# Archivos subidos por los usuarios: nunca al repositorio
+app/uploads/
+uploads/
+
+# Respaldos
+*.sql
+*.tgz
+respaldos/
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

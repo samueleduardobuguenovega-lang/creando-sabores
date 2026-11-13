@@ -1,0 +1,47 @@
+<%- include('../partials/head') %>
+
+<h1><%= titulo %></h1>
+
+<% if (errores.length > 0) { %>
+  <div class="mensaje mensaje-error" role="alert">
+    <p>Revisa estos puntos:</p>
+    <ul>
+      <% errores.forEach(function (linea) { %><li><%= linea %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post"
+      action="<%= modo === 'crear' ? '/admin/usuarios' : '/admin/usuarios/' + cuenta.id %>"
+      class="formulario">
+
+  <label for="nombre">Nombre completo</label>
+  <input id="nombre" name="nombre" type="text" required maxlength="120" value="<%= cuenta.nombre %>">
+
+  <label for="usuario">Nombre de usuario</label>
+  <input id="usuario" name="usuario" type="text" required maxlength="60" value="<%= cuenta.usuario %>">
+  <p class="ayuda">Letras, números, punto, guion y guion bajo. No se puede repetir.</p>
+
+  <label for="rol">Rol</label>
+  <select id="rol" name="rol">
+    <option value="docente" <%= cuenta.rol === 'docente' ? 'selected' : '' %>>Docente</option>
+    <option value="admin" <%= cuenta.rol === 'admin' ? 'selected' : '' %>>Administrador</option>
+  </select>
+
+  <label for="clave"><%= modo === 'crear' ? 'Contraseña' : 'Nueva contraseña (opcional)' %></label>
+  <input id="clave" name="clave" type="password" autocomplete="new-password"
+         <%= modo === 'crear' ? 'required' : '' %> minlength="8">
+  <p class="ayuda">Mínimo 8 caracteres. Si no la cambias, queda la anterior.</p>
+
+  <label class="casilla">
+    <input type="checkbox" name="activo" <%= cuenta.activo ? 'checked' : '' %>>
+    Cuenta activa
+  </label>
+
+  <div class="acciones">
+    <button type="submit" class="boton boton-primario">Guardar</button>
+    <a class="boton boton-texto" href="/admin/usuarios">Cancelar</a>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

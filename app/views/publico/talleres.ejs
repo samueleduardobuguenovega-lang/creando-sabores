@@ -1,0 +1,35 @@
+<%- include('../partials/head') %>
+
+<h1>Talleres</h1>
+
+<form method="get" action="/talleres" class="filtros">
+  <label for="anio">Filtrar por año</label>
+  <select id="anio" name="anio">
+    <option value="">Todos</option>
+    <% anios.forEach(function (fila) { %>
+      <option value="<%= fila.anio %>" <%= String(anio) === String(fila.anio) ? 'selected' : '' %>><%= fila.anio %></option>
+    <% }) %>
+  </select>
+  <button type="submit" class="boton">Filtrar</button>
+</form>
+
+<% if (talleres.length === 0) { %>
+  <p class="ayuda">No hay talleres para mostrar con ese filtro.</p>
+<% } else { %>
+  <ul class="lista-tarjetas">
+    <% talleres.forEach(function (taller) { %>
+      <li class="tarjeta">
+        <p class="etiqueta"><%= taller.tematica %></p>
+        <h2><%= taller.nombre %></h2>
+        <p><%= taller.descripcion %></p>
+        <p class="ayuda">
+          <%= taller.estado === 'finalizado' ? 'Realizado' : 'Programado' %>:
+          <%= fecha(taller.fecha_planificada) %>
+          · Recetas asociadas: <%= taller.recetas %>
+        </p>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,48 @@
+<%- include('../partials/head') %>
+
+<h1><%= titulo %></h1>
+
+<% if (errores.length > 0) { %>
+  <div class="mensaje mensaje-error" role="alert">
+    <p>Revisa estos puntos:</p>
+    <ul>
+      <% errores.forEach(function (linea) { %><li><%= linea %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post"
+      action="<%= modo === 'crear' ? '/admin/talleres' : '/admin/talleres/' + taller.id %>"
+      class="formulario">
+
+  <label for="nombre">Nombre del taller</label>
+  <input id="nombre" name="nombre" type="text" required maxlength="140" value="<%= taller.nombre %>">
+
+  <label for="tematica">Temática</label>
+  <input id="tematica" name="tematica" type="text" required maxlength="120" value="<%= taller.tematica %>">
+
+  <label for="descripcion">Descripción</label>
+  <textarea id="descripcion" name="descripcion" rows="5" maxlength="2000"><%= taller.descripcion %></textarea>
+
+  <div class="fila-campos">
+    <div>
+      <label for="fecha_planificada">Fecha planificada</label>
+      <input id="fecha_planificada" name="fecha_planificada" type="date" value="<%= taller.fecha_planificada %>">
+    </div>
+    <div>
+      <label for="estado">Estado</label>
+      <select id="estado" name="estado">
+        <% ['planificado', 'en_ejecucion', 'finalizado'].forEach(function (clave) { %>
+          <option value="<%= clave %>" <%= taller.estado === clave ? 'selected' : '' %>><%= etiquetaEstado[clave] %></option>
+        <% }) %>
+      </select>
+    </div>
+  </div>
+
+  <div class="acciones">
+    <button type="submit" class="boton boton-primario">Guardar</button>
+    <a class="boton boton-texto" href="/admin/talleres">Cancelar</a>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

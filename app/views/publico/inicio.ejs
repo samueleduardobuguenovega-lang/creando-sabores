@@ -1,0 +1,49 @@
+<%- include('../partials/head') %>
+
+<section class="portada">
+  <h1>Talleres que se quedan</h1>
+  <p class="portada-texto">
+    Aquí queda registrado cada taller gastronómico: sus recetas, sus documentos y lo que
+    realmente pasó el día de la actividad.
+  </p>
+  <div class="acciones">
+    <a class="boton boton-primario" href="/talleres">Ver talleres</a>
+    <a class="boton" href="/ejecuciones">Ver ejecuciones</a>
+  </div>
+</section>
+
+<section class="indicadores" aria-label="Resumen">
+  <div class="indicador">
+    <span class="indicador-numero"><%= resumen.talleres %></span>
+    <span class="indicador-texto">Talleres registrados</span>
+  </div>
+  <div class="indicador">
+    <span class="indicador-numero"><%= resumen.finalizados %></span>
+    <span class="indicador-texto">Talleres finalizados</span>
+  </div>
+  <div class="indicador">
+    <span class="indicador-numero"><%= totalRecetas %></span>
+    <span class="indicador-texto">Recetas disponibles</span>
+  </div>
+</section>
+
+<h2>Últimos talleres</h2>
+<% if (ultimos.length === 0) { %>
+  <p class="ayuda">Todavía no hay talleres registrados.</p>
+<% } else { %>
+  <ul class="lista-tarjetas">
+    <% ultimos.forEach(function (taller) { %>
+      <li class="tarjeta">
+        <p class="etiqueta"><%= taller.tematica %></p>
+        <h3><%= taller.nombre %></h3>
+        <p class="ayuda">
+          Estado: <%= etiquetaEstado[taller.estado] || taller.estado %>
+          · Fecha: <%= fecha(taller.fecha_planificada) %>
+          · Ejecuciones: <%= taller.ejecuciones %>
+        </p>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<%- include('../partials/footer') %>

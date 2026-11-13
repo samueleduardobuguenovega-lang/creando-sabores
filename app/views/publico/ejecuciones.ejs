@@ -1,0 +1,23 @@
+<%- include('../partials/head') %>
+
+<h1>Ejecuciones</h1>
+<p class="ayuda">Lo que ocurrió en cada taller, en orden de fecha. Solo se publica el número de participantes, nunca nombres.</p>
+
+<% if (ejecuciones.length === 0) { %>
+  <p class="ayuda">Todavía no hay ejecuciones registradas.</p>
+<% } else { %>
+  <ul class="lista-tarjetas">
+    <% ejecuciones.forEach(function (ejecucion) { %>
+      <li class="tarjeta">
+        <p class="etiqueta"><%= fecha(ejecucion.fecha_ejecucion) %></p>
+        <h2><%= ejecucion.taller %></h2>
+        <p class="ayuda"><%= ejecucion.tematica %> · Participantes: <%= ejecucion.cantidad_participantes %></p>
+        <% if (ejecucion.observaciones) { %>
+          <p><%= ejecucion.observaciones %></p>
+        <% } %>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Registro, administración y consulta de talleres gastronómicos de Creando Sabores.">
+  <title><%= titulo %> · Creando Sabores</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="/">
+        <span class="marca-punto" aria-hidden="true"></span>
+        Creando Sabores
+      </a>
+
+      <nav class="navegacion" aria-label="Menú principal">
+        <% if (usuario) { %>
+          <a href="/panel" class="<%= rutaActual === '/panel' ? 'activo' : '' %>">Panel</a>
+          <a href="/admin/talleres" class="<%= rutaActual.startsWith('/admin/talleres') ? 'activo' : '' %>">Talleres</a>
+          <a href="/admin/recetas" class="<%= rutaActual === '/admin/recetas' ? 'activo' : '' %>">Recetas</a>
+          <a href="/admin/documentos" class="<%= rutaActual === '/admin/documentos' ? 'activo' : '' %>">Documentos</a>
+          <a href="/admin/videos" class="<%= rutaActual === '/admin/videos' ? 'activo' : '' %>">Videos</a>
+          <a href="/admin/ejecuciones" class="<%= rutaActual === '/admin/ejecuciones' ? 'activo' : '' %>">Ejecuciones</a>
+          <% if (usuario.rol === 'admin') { %>
+            <a href="/admin/usuarios" class="<%= rutaActual.startsWith('/admin/usuarios') ? 'activo' : '' %>">Usuarios</a>
+            <a href="/admin/auditoria" class="<%= rutaActual === '/admin/auditoria' ? 'activo' : '' %>">Auditoría</a>
+          <% } %>
+        <% } else { %>
+          <a href="/" class="<%= rutaActual === '/' ? 'activo' : '' %>">Inicio</a>
+          <a href="/talleres" class="<%= rutaActual === '/talleres' ? 'activo' : '' %>">Talleres</a>
+          <a href="/recetas" class="<%= rutaActual === '/recetas' ? 'activo' : '' %>">Recetas</a>
+          <a href="/ejecuciones" class="<%= rutaActual === '/ejecuciones' ? 'activo' : '' %>">Ejecuciones</a>
+        <% } %>
+      </nav>
+
+      <div class="cuenta">
+        <% if (usuario) { %>
+          <span class="cuenta-nombre"><%= usuario.nombre %> · <%= usuario.rol === 'admin' ? 'Administrador' : 'Docente' %></span>
+          <form method="post" action="/salir" class="en-linea">
+            <button type="submit" class="boton boton-texto">Salir</button>
+          </form>
+        <% } else { %>
+          <a class="boton boton-primario" href="/login">Ingresar</a>
+        <% } %>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenido" class="contenedor">
+    <% if (aviso) { %><p class="mensaje mensaje-ok" role="status"><%= aviso %></p><% } %>
+    <% if (error) { %><p class="mensaje mensaje-error" role="alert"><%= error %></p><% } %>

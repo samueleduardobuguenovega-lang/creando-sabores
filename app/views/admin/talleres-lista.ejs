@@ -1,0 +1,52 @@
+<%- include('../partials/head') %>
+
+<div class="barra-titulo">
+  <h1>Talleres</h1>
+  <a class="boton boton-primario" href="/admin/talleres/nuevo">Nuevo taller</a>
+</div>
+
+<form method="get" action="/admin/talleres" class="filtros">
+  <label for="q">Buscar</label>
+  <input id="q" name="q" type="search" value="<%= busqueda %>" placeholder="Nombre o temática">
+
+  <label for="estado">Estado</label>
+  <select id="estado" name="estado">
+    <option value="">Todos</option>
+    <% ['planificado', 'en_ejecucion', 'finalizado'].forEach(function (clave) { %>
+      <option value="<%= clave %>" <%= estado === clave ? 'selected' : '' %>><%= etiquetaEstado[clave] %></option>
+    <% }) %>
+  </select>
+
+  <button type="submit" class="boton">Filtrar</button>
+</form>
+
+<% if (talleres.length === 0) { %>
+  <p class="ayuda">No hay talleres que coincidan con la búsqueda.</p>
+<% } else { %>
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Taller</th>
+        <th>Temática</th>
+        <th>Fecha</th>
+        <th>Estado</th>
+        <th class="numero">Recetas</th>
+        <th class="numero">Ejecuciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% talleres.forEach(function (taller) { %>
+        <tr>
+          <td><a href="/admin/talleres/<%= taller.id %>"><%= taller.nombre %></a></td>
+          <td><%= taller.tematica %></td>
+          <td><%= fecha(taller.fecha_planificada) %></td>
+          <td><span class="insignia insignia-<%= taller.estado %>"><%= etiquetaEstado[taller.estado] %></span></td>
+          <td class="numero"><%= taller.recetas %></td>
+          <td class="numero"><%= taller.ejecuciones %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<%- include('../partials/footer') %>

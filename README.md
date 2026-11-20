@@ -32,23 +32,30 @@ Fuera del alcance (lo dice el SRS): inscripción de participantes, asistencia, c
 
 ### 1. Con Docker (lo más simple)
 
+Las claves no están en el repositorio: primero se crea el archivo de configuración a partir de la
+plantilla y se completan `POSTGRES_PASSWORD` y `SESSION_SECRET`.
+
 ```bash
-docker compose up --build
+cp entorno.ejemplo .env    # completar POSTGRES_PASSWORD y SESSION_SECRET
+docker compose up -d --build
 ```
 
-La plataforma queda en <http://localhost:3000>. La primera vez hay que crear el esquema y los datos
-de ejemplo:
+La plataforma queda en <http://localhost:3000>. La primera vez hay que crear el esquema y los datos de
+ejemplo. El arranque del contenedor ya crea las tablas (es idempotente); el seed se pide una sola vez:
 
 ```bash
 docker compose exec app npm run instalar
 docker compose exec app npm run seed
 ```
 
+Si `docker compose` responde `falta POSTGRES_PASSWORD en .env` o `falta SESSION_SECRET en .env`, es a
+propósito: no arranca con claves de ejemplo.
+
 ### 2. Con PostgreSQL instalado en tu máquina
 
 ```bash
 cd app
-cp ../.env.example .env          # ajusta DATABASE_URL si tu clave es distinta
+cp ../entorno.ejemplo .env       # ajusta DATABASE_URL si tu clave es distinta
 npm install
 npm run instalar                 # crea las tablas
 npm run seed                     # datos de ejemplo (opcional)
@@ -110,7 +117,7 @@ odd/tasks/               plan de tareas con responsables y criterios de aceptaci
 | Documentos PDF | Pendiente (T7) | Goran Almendra |
 | Videos | Pendiente (T8) | Goran Almendra |
 | Datos demo y QA | Pendiente (T10) | Goran Almendra |
-| CI, despliegue y respaldo | Pendiente (T11) | Samuel Bugueño |
+| CI, despliegue y respaldo | Listo (T11) | Samuel Bugueño |
 | Manual y presentación | Pendiente (T12) | Samuel Bugueño |
 
 El detalle de cada tarea, con lo que hay que cumplir para darla por terminada, está en
@@ -124,6 +131,7 @@ El detalle de cada tarea, con lo que hay que cumplir para darla por terminada, e
 - [`docs/despliegue.md`](docs/despliegue.md) — cómo publicarlo (y por qué Firebase Hosting solo no alcanza).
 - [`docs/manual-usuario.md`](docs/manual-usuario.md) — uso por rol.
 - [`docs/operacion.md`](docs/operacion.md) — despliegue, respaldo y restauración.
+- [`docs/guia-mantenedores.md`](docs/guia-mantenedores.md) — guía para quien quede a cargo de la plataforma.
 
 ## Licencia
 

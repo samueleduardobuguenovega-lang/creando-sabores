@@ -1,0 +1,32 @@
+# Plantilla de configuración. Copiala a `.env` (que NO se versiona) y completá
+# los valores:
+#
+#   cp entorno.ejemplo .env
+#
+# Docker Compose lee `.env` solo. Si corrés la aplicación sin Docker, exportá
+# las mismas variables en tu shell y definí DATABASE_URL.
+
+# --- Base de datos (contenedor db de docker-compose) ---
+POSTGRES_USER=creando
+POSTGRES_DB=creando_sabores
+# Obligatoria: sin ella docker compose se niega a arrancar. Sin caracteres que
+# rompan una URL (@ : / ?); un hexadecimal de 32 bytes siempre sirve:
+#   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+POSTGRES_PASSWORD=
+
+# --- Aplicación ---
+# Obligatoria en producción. Si la cambiás, se cierran todas las sesiones abiertas.
+SESSION_SECRET=
+# Puerto del host donde se publica el sitio (dentro del contenedor siempre es 3000).
+PUERTO_APP=3000
+# 1 = cookies de sesión solo por HTTPS. Dejalo en 1 cuando haya TLS (dominio con
+# certificado o túnel). Ponelo en 0 solo para una demo por HTTP en la red local:
+# con 1 sobre HTTP el navegador no devuelve la cookie y el login no persiste.
+COOKIE_SEGURA=1
+
+# --- Primera instalación ---
+# 1 = siembra los datos de ejemplo al arrancar (solo la primera vez).
+SEMBRAR=0
+# Claves que usa el seed para las dos cuentas iniciales. Cambialas antes de sembrar.
+CLAVE_ADMIN=
+CLAVE_DOCENTE=

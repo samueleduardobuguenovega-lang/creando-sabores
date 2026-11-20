@@ -8,8 +8,12 @@
 | `PORT` | Puerto HTTP | `3000` |
 | `SESSION_SECRET` | Firma de la cookie de sesión | (en producción es obligatoria) |
 | `NODE_ENV` | Activa la cookie `secure` en producción | `development` |
+| `COOKIE_SEGURA` | `1` exige HTTPS para la cookie de sesión, `0` la permite por HTTP | según `NODE_ENV` |
+| `SEMBRAR` | `1` siembra los datos de ejemplo al arrancar el contenedor | `0` |
 | `CLAVE_ADMIN`, `CLAVE_DOCENTE` | Claves que crea `npm run seed` | `Admin-2026`, `Docente-2026` |
 | `UPLOAD_DIR` | Carpeta de archivos subidos | `app/uploads` |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Base que crea el servicio `db` de compose | `creando`, (obligatoria), `creando_sabores` |
+| `PUERTO_APP` | Puerto del host donde se publica el sitio | `3000` |
 
 En producción, `SESSION_SECRET` debe ser una cadena larga y aleatoria
 (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`). Si cambia, todas las
@@ -18,10 +22,24 @@ sesiones abiertas se cierran.
 ## Con Docker
 
 ```bash
+cp entorno.ejemplo .env                 # completar POSTGRES_PASSWORD y SESSION_SECRET
 docker compose up -d --build
 docker compose exec app npm run instalar
 docker compose exec app npm run seed    # solo la primera vez
 ```
+
+Las claves no están en el repositorio: si falta `POSTGRES_PASSWORD` o `SESSION_SECRET`, compose se
+niega a arrancar (`falta POSTGRES_PASSWORD en .env`) en lugar de usar un valor de ejemplo. El servicio
+`db` **no publica puerto al host**: solo lo alcanza `app` por la red interna. Para respaldar, consultar
+o restaurar se usan los comandos `docker compose exec db ...` de más abajo.
+
+### Cookie de sesión y HTTPS
+
+En producción la cookie de sesión se marca `secure`, es decir que el navegador solo la manda por
+HTTPS. Servida por HTTP (por ejemplo una demo en la red local con `http://192.168.1.112:8099`), el
+navegador descarta la cookie: el login acepta la clave y la sesión no persiste. Para ese caso se pone
+`COOKIE_SEGURA=0` en `.env`. Cuando el sitio queda detrás de HTTPS (dominio con certificado o túnel)
+hay que volver a `COOKIE_SEGURA=1`.
 
 Los datos de PostgreSQL viven en el volumen `pgdata` y los archivos subidos en `uploads`. Un
 `docker compose down` sin `-v` no borra nada.
@@ -73,6 +91,36 @@ Después de restaurar, verificar tres cosas:
 
 Los archivos subidos se restauran descomprimiendo el `.tgz` en `app/uploads` (o copiándolos al volumen).
 
+## Instancia de demostración (red local)
+
+Hay una instalación corriendo en el servidor de la casa de estudios para mostrar el avance sin
+depender de la máquina de nadie.
+
+| Dato | Valor |
+|---|---|
+| Servidor | `pctesla` (192.168.1.112) |
+| Carpeta | `/opt/data/repos/creando-sabores` |
+| Dirección | <http://192.168.1.112:8099> |
+| Contenedores | `creando-sabores-app-1` y `creando-sabores-db-1` |
+| Configuración | `PUERTO_APP=8099`, `COOKIE_SEGURA=0` (HTTP), `SEMBRAR=1` la primera vez |
+
+Las claves de esa instalación **no** están en el repositorio: se generaron al desplegar
+(`openssl rand -hex`) y viven en el entorno de los contenedores. Para recrear los contenedores hay que
+volver a exportar `POSTGRES_PASSWORD`, `SESSION_SECRET`, `CLAVE_ADMIN` y `CLAVE_DOCENTE`, o crear el
+`.env` correspondiente a partir de `entorno.ejemplo`.
+
+Los datos de demostración (talleres y ejecuciones coherentes con la actividad real) se cargaron por SQL
+directo sobre esa base, porque la siembra oficial la define T10. Si se recrea la base, hay que volver a
+cargarlos.
+
+Comandos útiles con los contenedores ya creados (no necesitan las variables):
+
+```bash
+docker exec creando-sabores-db-1 psql -U creando -d creando_sabores -c 'SELECT COUNT(*) FROM taller'
+docker exec creando-sabores-db-1 pg_dump -U creando -d creando_sabores > respaldo-$(date +%F).sql
+docker logs creando-sabores-app-1 --tail 40
+```
+
 ## Prueba de restauración (obligatoria en T11)
 
 Un respaldo que nunca se restauró no es un respaldo. La prueba consiste en:
@@ -84,4 +132,4 @@ Un respaldo que nunca se restauró no es un respaldo. La prueba consiste en:
 
 | Fecha | Quién | Resultado |
 |---|---|---|
-| (pendiente T11) | | |
+| 2026-11-20 | Samuel Bugueño Vega | **Correcta.** `pg_dump` de 23 KB en `/opt/backups/creando-sabores-2026-11-20.sql`, restaurado en la base limpia `creando_restaurada` con `psql -v ON_ERROR_STOP=1` sin errores. Conteos idénticos en las siete tablas (usuario 2, taller 11, receta 1, documento 0, video 0, ejecucion 6, auditoria 0). Un contenedor de la aplicación apuntando a la base restaurada respondió el login (302), el panel (200) y el listado de talleres con los datos restaurados. |

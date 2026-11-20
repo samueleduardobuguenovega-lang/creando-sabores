@@ -1,20 +1,33 @@
+# Levanta la plataforma completa: PostgreSQL 16 + la aplicación Express.
+#
+# Los valores salen del archivo `.env` del mismo directorio (plantilla en
+# `entorno.ejemplo`). Las claves no viven en el repositorio: si falta una
+# obligatoria, `docker compose` se niega a arrancar en vez de usar un valor
+# por defecto inseguro.
+#
+#   cp entorno.ejemplo .env      # y completar POSTGRES_PASSWORD y SESSION_SECRET
+#   docker compose up -d --build
+#
+# Documentación: docs/operacion.md
+
 services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: creando
-      POSTGRES_PASSWORD: creando
-      POSTGRES_DB: creando_sabores
+      POSTGRES_USER: ${POSTGRES_USER:-creando}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}
+      POSTGRES_DB: ${POSTGRES_DB:-creando_sabores}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U creando -d creando_sabores"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-creando} -d ${POSTGRES_DB:-creando_sabores}"]
       interval: 10s
       timeout: 5s
       retries: 5
-    ports:
-      - "5432:5432"
+    # La base no publica puerto al host a propósito: solo la alcanza el servicio
+    # `app` por la red interna de compose. Para respaldar o consultar se usa
+    # `docker compose exec db ...` (ver docs/operacion.md).
 
   app:
     build: .
@@ -23,12 +36,18 @@ services:
       db:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://creando:creando@db:5432/creando_sabores
-      SESSION_SECRET: cambiar-esta-clave-antes-de-publicar
+      DATABASE_URL: postgres://${POSTGRES_USER:-creando}:${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}@db:5432/${POSTGRES_DB:-creando_sabores}
+      SESSION_SECRET: ${SESSION_SECRET:?falta SESSION_SECRET en .env}
       NODE_ENV: production
+      # En producción la cookie es "secure" (solo HTTPS) salvo que se pida lo
+      # contrario, que es lo que necesita una demo por HTTP en la red local.
+      COOKIE_SEGURA: ${COOKIE_SEGURA:-1}
+      SEMBRAR: ${SEMBRAR:-0}
+      CLAVE_ADMIN: ${CLAVE_ADMIN:-}
+      CLAVE_DOCENTE: ${CLAVE_DOCENTE:-}
       PORT: 3000
     ports:
-      - "3000:3000"
+      - "${PUERTO_APP:-3000}:3000"
     volumes:
       - uploads:/app/uploads
 

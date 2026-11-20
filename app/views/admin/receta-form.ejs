@@ -1,0 +1,59 @@
+<%- include('../partials/head') %>
+
+<h1><%= titulo %></h1>
+
+<% if (errores.length > 0) { %>
+  <div class="mensaje mensaje-error" role="alert">
+    <p>Revisa estos puntos:</p>
+    <ul>
+      <% errores.forEach(function (linea) { %><li><%= linea %></li><% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<form method="post"
+      action="<%= modo === 'crear' ? '/admin/recetas' : '/admin/recetas/' + receta.id %>"
+      class="formulario">
+
+  <label for="codigo">Código</label>
+  <input id="codigo" name="codigo" type="text" required maxlength="40" value="<%= receta.codigo %>">
+
+  <label for="nombre">Nombre de la receta</label>
+  <input id="nombre" name="nombre" type="text" required maxlength="140" value="<%= receta.nombre %>">
+
+  <label for="descripcion">Descripción</label>
+  <textarea id="descripcion" name="descripcion" rows="5" maxlength="2000"><%= receta.descripcion %></textarea>
+
+  <label for="enlace_pdf">Enlace al PDF</label>
+  <input id="enlace_pdf" name="enlace_pdf" type="url" maxlength="2048" value="<%= receta.enlace_pdf || '' %>" placeholder="https://...">
+
+  <fieldset>
+    <legend>Talleres asociados</legend>
+    <% if (talleres.length === 0) { %>
+      <p class="ayuda">No hay talleres disponibles para asociar.</p>
+    <% } else { %>
+      <% talleres.forEach(function (taller) { %>
+        <label class="casilla">
+          <input type="checkbox" name="talleres" value="<%= taller.id %>"
+            <%= talleresSeleccionados.includes(taller.id) ? 'checked' : '' %>>
+          <%= taller.nombre %> · <%= taller.tematica %>
+        </label>
+      <% }) %>
+    <% } %>
+  </fieldset>
+
+  <div class="acciones">
+    <button type="submit" class="boton boton-primario">Guardar</button>
+    <a class="boton boton-texto" href="/admin/recetas">Cancelar</a>
+    <% if (modo === 'editar' && usuario.rol === 'admin') { %>
+      <button form="eliminar-receta" type="submit" class="boton boton-peligro">Eliminar</button>
+    <% } %>
+  </div>
+</form>
+
+<% if (modo === 'editar' && usuario.rol === 'admin') { %>
+  <form id="eliminar-receta" method="post" action="/admin/recetas/<%= receta.id %>/eliminar"
+        class="en-linea" onsubmit="return confirm('¿Eliminar esta receta y sus asociaciones?');"></form>
+<% } %>
+
+<%- include('../partials/footer') %>

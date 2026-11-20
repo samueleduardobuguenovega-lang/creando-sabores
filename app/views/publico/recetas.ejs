@@ -1,0 +1,26 @@
+<%- include('../partials/head') %>
+
+<h1>Recetas</h1>
+
+<form method="get" action="/recetas" class="filtros">
+  <label for="q">Buscar por código o nombre</label>
+  <input id="q" name="q" type="search" value="<%= busqueda %>" placeholder="Ej.: REC-001 o mermelada">
+  <button type="submit" class="boton">Buscar</button>
+</form>
+
+<% if (recetas.length === 0) { %>
+  <p class="ayuda">No hay recetas para mostrar con esa búsqueda.</p>
+<% } else { %>
+  <ul class="lista-tarjetas">
+    <% recetas.forEach(function (receta) { %>
+      <li class="tarjeta">
+        <p class="etiqueta"><%= receta.codigo %></p>
+        <h2><a href="/recetas/<%= receta.id %>"><%= receta.nombre %></a></h2>
+        <p><%= receta.descripcion || 'Sin descripción.' %></p>
+        <p class="ayuda">Talleres asociados: <%= receta.talleres %></p>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<%- include('../partials/footer') %>

@@ -36,7 +36,7 @@
     <% } else { %>
       <ul class="lista-simple">
         <% recetas.forEach(function (receta) { %>
-          <li><strong><%= receta.codigo %></strong> · <%= receta.nombre %></li>
+          <li><a href="/admin/recetas/<%= receta.id %>/editar"><strong><%= receta.codigo %></strong> · <%= receta.nombre %></a></li>
         <% }) %>
       </ul>
     <% } %>

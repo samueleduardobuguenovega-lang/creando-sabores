@@ -11,6 +11,7 @@ const { ETIQUETA_ESTADO } = require('./validaciones');
 const rutasPublicas = require('../routes/publico');
 const rutasAuth = require('../routes/auth');
 const rutasAdmin = require('../routes/admin');
+const rutasDocumentos = require('../routes/documentos');
 
 function crearApp() {
   const app = express();
@@ -68,6 +69,7 @@ function crearApp() {
   app.use('/', rutasPublicas);
   app.use('/', rutasAuth);
   app.use('/', rutasAdmin);
+  app.use('/', rutasDocumentos);
 
   app.use((req, res) => {
     res.status(404).render('error', {

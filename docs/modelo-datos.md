@@ -63,6 +63,7 @@ erDiagram
         varchar archivo
         varchar tipo_mime
         int tamano
+        bytea contenido
         int id_taller FK
         int id_receta FK
         int id_usuario FK

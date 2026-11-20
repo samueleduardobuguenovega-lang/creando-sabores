@@ -107,7 +107,7 @@ odd/tasks/               plan de tareas con responsables y criterios de aceptaci
 | Recetas y vínculo con talleres | Pendiente (T5) | Francisco Puelles |
 | Ejecución de talleres | Pendiente (T6) | Francisco Puelles |
 | Adaptabilidad, PWA y accesibilidad | Pendiente (T9) | Francisco Puelles |
-| Documentos PDF | Pendiente (T7) | Goran Almendra |
+| Documentos PDF | Listo (T7: carga, validación y visor) | Goran Almendra |
 | Videos | Pendiente (T8) | Goran Almendra |
 | Datos demo y QA | Pendiente (T10) | Goran Almendra |
 | CI, despliegue y respaldo | Pendiente (T11) | Samuel Bugueño |

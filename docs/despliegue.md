@@ -34,7 +34,7 @@ Límites que hay que conocer antes de mandar el link:
 |---|---|---|
 | Se duerme a los 15 min sin visitas | La primera visita después tarda ~1 minuto en cargar | Avisar en el grupo: "si no carga al toque, esperen un minuto" |
 | La base gratis **expira a los 30 días** | Se pierden los datos | Para la entrega del curso alcanza. Para algo permanente: Neon (gratis, no expira) y cambiar `DATABASE_URL` |
-| Disco efímero | Los PDF subidos se pierden en cada reinicio | Afecta a T7: los documentos deben ir a la base (columna `bytea`) o a un almacenamiento externo, no al disco |
+| Disco efímero | No afecta a los PDF: sus bytes se guardan en la base de datos PostgreSQL |
 | 750 horas por mes | Alcanza para un servicio siempre despierto | No mantener dos servicios gratis en la misma cuenta |
 
 Para usar Neon en vez de la base de Render:

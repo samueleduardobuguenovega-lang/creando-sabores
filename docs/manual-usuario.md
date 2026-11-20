@@ -67,8 +67,9 @@ receta se puede asociar a varios talleres: se registra una sola vez y se reutili
 
 *(T7 y T8 — Goran Almendra)*
 
-- **Documentos**: se sube el PDF, se le pone un nombre y se asocia a un taller o a una receta. Se puede
-  leer dentro del navegador, sin descargarlo. Solo se ve con sesión iniciada.
+- **Documentos**: se sube un PDF de hasta 10 MB, se le pone un nombre y se asocia a un taller o a una
+  receta. El tipo y el contenido del archivo se validan. Se puede leer dentro del navegador, sin
+  descargarlo; solo se ve con sesión iniciada.
 - **Videos**: se registra el enlace de YouTube o Vimeo, con nombre y descripción. No se sube el video a
   la plataforma: se guarda el enlace.
 

@@ -11,7 +11,7 @@ dice qué se pidió, dónde está y con qué prueba se demuestra.
 | RF-02 | Dos roles (administrador, docente), inicio de sesión y acciones asociadas a la cuenta | `app/src/auth.js`, `app/routes/auth.js`, `/admin/usuarios`, `/admin/auditoria` | `app/tests/auth.test.js`, `app/tests/usuarios.test.js` |
 | RF-03 | Crear, editar, consultar y administrar talleres | `/admin/talleres*` | `app/tests/talleres.test.js` |
 | RF-04 | Recetas con identificador y enlace PDF, reutilizables en uno o varios talleres | T5 — `app/routes/recetas.js` | `app/tests/recetas.test.js` (pendiente) |
-| RF-05 | Documentos PDF asociados a taller o receta, con visor; videos de YouTube/Vimeo con nombre, descripción y enlace | T7 y T8 — `app/routes/documentos.js`, `app/routes/videos.js` | `app/tests/documentos.test.js`, `app/tests/videos.test.js` (pendientes) |
+| RF-05 | Documentos PDF asociados a taller o receta, con visor; videos de YouTube/Vimeo con nombre, descripción y enlace | T7 — `app/routes/documentos.js`; T8 — `app/routes/videos.js` | T7 — `app/tests/documentos.test.js`; T8 — `app/tests/videos.test.js` (pendiente) |
 | RF-06 | Ejecución del taller: id, fecha, taller, cantidad de participantes, observaciones, video | T6 — `app/routes/ejecuciones.js` | `app/tests/ejecuciones.test.js` (pendiente) |
 
 ## Casos de uso
@@ -22,7 +22,7 @@ dice qué se pidió, dónde está y con qué prueba se demuestra.
 | CU-02 | Consultar panel principal | `GET /panel` | Hecho |
 | CU-03 | Crear y modificar taller gastronómico | `POST /admin/talleres`, `POST /admin/talleres/:id` | Hecho |
 | CU-04 | Registrar y vincular receta (ficha PDF) | T5 | Pendiente |
-| CU-05 | Gestionar documentos PDF y enlaces de video | T7, T8 | Pendiente |
+| CU-05 | Gestionar documentos PDF y enlaces de video | T7, T8 | Parcial: documentos listos; videos pendientes |
 | CU-06 | Documentar ejecución de taller | T6 | Pendiente |
 
 ## Requerimientos no funcionales
@@ -32,7 +32,7 @@ dice qué se pidió, dónde está y con qué prueba se demuestra.
 | Diseño adaptable a computador, tablet y celular | CSS propio con grilla fluida, revisado a 390 px y 1280 px | `app/public/css/estilos.css` (T9) |
 | Autenticación segura | Contraseñas con bcrypt (costo 10), sesión en base con cookie `httpOnly` y `sameSite=lax`, `secure` en producción | `app/src/auth.js`, `app/src/app.js` |
 | Control de acceso según roles y permisos | Guardas `requiereSesion` / `requiereRol` en cada ruta privada | `app/src/auth.js`, `app/routes/admin.js` |
-| Almacenamiento seguro de archivos | Subidas fuera de `public/`, tipo y tamaño validados, nombre generado por el servidor | T7 |
+| Almacenamiento seguro de archivos | PDF de hasta 10 MB validado por contenido, nombre generado por el servidor y bytes guardados en PostgreSQL | `app/routes/documentos.js` |
 | Copias de seguridad y recuperación | `pg_dump` diario documentado, restauración probada | `docs/operacion.md` (T11) |
 | Interfaz sencilla e intuitiva | Formularios de una columna, mensajes en español que dicen qué corregir | Todas las vistas |
 | Carga de fotografías desde el móvil | Acepta PDF e imágenes desde la cámara del teléfono en el mismo formulario de subida | T7 |

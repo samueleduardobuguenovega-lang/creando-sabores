@@ -443,12 +443,6 @@ const PENDIENTES = {
     tarea: 'T5',
     descripcion: 'Ficha PDF de recetas, código único y vínculo con uno o varios talleres (RF-04 / CU-04).',
   },
-  documentos: {
-    titulo: 'Documentos PDF',
-    responsable: 'Goran Almendra',
-    tarea: 'T7',
-    descripcion: 'Subida de PDF, validación de tamaño y tipo, y visor dentro del navegador (RF-05 / CU-05).',
-  },
   videos: {
     titulo: 'Videos',
     responsable: 'Goran Almendra',

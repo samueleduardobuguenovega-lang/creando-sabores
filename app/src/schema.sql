@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS documento (
   archivo    VARCHAR(200) NOT NULL,
   tipo_mime  VARCHAR(100) NOT NULL,
   tamano     INTEGER      NOT NULL,
+  contenido  BYTEA        NOT NULL,
   id_taller  INTEGER      REFERENCES taller(id) ON DELETE CASCADE,
   id_receta  INTEGER      REFERENCES receta(id) ON DELETE CASCADE,
   id_usuario INTEGER      NOT NULL REFERENCES usuario(id),
@@ -58,6 +59,8 @@ CREATE TABLE IF NOT EXISTS documento (
     OR (id_taller IS NULL AND id_receta IS NOT NULL)
   )
 );
+
+ALTER TABLE documento ADD COLUMN IF NOT EXISTS contenido BYTEA;
 
 CREATE TABLE IF NOT EXISTS video (
   id          SERIAL PRIMARY KEY,

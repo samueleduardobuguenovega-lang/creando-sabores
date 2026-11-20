@@ -1,0 +1,75 @@
+<%- include('../partials/head') %>
+
+<div class="barra-titulo">
+  <div>
+    <p class="etiqueta">RF-05 / CU-05</p>
+    <h1>Documentos PDF</h1>
+  </div>
+</div>
+
+<section class="tarjeta">
+  <h2>Subir documento</h2>
+  <p class="ayuda">Solo archivos PDF de hasta 10 MB. El documento se podrá leer en el navegador y requiere iniciar sesión.</p>
+
+  <% if (errores.length > 0) { %>
+    <div class="mensaje mensaje-error" role="alert">
+      <p>Revisa estos puntos:</p>
+      <ul>
+        <% errores.forEach(function (linea) { %><li><%= linea %></li><% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <form method="post" action="/admin/documentos" enctype="multipart/form-data" class="formulario">
+    <label for="nombre">Nombre del documento</label>
+    <input id="nombre" name="nombre" type="text" required maxlength="160" value="<%= valores.nombre || '' %>">
+
+    <label for="destino">Asociar a taller o receta</label>
+    <select id="destino" name="destino" required>
+      <option value="">Selecciona un taller o receta</option>
+      <% if (talleres.length > 0) { %>
+        <optgroup label="Talleres">
+          <% talleres.forEach(function (taller) { %>
+            <option value="taller:<%= taller.id %>" <%= valores.destino === `taller:${taller.id}` ? 'selected' : '' %>><%= taller.nombre %></option>
+          <% }) %>
+        </optgroup>
+      <% } %>
+      <% if (recetas.length > 0) { %>
+        <optgroup label="Recetas">
+          <% recetas.forEach(function (receta) { %>
+            <option value="receta:<%= receta.id %>" <%= valores.destino === `receta:${receta.id}` ? 'selected' : '' %>><%= receta.codigo %> · <%= receta.nombre %></option>
+          <% }) %>
+        </optgroup>
+      <% } %>
+    </select>
+
+    <label for="archivo">Archivo PDF</label>
+    <input id="archivo" name="archivo" type="file" accept=".pdf,application/pdf" required>
+
+    <div class="acciones">
+      <button type="submit" class="boton boton-primario">Subir PDF</button>
+    </div>
+  </form>
+</section>
+
+<section class="tarjeta">
+  <h2>Documentos subidos</h2>
+  <% if (documentos.length === 0) { %>
+    <p class="ayuda">Todavía no hay documentos PDF.</p>
+  <% } else { %>
+    <ul class="lista-simple">
+      <% documentos.forEach(function (documento) { %>
+        <li>
+          <span>
+            <strong><%= documento.nombre %></strong><br>
+            <span class="ayuda"><%= documento.tipo_asociacion %>: <%= documento.asociado_a %> ·
+              <%= (documento.tamano / 1024 / 1024).toFixed(2) %> MB</span>
+          </span>
+          <a class="boton" href="/admin/documentos/<%= documento.id %>/ver">Ver PDF</a>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

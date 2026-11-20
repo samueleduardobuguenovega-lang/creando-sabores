@@ -91,6 +91,36 @@ Después de restaurar, verificar tres cosas:
 
 Los archivos subidos se restauran descomprimiendo el `.tgz` en `app/uploads` (o copiándolos al volumen).
 
+## Instancia de demostración (red local)
+
+Hay una instalación corriendo en el servidor de la casa de estudios para mostrar el avance sin
+depender de la máquina de nadie.
+
+| Dato | Valor |
+|---|---|
+| Servidor | `pctesla` (192.168.1.112) |
+| Carpeta | `/opt/data/repos/creando-sabores` |
+| Dirección | <http://192.168.1.112:8099> |
+| Contenedores | `creando-sabores-app-1` y `creando-sabores-db-1` |
+| Configuración | `PUERTO_APP=8099`, `COOKIE_SEGURA=0` (HTTP), `SEMBRAR=1` la primera vez |
+
+Las claves de esa instalación **no** están en el repositorio: se generaron al desplegar
+(`openssl rand -hex`) y viven en el entorno de los contenedores. Para recrear los contenedores hay que
+volver a exportar `POSTGRES_PASSWORD`, `SESSION_SECRET`, `CLAVE_ADMIN` y `CLAVE_DOCENTE`, o crear el
+`.env` correspondiente a partir de `entorno.ejemplo`.
+
+Los datos de demostración (talleres y ejecuciones coherentes con la actividad real) se cargaron por SQL
+directo sobre esa base, porque la siembra oficial la define T10. Si se recrea la base, hay que volver a
+cargarlos.
+
+Comandos útiles con los contenedores ya creados (no necesitan las variables):
+
+```bash
+docker exec creando-sabores-db-1 psql -U creando -d creando_sabores -c 'SELECT COUNT(*) FROM taller'
+docker exec creando-sabores-db-1 pg_dump -U creando -d creando_sabores > respaldo-$(date +%F).sql
+docker logs creando-sabores-app-1 --tail 40
+```
+
 ## Prueba de restauración (obligatoria en T11)
 
 Un respaldo que nunca se restauró no es un respaldo. La prueba consiste en:
@@ -102,4 +132,4 @@ Un respaldo que nunca se restauró no es un respaldo. La prueba consiste en:
 
 | Fecha | Quién | Resultado |
 |---|---|---|
-| (pendiente T11) | | |
+| 2026-11-20 | Samuel Bugueño Vega | **Correcta.** `pg_dump` de 23 KB en `/opt/backups/creando-sabores-2026-11-20.sql`, restaurado en la base limpia `creando_restaurada` con `psql -v ON_ERROR_STOP=1` sin errores. Conteos idénticos en las siete tablas (usuario 2, taller 11, receta 1, documento 0, video 0, ejecucion 6, auditoria 0). Un contenedor de la aplicación apuntando a la base restaurada respondió el login (302), el panel (200) y el listado de talleres con los datos restaurados. |

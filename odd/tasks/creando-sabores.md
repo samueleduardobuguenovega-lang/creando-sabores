@@ -4,7 +4,9 @@
 **Equipo:** Francisco Puelles · Goran Almendra · Samuel Bugueño Vega
 **Tutor:** Jorge Ponce
 **Repositorio:** https://github.com/samueleduardobuguenovega-lang/creando-sabores
-**Estado:** base construida y en verde (37 pruebas de integración). Módulos de recetas, ejecuciones, documentos y videos asignados y pendientes.
+**Estado:** base construida y en verde (41 pruebas de integración). Instancia de demostración corriendo en
+la red local y respaldo probado (T11). Módulos de recetas, ejecuciones, documentos y videos asignados y
+pendientes.
 
 ---
 
@@ -142,12 +144,16 @@ Cada tarea corta vertical (esquema → lógica → pantalla → prueba) y declar
 - Superficies: `app/src/seed.js`, `docs/pruebas-manuales.md` (nuevo).
 - **Bloqueada por:** T5, T6, T7, T8.
 
-### T11 · CI, despliegue y respaldo — *Samuel Bugueño*
+### T11 · CI, despliegue y respaldo — *Samuel Bugueño* — **hecha (2026-11-20)**
 
 - GitHub Actions con PostgreSQL de servicio: instalación, esquema y pruebas en cada push.
 - `docker-compose` para levantar base + aplicación; `docs/operacion.md` con respaldo y restauración (`pg_dump`).
 - Hecho cuando: el workflow queda en verde en un PR real y el respaldo se restaura en una base limpia.
 - Superficies: `.github/workflows/ci.yml`, `docker-compose.yml`, `Dockerfile`, `docs/operacion.md`.
+- **Evidencia:** workflow verde en el PR #9 (2026-11-20) y en los pushes a `main`; respaldo de 23 KB
+  restaurado en una base limpia con los conteos idénticos en las siete tablas y la aplicación respondiendo
+  sobre esa copia (detalle en `docs/operacion.md`); instancia de demostración en
+  <http://192.168.1.112:8099> con los dos roles verificados por HTTP.
 
 ### T12 · Manual de usuario y presentación — *Samuel Bugueño* (con revisión de los tres)
 
@@ -196,3 +202,6 @@ Detalle operativo en `docs/plan-trabajo.md`.
 
 - **2026-11-13** — Repositorio creado. T1–T4 implementadas por Samuel con 37 pruebas de integración en verde (auth, talleres, panel, usuarios, módulos pendientes). Documento ODD creado; issues abiertas para T5–T12. Base de referencia tomada del prototipo de noviembre 2026 (misma decisión de stack: Express + PostgreSQL).
 - **2026-11-13** — Listo para publicar: `render.yaml` (servicio + base en un clic), arranque en contenedor que crea el esquema y siembra datos, y `trust proxy` para que la sesión funcione detrás de HTTPS. Firebase Hosting queda descartado para el servidor: exige Blaze con tarjeta (ver `docs/despliegue.md`).
+- **2026-11-20** — T11 cerrada. Despliegue sin claves en el repositorio: plantilla `entorno.ejemplo` (el README nombraba un `.env.example` que no existía y que git ignora por `.env.*`), `docker compose` exige `POSTGRES_PASSWORD` y `SESSION_SECRET`, la base dejó de publicar el puerto 5432 al host y `SEMBRAR`/`CLAVE_*` llegan al contenedor. `COOKIE_SEGURA` se agrega porque en producción Express no emite la cookie de sesión sin HTTPS: la demo por HTTP no permitía mantener la sesión abierta. Cuatro pruebas nuevas en `app/tests/cookies.test.js` (41 en total).
+- **2026-11-20** — Instancia de demostración en `pctesla` (192.168.1.112:8099) con datos cargados por SQL: sitio público sin sesión en 200, panel y auditoría para `admin`, y 403 para `docente` al listar usuarios, crear usuarios o eliminar talleres. Respaldo y restauración probados sobre esa misma base. Guía de mantenimiento en `docs/guia-mantenedores.md` para quien quede a cargo.
+- **2026-11-20** — El PR #9 (T5, recetas) de Francisco está abierto, mergeable y con CI en verde: falta revisión y merge, no desarrollo. Ese merge desbloquea T10.

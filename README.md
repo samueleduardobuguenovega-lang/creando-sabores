@@ -117,7 +117,7 @@ odd/tasks/               plan de tareas con responsables y criterios de aceptaci
 | Documentos PDF | Pendiente (T7) | Goran Almendra |
 | Videos | Pendiente (T8) | Goran Almendra |
 | Datos demo y QA | Pendiente (T10) | Goran Almendra |
-| CI, despliegue y respaldo | Pendiente (T11) | Samuel Bugueño |
+| CI, despliegue y respaldo | Listo (T11) | Samuel Bugueño |
 | Manual y presentación | Pendiente (T12) | Samuel Bugueño |
 
 El detalle de cada tarea, con lo que hay que cumplir para darla por terminada, está en
@@ -131,6 +131,7 @@ El detalle de cada tarea, con lo que hay que cumplir para darla por terminada, e
 - [`docs/despliegue.md`](docs/despliegue.md) — cómo publicarlo (y por qué Firebase Hosting solo no alcanza).
 - [`docs/manual-usuario.md`](docs/manual-usuario.md) — uso por rol.
 - [`docs/operacion.md`](docs/operacion.md) — despliegue, respaldo y restauración.
+- [`docs/guia-mantenedores.md`](docs/guia-mantenedores.md) — guía para quien quede a cargo de la plataforma.
 
 ## Licencia
 

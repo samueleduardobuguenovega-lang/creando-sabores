@@ -66,12 +66,39 @@ function enlaceVideo(valor) {
   if (!['http:', 'https:'].includes(url.protocol)) {
     return { ok: false, error: 'El enlace del video debe empezar con http:// o https://.' };
   }
+  if (url.username || url.password || url.port) {
+    return { ok: false, error: 'El enlace del video no es válido.' };
+  }
   const host = url.hostname.replace(/^www\./, '');
   if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtu.be') {
-    return { ok: true, valor: limpio, proveedor: 'youtube' };
+    const partes = url.pathname.split('/').filter(Boolean);
+    const id = host === 'youtu.be'
+      ? partes[0]
+      : url.searchParams.get('v') || (['embed', 'shorts', 'live'].includes(partes[0]) ? partes[1] : null);
+    if (!id || !/^[a-zA-Z0-9_-]{11}$/.test(id)) {
+      return { ok: false, error: 'El enlace de YouTube no contiene un identificador de video válido.' };
+    }
+    return {
+      ok: true,
+      valor: limpio,
+      proveedor: 'youtube',
+      embedUrl: `https://www.youtube-nocookie.com/embed/${id}`,
+    };
   }
   if (host === 'vimeo.com' || host === 'player.vimeo.com') {
-    return { ok: true, valor: limpio, proveedor: 'vimeo' };
+    const partes = url.pathname.split('/').filter(Boolean);
+    const id = host === 'player.vimeo.com'
+      ? (partes[0] === 'video' ? partes[1] : null)
+      : partes[0];
+    if (!id || !/^\d+$/.test(id)) {
+      return { ok: false, error: 'El enlace de Vimeo no contiene un identificador de video válido.' };
+    }
+    return {
+      ok: true,
+      valor: limpio,
+      proveedor: 'vimeo',
+      embedUrl: `https://player.vimeo.com/video/${id}`,
+    };
   }
   return { ok: false, error: 'Solo se aceptan enlaces de YouTube o Vimeo.' };
 }

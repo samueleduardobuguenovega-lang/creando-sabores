@@ -11,7 +11,7 @@ dice qué se pidió, dónde está y con qué prueba se demuestra.
 | RF-02 | Dos roles (administrador, docente), inicio de sesión y acciones asociadas a la cuenta | `app/src/auth.js`, `app/routes/auth.js`, `/admin/usuarios`, `/admin/auditoria` | `app/tests/auth.test.js`, `app/tests/usuarios.test.js` |
 | RF-03 | Crear, editar, consultar y administrar talleres | `/admin/talleres*` | `app/tests/talleres.test.js` |
 | RF-04 | Recetas con identificador y enlace PDF, reutilizables en uno o varios talleres | T5 — `app/routes/recetas.js` | `app/tests/recetas.test.js` (pendiente) |
-| RF-05 | Documentos PDF asociados a taller o receta, con visor; videos de YouTube/Vimeo con nombre, descripción y enlace | T7 — `app/routes/documentos.js`; T8 — `app/routes/videos.js` | T7 — `app/tests/documentos.test.js`; T8 — `app/tests/videos.test.js` (pendiente) |
+| RF-05 | Documentos PDF asociados a taller o receta, con visor; videos de YouTube/Vimeo con nombre, descripción y enlace | T7 — `app/routes/documentos.js`; T8 — `app/routes/videos.js` | `app/tests/documentos.test.js`, `app/tests/videos.test.js` |
 | RF-06 | Ejecución del taller: id, fecha, taller, cantidad de participantes, observaciones, video | T6 — `app/routes/ejecuciones.js` | `app/tests/ejecuciones.test.js` (pendiente) |
 
 ## Casos de uso
@@ -22,7 +22,7 @@ dice qué se pidió, dónde está y con qué prueba se demuestra.
 | CU-02 | Consultar panel principal | `GET /panel` | Hecho |
 | CU-03 | Crear y modificar taller gastronómico | `POST /admin/talleres`, `POST /admin/talleres/:id` | Hecho |
 | CU-04 | Registrar y vincular receta (ficha PDF) | T5 | Pendiente |
-| CU-05 | Gestionar documentos PDF y enlaces de video | T7, T8 | Parcial: documentos listos; videos pendientes |
+| CU-05 | Gestionar documentos PDF y enlaces de video | T7, T8 | Hecho |
 | CU-06 | Documentar ejecución de taller | T6 | Pendiente |
 
 ## Requerimientos no funcionales

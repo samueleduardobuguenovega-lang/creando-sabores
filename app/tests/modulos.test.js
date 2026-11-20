@@ -20,7 +20,6 @@ after(async () => {
 
 const PENDIENTES = [
   ['/admin/recetas', 'Francisco Puelles', 'T5'],
-  ['/admin/videos', 'Goran Almendra', 'T8'],
   ['/admin/ejecuciones', 'Francisco Puelles', 'T6'],
 ];
 

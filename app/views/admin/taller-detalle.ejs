@@ -8,7 +8,7 @@
     <a class="boton" href="/admin/talleres/<%= taller.id %>/editar">Editar</a>
     <% if (usuario.rol === 'admin') { %>
       <form method="post" action="/admin/talleres/<%= taller.id %>/eliminar" class="en-linea"
-            onsubmit="return confirm('¿Eliminar el taller y todo lo asociado (recetas, documentos, ejecuciones)?');">
+            onsubmit="return confirm('¿Eliminar el taller y todo lo asociado (recetas, documentos, videos y ejecuciones)?');">
         <button type="submit" class="boton boton-peligro">Eliminar</button>
       </form>
     <% } %>
@@ -79,7 +79,20 @@
     <% } else { %>
       <ul class="lista-simple">
         <% videos.forEach(function (video) { %>
-          <li><a href="<%= video.enlace %>" target="_blank" rel="noopener"><%= video.nombre %></a></li>
+          <li>
+            <div>
+              <strong><%= video.nombre %></strong>
+              <% if (video.embedUrl) { %>
+                <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"
+                        loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+              <% } %>
+              <% if (video.enlaceValidado) { %>
+                <a href="<%= video.enlaceValidado %>" target="_blank" rel="noopener noreferrer">Abrir en <%= video.proveedor === 'youtube' ? 'YouTube' : 'Vimeo' %></a>
+              <% } %>
+            </div>
+          </li>
         <% }) %>
       </ul>
     <% } %>

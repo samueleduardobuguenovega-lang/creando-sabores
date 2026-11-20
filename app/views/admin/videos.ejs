@@ -1,0 +1,89 @@
+<%- include('../partials/head') %>
+
+<div class="barra-titulo">
+  <div>
+    <p class="etiqueta">RF-05 / CU-05</p>
+    <h1>Videos</h1>
+  </div>
+</div>
+
+<section class="tarjeta">
+  <h2>Registrar video</h2>
+  <p class="ayuda">Agrega enlaces de YouTube o Vimeo y asócialos a un taller o receta.</p>
+
+  <% if (errores.length > 0) { %>
+    <div class="mensaje mensaje-error" role="alert">
+      <p>Revisa estos puntos:</p>
+      <ul>
+        <% errores.forEach(function (linea) { %><li><%= linea %></li><% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <form method="post" action="/admin/videos" class="formulario">
+    <label for="nombre">Nombre del video</label>
+    <input id="nombre" name="nombre" type="text" required maxlength="160" value="<%= valores.nombre || '' %>">
+
+    <label for="descripcion">Descripción</label>
+    <textarea id="descripcion" name="descripcion" rows="4" maxlength="2000"><%= valores.descripcion || '' %></textarea>
+
+    <label for="enlace">Enlace de YouTube o Vimeo</label>
+    <input id="enlace" name="enlace" type="url" required
+           placeholder="https://www.youtube.com/watch?v=..."
+           value="<%= valores.enlace || '' %>">
+
+    <label for="destino">Asociar a taller o receta</label>
+    <select id="destino" name="destino" required>
+      <option value="">Selecciona un taller o receta</option>
+      <% if (talleres.length > 0) { %>
+        <optgroup label="Talleres">
+          <% talleres.forEach(function (taller) { %>
+            <option value="taller:<%= taller.id %>" <%= valores.destino === `taller:${taller.id}` ? 'selected' : '' %>><%= taller.nombre %></option>
+          <% }) %>
+        </optgroup>
+      <% } %>
+      <% if (recetas.length > 0) { %>
+        <optgroup label="Recetas">
+          <% recetas.forEach(function (receta) { %>
+            <option value="receta:<%= receta.id %>" <%= valores.destino === `receta:${receta.id}` ? 'selected' : '' %>><%= receta.codigo %> · <%= receta.nombre %></option>
+          <% }) %>
+        </optgroup>
+      <% } %>
+    </select>
+
+    <div class="acciones">
+      <button type="submit" class="boton boton-primario">Guardar video</button>
+    </div>
+  </form>
+</section>
+
+<section class="tarjeta">
+  <h2>Videos registrados</h2>
+  <% if (videos.length === 0) { %>
+    <p class="ayuda">Todavía no hay videos registrados.</p>
+  <% } else { %>
+    <ul class="lista-simple">
+      <% videos.forEach(function (video) { %>
+        <li>
+          <span>
+            <strong><%= video.nombre %></strong><br>
+            <span class="ayuda"><%= video.tipo_asociacion %>: <%= video.asociado_a %> ·
+              <%= video.proveedor === 'youtube' ? 'YouTube' : 'Vimeo' %></span>
+            <% if (video.descripcion) { %><br><span><%= video.descripcion %></span><% } %>
+            <% if (video.embedUrl) { %>
+              <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"
+                      loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowfullscreen></iframe>
+            <% } %>
+          </span>
+          <% if (video.enlaceValidado) { %>
+            <a class="boton" href="<%= video.enlaceValidado %>" target="_blank" rel="noopener noreferrer">Abrir video</a>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

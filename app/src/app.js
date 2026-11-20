@@ -12,6 +12,7 @@ const rutasPublicas = require('../routes/publico');
 const rutasAuth = require('../routes/auth');
 const rutasAdmin = require('../routes/admin');
 const rutasDocumentos = require('../routes/documentos');
+const rutasVideos = require('../routes/videos');
 
 function crearApp() {
   const app = express();
@@ -70,6 +71,7 @@ function crearApp() {
   app.use('/', rutasAuth);
   app.use('/', rutasAdmin);
   app.use('/', rutasDocumentos);
+  app.use('/', rutasVideos);
 
   app.use((req, res) => {
     res.status(404).render('error', {

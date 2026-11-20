@@ -176,6 +176,14 @@ router.get('/admin/talleres/:id', requiereSesion, async (req, res, next) => {
       [id]
     );
     const { rows: responsables } = await query('SELECT nombre FROM usuario WHERE id = $1', [taller.id_usuario]);
+    const videosConReproductor = videos.map((video) => {
+      const resultado = v.enlaceVideo(video.enlace);
+      return {
+        ...video,
+        embedUrl: resultado.ok ? resultado.embedUrl : null,
+        enlaceValidado: resultado.ok ? resultado.valor : null,
+      };
+    });
 
     res.render('admin/taller-detalle', {
       titulo: taller.nombre,
@@ -184,7 +192,7 @@ router.get('/admin/talleres/:id', requiereSesion, async (req, res, next) => {
       recetas,
       ejecuciones,
       documentos,
-      videos,
+      videos: videosConReproductor,
     });
   } catch (error) {
     next(error);
@@ -442,12 +450,6 @@ const PENDIENTES = {
     responsable: 'Francisco Puelles',
     tarea: 'T5',
     descripcion: 'Ficha PDF de recetas, código único y vínculo con uno o varios talleres (RF-04 / CU-04).',
-  },
-  videos: {
-    titulo: 'Videos',
-    responsable: 'Goran Almendra',
-    tarea: 'T8',
-    descripcion: 'Registro de enlaces de YouTube y Vimeo con nombre, descripción y asociación (RF-05 / CU-05).',
   },
   ejecuciones: {
     titulo: 'Ejecuciones',

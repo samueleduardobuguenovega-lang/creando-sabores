@@ -4,7 +4,7 @@
 **Equipo:** Francisco Puelles · Goran Almendra · Samuel Bugueño Vega
 **Tutor:** Jorge Ponce
 **Repositorio:** https://github.com/samueleduardobuguenovega-lang/creando-sabores
-**Estado:** base construida y en verde (37 pruebas de integración). Módulos de recetas, ejecuciones, documentos y videos asignados y pendientes.
+**Estado:** base construida y en verde. Documentos PDF (T7) y videos (T8) implementados; recetas y ejecuciones pendientes.
 
 ---
 
@@ -118,7 +118,7 @@ Cada tarea corta vertical (esquema → lógica → pantalla → prueba) y declar
 - Hecho cuando: S8 probado (archivo que no es PDF → 400; sin sesión → 302; descarga con el tipo correcto).
 - Superficies: `app/src/uploads.js` (nuevo), `app/routes/documentos.js` (nuevo), `app/views/admin/documento-*.ejs` (nuevos), `app/tests/documentos.test.js` (nuevo), `app/.gitignore` (carpeta de subidas).
 
-### T8 · Videos — *Goran Almendra*
+### T8 · Videos — *Goran Almendra* — **hecha**
 
 - Alta de video con nombre, descripción, enlace y asociación; validación de proveedor con `enlaceVideo()`.
 - Reproductor embebido en el detalle del taller y en la ficha de receta.

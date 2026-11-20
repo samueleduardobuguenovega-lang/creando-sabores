@@ -1,0 +1,11 @@
+# El repositorio se edita en Windows y se ejecuta en Linux. Sin esto, un checkout
+# de Windows deja los finales de línea en CRLF y rompe lo que se ejecuta en Linux:
+# el `#!/bin/sh` del entrypoint termina como `sh\r` y el contenedor no arranca.
+* text=auto eol=lf
+
+# Estos archivos se ejecutan o se interpretan en Linux: siempre LF.
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sql text eol=lf

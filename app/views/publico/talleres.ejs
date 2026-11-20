@@ -1,30 +1,38 @@
 <%- include('../partials/head') %>
 
-<section class="caratula">
-  <p class="rotulo">Fichero de talleres<% if (anio) { %> · <%= anio %><% } %></p>
-  <h1>Talleres</h1>
-  <p class="caratula-texto">
-    Cada ficha guarda la fecha, cuántas personas pasaron por el taller y cuántas recetas
-    quedaron asociadas.
-  </p>
+<section class="portada-archivo">
+  <div>
+    <p class="rotulo">Fichero completo<% if (anio) { %> · <%= anio %><% } %></p>
+    <h1>Talleres</h1>
+    <p class="portada-texto">
+      Cada carpeta es una temática. Cada ficha guarda la fecha, cuántas personas pasaron por
+      el taller y cuántas recetas quedaron asociadas.
+    </p>
 
-  <form method="get" action="/talleres" class="filtros">
-    <label for="anio">Filtrar por año</label>
-    <select id="anio" name="anio">
-      <option value="">Todos</option>
-      <% anios.forEach(function (fila) { %>
-        <option value="<%= fila.anio %>" <%= String(anio) === String(fila.anio) ? 'selected' : '' %>><%= fila.anio %></option>
-      <% }) %>
-    </select>
-    <button type="submit" class="boton">Filtrar</button>
-  </form>
+    <form method="get" action="/talleres" class="filtros">
+      <label for="anio">Filtrar por año</label>
+      <select id="anio" name="anio">
+        <option value="">Todos</option>
+        <% anios.forEach(function (fila) { %>
+          <option value="<%= fila.anio %>" <%= String(anio) === String(fila.anio) ? 'selected' : '' %>><%= fila.anio %></option>
+        <% }) %>
+      </select>
+      <button type="submit" class="boton">Filtrar</button>
+    </form>
+  </div>
+
+  <div class="resumen-archivo" aria-label="Resumen del archivo">
+    <span>Talleres<b><%= talleres.length %></b></span>
+    <% const conEjecucion = talleres.filter(function (t) { return t.participantes > 0; }).length; %>
+    <span>Con ejecución<b><%= conEjecucion %></b></span>
+  </div>
 </section>
 
 <% if (talleres.length === 0) { %>
   <p class="ayuda">No hay talleres para mostrar con ese filtro.</p>
 <% } else { %>
   <%
-    // Misma agrupación que la portada: una carpeta por temática.
+    // Todas las carpetas: es el fichero completo.
     const porTematica = new Map();
     talleres.forEach(function (taller) {
       const clave = taller.tematica || 'Sin temática';

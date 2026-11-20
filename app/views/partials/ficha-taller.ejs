@@ -1,19 +1,15 @@
-<%# Una ficha del archivo público: hueco de foto, datos como campos y sello de estado.
-    Espera: taller (con id, nombre, tematica, descripcion, estado, fecha_planificada,
-    ejecuciones y recetas), y los locals etiquetaEstado y fecha. %>
+<%# Una ficha del fichero público: hueco de foto, título con los datos en línea y sello de
+    estado. Espera `taller` (con nombre, estado, fecha_planificada, participantes, recetas)
+    y los locals `etiquetaEstado` y `fecha`. %>
 <li class="ficha-archivo">
   <span class="foto-hueco" aria-hidden="true">sin foto</span>
 
-  <div class="ficha-texto">
-    <h3><%= taller.nombre %></h3>
-    <% if (taller.descripcion) { %>
-      <p class="ficha-desc"><%= taller.descripcion %></p>
-    <% } %>
-    <p class="ficha-campos">
-      <span class="campo-archivo">Fecha<b><%= fecha(taller.fecha_planificada) %></b></span>
-      <span class="campo-archivo">Participantes<b><%= taller.participantes || '—' %></b></span>
-      <span class="campo-archivo">Ejecuciones<b><%= taller.ejecuciones %></b></span>
-      <span class="campo-archivo">Recetas<b><%= taller.recetas %></b></span>
+  <div>
+    <h3 class="ficha-titulo"><%= taller.nombre %></h3>
+    <p class="ficha-meta">
+      <span><%= fecha(taller.fecha_planificada) %></span>
+      <span><%= taller.participantes ? taller.participantes + ' participantes' : 'sin ejecutar' %></span>
+      <span><%= taller.recetas %> <%= taller.recetas === 1 ? 'receta' : 'recetas' %></span>
     </p>
   </div>
 

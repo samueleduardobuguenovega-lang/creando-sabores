@@ -537,11 +537,10 @@ code {
   .tabla { display: block; overflow-x: auto; white-space: nowrap; }
   .filtros input, .filtros select { width: 100%; }
 }
-
 /* ------------------------------------------------------------ fichero público
-   El sitio público se lee como un archivo de talleres: carátula con resumen,
-   una carpeta por temática y una ficha por taller. Reusa los colores de estado
-   de las insignias y no cambia nada del panel. */
+   El sitio público se lee como el fichero de la actividad: una carpeta por temática, con
+   pestaña de cartulina, y una ficha por taller con el hueco de la foto, los datos y el sello
+   de estado. Reusa los colores de estado de las insignias y no toca el panel. */
 
 :root {
   --borde-fuerte: #c9b8a2;
@@ -557,93 +556,66 @@ code {
   margin-bottom: 0.8rem;
 }
 
-.caratula {
-  padding: 2.2rem 0 1.8rem;
-  border-bottom: 3px double var(--borde-fuerte);
-}
-
-.caratula-grid {
+/* portada compacta con el resumen en línea */
+.portada-archivo {
   display: grid;
-  grid-template-columns: 1.25fr 0.75fr;
-  gap: 2.6rem;
-  align-items: start;
+  grid-template-columns: 1.3fr 0.7fr;
+  gap: 2.4rem;
+  align-items: end;
+  padding: 2.2rem 0 1.6rem;
 }
 
-.caratula h1 {
+.portada-archivo h1 {
   font-size: clamp(2rem, 3.6vw, 2.9rem);
   letter-spacing: -0.03em;
   max-width: 17ch;
   margin: 0;
 }
 
-.caratula-texto {
-  margin-top: 0.9rem;
-  font-size: 1.05rem;
+.portada-texto {
+  margin-top: 0.8rem;
+  font-size: 1.02rem;
   color: var(--tinta-suave);
-  max-width: 48ch;
+  max-width: 46ch;
 }
 
-.maestra {
-  background: var(--superficie);
-  border: 1px solid var(--borde-fuerte);
-  box-shadow: 3px 3px 0 rgba(138, 59, 18, 0.08);
-  padding: 1.05rem 1.15rem;
-}
-
-.maestra h2 {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--tinta-suave);
-  padding-bottom: 0.55rem;
-  border-bottom: 1px solid var(--borde);
-  margin: 0 0 0.45rem;
-}
-
-.maestra dl { margin: 0; }
-
-.campo-maestra {
+.resumen-archivo {
   display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  padding: 0.35rem 0;
-}
-
-.campo-maestra dt {
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  justify-content: flex-end;
   font-family: var(--mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--tinta-suave);
-  white-space: nowrap;
 }
 
-.campo-maestra .linea {
-  flex: 1;
-  border-bottom: 1px dotted var(--borde-fuerte);
-  transform: translateY(-3px);
-}
-
-.campo-maestra dd {
-  margin: 0;
-  font-weight: 800;
+.resumen-archivo b {
+  display: block;
+  font-size: 1.25rem;
+  letter-spacing: 0;
+  color: var(--tinta);
   font-variant-numeric: tabular-nums;
+  margin-top: 0.15rem;
 }
 
+/* carpetas */
 .carpetas {
   display: grid;
-  gap: 2.2rem;
-  padding: 1.8rem 0 2.4rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem 1.6rem;
+  padding: 1.8rem 0 2.6rem;
+  align-items: start;
 }
 
 .carpeta {
   position: relative;
-  margin-top: 1.4rem;
+  margin-top: 1.5rem;
   background: var(--superficie);
   border: 1px solid var(--borde-fuerte);
-  border-radius: 0 4px 4px 4px;
-  box-shadow: 4px 4px 0 rgba(138, 59, 18, 0.06);
+  border-radius: 0 6px 6px 6px;
+  box-shadow: 4px 4px 0 rgba(138, 59, 18, 0.07);
 }
 
 .carpeta-tab {
@@ -652,17 +624,18 @@ code {
   left: -1px;
   display: flex;
   align-items: baseline;
-  gap: 0.55rem;
-  padding: 0.3rem 0.9rem 0.35rem;
-  background: #efe8db;
+  gap: 0.6rem;
+  padding: 0.32rem 1rem 0.38rem;
+  background: #e8dcc9;
   border: 1px solid var(--borde-fuerte);
   border-bottom: none;
-  border-radius: 4px 12px 0 0;
+  border-radius: 6px 14px 0 0;
 }
 
 .carpeta-tab h2 {
   margin: 0;
   font-size: 0.95rem;
+  letter-spacing: -0.01em;
 }
 
 .carpeta-tab span {
@@ -672,8 +645,9 @@ code {
   font-weight: 700;
 }
 
-.carpeta-cuerpo { padding: 0.3rem 1.1rem 0.8rem; }
+.carpeta-cuerpo { padding: 0.4rem 1.15rem 1rem; }
 
+/* fichas */
 .fichas-archivo {
   list-style: none;
   margin: 0;
@@ -683,13 +657,13 @@ code {
 .ficha-archivo {
   display: grid;
   grid-template-columns: 52px 1fr auto;
-  gap: 0.95rem;
+  gap: 0.9rem;
   align-items: start;
   padding: 0.85rem 0;
   border-bottom: 1px dashed var(--borde);
 }
 
-.ficha-archivo:last-child { border-bottom: 0; }
+.ficha-archivo:last-child { border-bottom: none; }
 
 .foto-hueco {
   width: 52px;
@@ -708,41 +682,20 @@ code {
   line-height: 1.25;
 }
 
-.ficha-texto h3 {
+.ficha-titulo {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.02rem;
   letter-spacing: -0.01em;
 }
 
-.ficha-desc {
-  margin: 0.2rem 0 0;
-  color: var(--tinta-suave);
-  font-size: 0.93rem;
-}
-
-.ficha-campos {
+.ficha-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem 1.2rem;
-  margin: 0.5rem 0 0;
-}
-
-.campo-archivo {
+  gap: 0.25rem 0.9rem;
+  margin: 0.3rem 0 0;
   font-family: var(--mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.74rem;
   color: var(--tinta-suave);
-}
-
-.campo-archivo b {
-  display: block;
-  margin-top: 0.05rem;
-  font-family: inherit;
-  font-size: 0.88rem;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--tinta);
   font-variant-numeric: tabular-nums;
 }
 
@@ -778,8 +731,10 @@ code {
   background: var(--exito-fondo);
 }
 
-@media (max-width: 860px) {
-  .caratula-grid { grid-template-columns: 1fr; gap: 1.6rem; }
+@media (max-width: 920px) {
+  .portada-archivo { grid-template-columns: 1fr; gap: 1.6rem; padding: 1.8rem 0 1.2rem; }
+  .resumen-archivo { justify-content: flex-start; }
+  .carpetas { grid-template-columns: 1fr; gap: 2.2rem; }
   .ficha-archivo { grid-template-columns: 44px 1fr; gap: 0.7rem; }
   .ficha-archivo .sello-archivo { grid-column: 2; justify-self: start; margin-top: 0.35rem; }
   .foto-hueco { width: 44px; height: 44px; }

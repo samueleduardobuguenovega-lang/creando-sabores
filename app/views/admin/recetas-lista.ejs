@@ -1,0 +1,45 @@
+<%- include('../partials/head') %>
+
+<div class="barra-titulo">
+  <h1>Recetas</h1>
+  <a class="boton boton-primario" href="/admin/recetas/nueva">Nueva receta</a>
+</div>
+
+<form method="get" action="/admin/recetas" class="filtros">
+  <label for="q">Buscar por código o nombre</label>
+  <input id="q" name="q" type="search" value="<%= busqueda %>" placeholder="Código o nombre">
+  <button type="submit" class="boton">Filtrar</button>
+</form>
+
+<% if (recetas.length === 0) { %>
+  <p class="ayuda">No hay recetas que coincidan con la búsqueda.</p>
+<% } else { %>
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th class="numero">Talleres</th>
+        <th>Ficha PDF</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% recetas.forEach(function (receta) { %>
+        <tr>
+          <td><a href="/admin/recetas/<%= receta.id %>/editar"><%= receta.codigo %></a></td>
+          <td><a href="/admin/recetas/<%= receta.id %>/editar"><%= receta.nombre %></a></td>
+          <td class="numero"><%= receta.talleres %></td>
+          <td>
+            <% if (receta.enlace_pdf) { %>
+              <a href="<%= receta.enlace_pdf %>" target="_blank" rel="noopener">Ver PDF</a>
+            <% } else { %>
+              —
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<%- include('../partials/footer') %>

@@ -76,14 +76,57 @@ router.get('/ejecuciones', async (req, res, next) => {
   }
 });
 
-// El listado público de recetas lo construye Francisco en su tarea (T5).
-router.get('/recetas', (req, res) => {
-  res.render('pendiente', {
-    titulo: 'Recetas',
-    responsable: 'Francisco Puelles',
-    tarea: 'T5',
-    descripcion: 'Buscador y fichas de recetas en PDF para el público.',
-  });
+router.get('/recetas', async (req, res, next) => {
+  try {
+    const busqueda = (req.query.q ?? '').toString().trim();
+    const { rows: recetas } = await query(
+      `SELECT r.id, r.codigo, r.nombre, r.descripcion, r.enlace_pdf,
+              COUNT(DISTINCT rt.id_taller)::int AS talleres
+         FROM receta r
+         LEFT JOIN receta_taller rt ON rt.id_receta = r.id
+        WHERE ($1 = '' OR r.codigo ILIKE '%' || $1 || '%' OR r.nombre ILIKE '%' || $1 || '%')
+        GROUP BY r.id
+        ORDER BY r.nombre, r.codigo`,
+      [busqueda]
+    );
+
+    res.render('publico/recetas', { titulo: 'Recetas', recetas, busqueda });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/recetas/:id', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id < 1) return next();
+
+    const { rows: recetas } = await query(
+      `SELECT id, codigo, nombre, descripcion, enlace_pdf
+         FROM receta
+        WHERE id = $1`,
+      [id]
+    );
+    const receta = recetas[0];
+    if (!receta) return next();
+
+    const { rows: talleres } = await query(
+      `SELECT t.id, t.nombre, t.tematica, t.descripcion, t.fecha_planificada, t.estado
+         FROM taller t
+         JOIN receta_taller rt ON rt.id_taller = t.id
+        WHERE rt.id_receta = $1
+        ORDER BY t.fecha_planificada DESC NULLS LAST, t.nombre`,
+      [id]
+    );
+
+    res.render('publico/receta-detalle', {
+      titulo: receta.nombre,
+      receta,
+      talleres,
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;

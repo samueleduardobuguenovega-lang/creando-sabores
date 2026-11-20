@@ -437,12 +437,6 @@ router.get('/admin/auditoria', requiereRol('admin'), async (req, res, next) => {
 // ------------------------------------- módulos de los compañeros (aún vacíos)
 
 const PENDIENTES = {
-  recetas: {
-    titulo: 'Recetas',
-    responsable: 'Francisco Puelles',
-    tarea: 'T5',
-    descripcion: 'Ficha PDF de recetas, código único y vínculo con uno o varios talleres (RF-04 / CU-04).',
-  },
   documentos: {
     titulo: 'Documentos PDF',
     responsable: 'Goran Almendra',

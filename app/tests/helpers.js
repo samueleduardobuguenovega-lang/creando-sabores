@@ -47,7 +47,13 @@ function crearCliente(base) {
     if (galleta) opciones.headers.cookie = galleta;
     if (datos) {
       opciones.headers['content-type'] = 'application/x-www-form-urlencoded';
-      opciones.body = new URLSearchParams(datos).toString();
+      const parametros = new URLSearchParams();
+      for (const [clave, valor] of Object.entries(datos)) {
+        for (const elemento of Array.isArray(valor) ? valor : [valor]) {
+          parametros.append(clave, elemento);
+        }
+      }
+      opciones.body = parametros.toString();
     }
 
     const respuesta = await fetch(base + ruta, opciones);

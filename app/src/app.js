@@ -12,6 +12,18 @@ const rutasPublicas = require('../routes/publico');
 const rutasAuth = require('../routes/auth');
 const rutasAdmin = require('../routes/admin');
 
+// La cookie de sesión se marca "secure" (el navegador solo la manda por HTTPS)
+// cuando se corre en producción. Eso es lo correcto detrás de un dominio con
+// certificado, pero rompe una demo servida por HTTP en la red local: el
+// navegador nunca devuelve la cookie y el login no persiste aunque la clave sea
+// correcta. COOKIE_SEGURA permite elegir explícitamente: 1 fuerza la cookie
+// segura, 0 la apaga (solo HTTP), y sin la variable manda NODE_ENV.
+function cookieSegura() {
+  const forzado = process.env.COOKIE_SEGURA;
+  if (forzado === '1' || forzado === '0') return forzado === '1';
+  return process.env.NODE_ENV === 'production';
+}
+
 function crearApp() {
   const app = express();
 
@@ -35,7 +47,7 @@ function crearApp() {
       cookie: {
         httpOnly: true,
         sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
+        secure: cookieSegura(),
         maxAge: 1000 * 60 * 60 * 8,
       },
     })

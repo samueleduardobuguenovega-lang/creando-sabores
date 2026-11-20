@@ -8,8 +8,12 @@
 | `PORT` | Puerto HTTP | `3000` |
 | `SESSION_SECRET` | Firma de la cookie de sesión | (en producción es obligatoria) |
 | `NODE_ENV` | Activa la cookie `secure` en producción | `development` |
+| `COOKIE_SEGURA` | `1` exige HTTPS para la cookie de sesión, `0` la permite por HTTP | según `NODE_ENV` |
+| `SEMBRAR` | `1` siembra los datos de ejemplo al arrancar el contenedor | `0` |
 | `CLAVE_ADMIN`, `CLAVE_DOCENTE` | Claves que crea `npm run seed` | `Admin-2026`, `Docente-2026` |
 | `UPLOAD_DIR` | Carpeta de archivos subidos | `app/uploads` |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Base que crea el servicio `db` de compose | `creando`, (obligatoria), `creando_sabores` |
+| `PUERTO_APP` | Puerto del host donde se publica el sitio | `3000` |
 
 En producción, `SESSION_SECRET` debe ser una cadena larga y aleatoria
 (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`). Si cambia, todas las
@@ -18,10 +22,24 @@ sesiones abiertas se cierran.
 ## Con Docker
 
 ```bash
+cp entorno.ejemplo .env                 # completar POSTGRES_PASSWORD y SESSION_SECRET
 docker compose up -d --build
 docker compose exec app npm run instalar
 docker compose exec app npm run seed    # solo la primera vez
 ```
+
+Las claves no están en el repositorio: si falta `POSTGRES_PASSWORD` o `SESSION_SECRET`, compose se
+niega a arrancar (`falta POSTGRES_PASSWORD en .env`) en lugar de usar un valor de ejemplo. El servicio
+`db` **no publica puerto al host**: solo lo alcanza `app` por la red interna. Para respaldar, consultar
+o restaurar se usan los comandos `docker compose exec db ...` de más abajo.
+
+### Cookie de sesión y HTTPS
+
+En producción la cookie de sesión se marca `secure`, es decir que el navegador solo la manda por
+HTTPS. Servida por HTTP (por ejemplo una demo en la red local con `http://192.168.1.112:8099`), el
+navegador descarta la cookie: el login acepta la clave y la sesión no persiste. Para ese caso se pone
+`COOKIE_SEGURA=0` en `.env`. Cuando el sitio queda detrás de HTTPS (dominio con certificado o túnel)
+hay que volver a `COOKIE_SEGURA=1`.
 
 Los datos de PostgreSQL viven en el volumen `pgdata` y los archivos subidos en `uploads`. Un
 `docker compose down` sin `-v` no borra nada.

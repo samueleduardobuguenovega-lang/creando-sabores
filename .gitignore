@@ -2,7 +2,8 @@
 node_modules/
 npm-debug.log*
 
-# Configuración local
+# Configuración local. Ojo: la plantilla que sí se versiona se llama
+# `entorno.ejemplo` justamente porque `.env.*` quedaría ignorado.
 .env
 .env.*
 

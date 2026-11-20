@@ -32,23 +32,30 @@ Fuera del alcance (lo dice el SRS): inscripción de participantes, asistencia, c
 
 ### 1. Con Docker (lo más simple)
 
+Las claves no están en el repositorio: primero se crea el archivo de configuración a partir de la
+plantilla y se completan `POSTGRES_PASSWORD` y `SESSION_SECRET`.
+
 ```bash
-docker compose up --build
+cp entorno.ejemplo .env    # completar POSTGRES_PASSWORD y SESSION_SECRET
+docker compose up -d --build
 ```
 
-La plataforma queda en <http://localhost:3000>. La primera vez hay que crear el esquema y los datos
-de ejemplo:
+La plataforma queda en <http://localhost:3000>. La primera vez hay que crear el esquema y los datos de
+ejemplo. El arranque del contenedor ya crea las tablas (es idempotente); el seed se pide una sola vez:
 
 ```bash
 docker compose exec app npm run instalar
 docker compose exec app npm run seed
 ```
 
+Si `docker compose` responde `falta POSTGRES_PASSWORD en .env` o `falta SESSION_SECRET en .env`, es a
+propósito: no arranca con claves de ejemplo.
+
 ### 2. Con PostgreSQL instalado en tu máquina
 
 ```bash
 cd app
-cp ../.env.example .env          # ajusta DATABASE_URL si tu clave es distinta
+cp ../entorno.ejemplo .env       # ajusta DATABASE_URL si tu clave es distinta
 npm install
 npm run instalar                 # crea las tablas
 npm run seed                     # datos de ejemplo (opcional)

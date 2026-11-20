@@ -1,11 +1,12 @@
-<%# Una ficha del archivo público: hueco de foto, datos como campos y sello de estado.
-    Espera: taller (con id, nombre, tematica, descripcion, estado, fecha_planificada,
-    ejecuciones y recetas), y los locals etiquetaEstado y fecha. %>
-<li class="ficha-archivo">
-  <span class="foto-hueco" aria-hidden="true">sin foto</span>
+<%# Una ficha del índice público: número de ficha, título, y los datos como campos
+    etiquetados, con el estado como sello. Espera `taller` (con id, nombre, tematica,
+    descripcion, estado, fecha_planificada, participantes, ejecuciones y recetas) y
+    los locals `etiquetaEstado` y `fecha`. %>
+<li class="ficha-indice">
+  <p class="ficha-num">N°<b><%= String(taller.id).padStart(2, '0') %></b></p>
 
-  <div class="ficha-texto">
-    <h3><%= taller.nombre %></h3>
+  <div>
+    <h3 class="ficha-titulo"><%= taller.nombre %></h3>
     <% if (taller.descripcion) { %>
       <p class="ficha-desc"><%= taller.descripcion %></p>
     <% } %>

@@ -42,7 +42,7 @@
   <p class="ayuda">Todavía no hay talleres registrados.</p>
 <% } else { %>
   <%
-    // El fichero se agrupa por temática: una carpeta por temática, con sus fichas.
+    // Índice del archivo: una entrada por temática, agrupando las fichas.
     const porTematica = new Map();
     talleres.forEach(function (taller) {
       const clave = taller.tematica || 'Sin temática';
@@ -52,30 +52,38 @@
     const grupos = Array.from(porTematica.entries()).slice(0, 3);
   %>
 
-  <div class="carpetas">
-    <% grupos.forEach(function (grupo) { const tematica = grupo[0]; const lista = grupo[1]; %>
-      <section class="carpeta">
-        <div class="carpeta-tab">
-          <h2><%= tematica %></h2>
-          <span><%= porTematica.get(tematica).length %></span>
-        </div>
-        <div class="carpeta-cuerpo">
-          <ul class="fichas-archivo">
-            <% lista.slice(0, 3).forEach(function (taller) { %>
+  <div class="cuerpo-archivo">
+    <nav class="pestanas" aria-label="Temáticas del archivo">
+      <h2>Temática</h2>
+      <a class="pestana pestana-activa" href="/talleres">Todas <span><%= talleres.length %></span></a>
+      <% Array.from(porTematica.entries()).forEach(function (grupo) { %>
+        <a class="pestana" href="/talleres"><%= grupo[0] %> <span><%= grupo[1].length %></span></a>
+      <% }) %>
+    </nav>
+
+    <div>
+      <% grupos.forEach(function (grupo) { const tematica = grupo[0]; const lista = grupo[1]; %>
+        <section class="grupo-archivo">
+          <div class="grupo-cabeza">
+            <h2><%= tematica %></h2>
+            <span><%= lista.length %> <%= lista.length === 1 ? 'ficha' : 'fichas' %></span>
+          </div>
+          <ul class="fichas-indice">
+            <% lista.forEach(function (taller) { %>
               <%- include('../partials/ficha-taller', { taller: taller }) %>
             <% }) %>
           </ul>
-        </div>
-      </section>
-    <% }) %>
-  </div>
+        </section>
+      <% }) %>
 
-  <% if (porTematica.size > grupos.length) { %>
-    <p class="ayuda">
-      Quedan <%= porTematica.size - grupos.length %> temáticas más en el fichero.
-      <a href="/talleres">Ver todos los talleres</a>.
-    </p>
-  <% } %>
+      <% if (porTematica.size > grupos.length) { %>
+        <p class="ayuda">
+          Quedan <%= porTematica.size - grupos.length %> temáticas más en el fichero.
+          <a href="/talleres">Ver el índice completo</a>.
+        </p>
+      <% } %>
+    </div>
+  </div>
 <% } %>
 
 <%- include('../partials/footer') %>

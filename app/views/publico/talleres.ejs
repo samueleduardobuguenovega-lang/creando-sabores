@@ -4,8 +4,8 @@
   <p class="rotulo">Fichero de talleres<% if (anio) { %> · <%= anio %><% } %></p>
   <h1>Talleres</h1>
   <p class="caratula-texto">
-    Cada ficha guarda la fecha, cuántas personas pasaron por el taller y cuántas recetas
-    quedaron asociadas.
+    El índice completo: cada ficha guarda la fecha, cuántas personas pasaron por el taller
+    y cuántas recetas quedaron asociadas.
   </p>
 
   <form method="get" action="/talleres" class="filtros">
@@ -24,7 +24,7 @@
   <p class="ayuda">No hay talleres para mostrar con ese filtro.</p>
 <% } else { %>
   <%
-    // Misma agrupación que la portada: una carpeta por temática.
+    // Misma agrupación que la portada, con todas las fichas del archivo.
     const porTematica = new Map();
     talleres.forEach(function (taller) {
       const clave = taller.tematica || 'Sin temática';
@@ -33,22 +33,34 @@
     });
   %>
 
-  <div class="carpetas">
-    <% Array.from(porTematica.entries()).forEach(function (grupo) { const tematica = grupo[0]; const lista = grupo[1]; %>
-      <section class="carpeta">
-        <div class="carpeta-tab">
-          <h2><%= tematica %></h2>
-          <span><%= lista.length %></span>
-        </div>
-        <div class="carpeta-cuerpo">
-          <ul class="fichas-archivo">
+  <div class="cuerpo-archivo">
+    <nav class="pestanas" aria-label="Temáticas del archivo">
+      <h2>Temática</h2>
+      <a class="pestana pestana-activa" href="/talleres<% if (anio) { %>?anio=<%= anio %><% } %>">
+        Todas <span><%= talleres.length %></span>
+      </a>
+      <% Array.from(porTematica.entries()).forEach(function (grupo) { %>
+        <a class="pestana" href="/talleres<% if (anio) { %>?anio=<%= anio %><% } %>">
+          <%= grupo[0] %> <span><%= grupo[1].length %></span>
+        </a>
+      <% }) %>
+    </nav>
+
+    <div>
+      <% Array.from(porTematica.entries()).forEach(function (grupo) { const tematica = grupo[0]; const lista = grupo[1]; %>
+        <section class="grupo-archivo">
+          <div class="grupo-cabeza">
+            <h2><%= tematica %></h2>
+            <span><%= lista.length %> <%= lista.length === 1 ? 'ficha' : 'fichas' %></span>
+          </div>
+          <ul class="fichas-indice">
             <% lista.forEach(function (taller) { %>
               <%- include('../partials/ficha-taller', { taller: taller }) %>
             <% }) %>
           </ul>
-        </div>
-      </section>
-    <% }) %>
+        </section>
+      <% }) %>
+    </div>
   </div>
 <% } %>
 

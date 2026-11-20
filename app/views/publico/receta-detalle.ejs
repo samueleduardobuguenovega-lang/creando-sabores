@@ -1,0 +1,36 @@
+<%- include('../partials/head') %>
+
+<p class="etiqueta"><%= receta.codigo %></p>
+<h1><%= receta.nombre %></h1>
+<p><%= receta.descripcion || 'Sin descripción.' %></p>
+
+<% if (receta.enlace_pdf) { %>
+  <p><a class="boton" href="<%= receta.enlace_pdf %>" target="_blank" rel="noopener">Ver ficha PDF</a></p>
+<% } else { %>
+  <p class="ayuda">La ficha PDF todavía no está disponible.</p>
+<% } %>
+
+<section>
+  <h2>Talleres asociados</h2>
+  <% if (talleres.length === 0) { %>
+    <p class="ayuda">Esta receta todavía no está asociada a talleres.</p>
+  <% } else { %>
+    <ul class="lista-tarjetas">
+      <% talleres.forEach(function (taller) { %>
+        <li class="tarjeta">
+          <p class="etiqueta"><%= taller.tematica %></p>
+          <h3><%= taller.nombre %></h3>
+          <p><%= taller.descripcion || 'Sin descripción.' %></p>
+          <p class="ayuda">
+            <%= taller.estado === 'finalizado' ? 'Realizado' : 'Programado' %>:
+            <%= fecha(taller.fecha_planificada) %>
+          </p>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+
+<p><a class="boton" href="/recetas">Volver a recetas</a></p>
+
+<%- include('../partials/footer') %>

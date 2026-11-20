@@ -1,4 +1,4 @@
-// Los módulos de los compañeros están anunciados dentro de la app, no rotos.
+// Los módulos pendientes están anunciados dentro de la app, no rotos.
 const { test, before, after } = require('node:test');
 const assert = require('node:assert/strict');
 const { prepararBase, levantarApp, crearCliente, entrar, pool } = require('./helpers');
@@ -19,7 +19,6 @@ after(async () => {
 });
 
 const PENDIENTES = [
-  ['/admin/recetas', 'Francisco Puelles', 'T5'],
   ['/admin/documentos', 'Goran Almendra', 'T7'],
   ['/admin/videos', 'Goran Almendra', 'T8'],
   ['/admin/ejecuciones', 'Francisco Puelles', 'T6'],
@@ -38,16 +37,17 @@ for (const [ruta, responsable, tarea] of PENDIENTES) {
 
 test('las páginas de módulos pendientes también exigen sesión', async () => {
   const anonimo = crearCliente(app.base);
-  const respuesta = await anonimo.get('/admin/recetas');
+  const respuesta = await anonimo.get('/admin/documentos');
 
   assert.equal(respuesta.estado, 302);
   assert.match(respuesta.ubicacion, /^\/login/);
 });
 
-test('el público ve el aviso de recetas en lugar de un error', async () => {
+test('el público consulta recetas sin iniciar sesión', async () => {
   const anonimo = crearCliente(app.base);
   const respuesta = await anonimo.get('/recetas');
 
   assert.equal(respuesta.estado, 200);
   assert.match(respuesta.texto, /Recetas/);
+  assert.doesNotMatch(respuesta.texto, /Módulo en construcción/);
 });

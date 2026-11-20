@@ -54,6 +54,20 @@ function estado(valor) {
   return { ok: true, valor: limpio };
 }
 
+function enlaceHttp(valor, { campo = 'enlace' } = {}) {
+  const limpio = (valor ?? '').toString().trim();
+  let url;
+  try {
+    url = new URL(limpio);
+  } catch {
+    return { ok: false, error: `El ${campo} no es una URL válida.` };
+  }
+  if (!/^https?:\/\//i.test(limpio) || !['http:', 'https:'].includes(url.protocol) || !url.hostname) {
+    return { ok: false, error: `El ${campo} debe empezar con http:// o https://.` };
+  }
+  return { ok: true, valor: limpio };
+}
+
 // Reconoce los formatos habituales de YouTube y Vimeo y devuelve el proveedor.
 function enlaceVideo(valor) {
   const limpio = (valor ?? '').toString().trim();
@@ -88,6 +102,7 @@ module.exports = {
   fecha,
   entero,
   estado,
+  enlaceHttp,
   enlaceVideo,
   correoNoUsado,
 };

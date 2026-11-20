@@ -11,6 +11,7 @@ const { ETIQUETA_ESTADO } = require('./validaciones');
 const rutasPublicas = require('../routes/publico');
 const rutasAuth = require('../routes/auth');
 const rutasAdmin = require('../routes/admin');
+const rutasRecetas = require('../routes/recetas');
 
 // La cookie de sesión se marca "secure" (el navegador solo la manda por HTTPS)
 // cuando se corre en producción. Eso es lo correcto detrás de un dominio con
@@ -79,6 +80,7 @@ function crearApp() {
 
   app.use('/', rutasPublicas);
   app.use('/', rutasAuth);
+  app.use('/', rutasRecetas);
   app.use('/', rutasAdmin);
 
   app.use((req, res) => {

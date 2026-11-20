@@ -1,49 +1,81 @@
 <%- include('../partials/head') %>
 
-<section class="portada">
-  <h1>Talleres que se quedan</h1>
-  <p class="portada-texto">
-    Aquí queda registrado cada taller gastronómico: sus recetas, sus documentos y lo que
-    realmente pasó el día de la actividad.
-  </p>
-  <div class="acciones">
-    <a class="boton boton-primario" href="/talleres">Ver talleres</a>
-    <a class="boton" href="/ejecuciones">Ver ejecuciones</a>
+<section class="caratula">
+  <p class="rotulo">Archivo de talleres · <%= anioActual %></p>
+  <div class="caratula-grid">
+    <div>
+      <h1>Talleres que se quedan</h1>
+      <p class="caratula-texto">
+        Cada taller queda archivado con sus recetas, sus documentos y lo que realmente pasó
+        el día de la actividad. Se puede revisar años después.
+      </p>
+      <div class="acciones">
+        <a class="boton boton-primario" href="/talleres">Abrir el fichero</a>
+        <a class="boton" href="/ejecuciones">Ver ejecuciones</a>
+      </div>
+    </div>
+
+    <div class="maestra">
+      <h2>Resumen del archivo</h2>
+      <dl>
+        <div class="campo-maestra">
+          <dt>Talleres registrados</dt><span class="linea"></span><dd><%= resumen.talleres %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>Finalizados</dt><span class="linea"></span><dd><%= resumen.finalizados %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>En ejecución</dt><span class="linea"></span><dd><%= resumen.en_ejecucion %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>Recetas</dt><span class="linea"></span><dd><%= totalRecetas %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>Ejecuciones</dt><span class="linea"></span><dd><%= totalEjecuciones %></dd>
+        </div>
+      </dl>
+    </div>
   </div>
 </section>
 
-<section class="indicadores" aria-label="Resumen">
-  <div class="indicador">
-    <span class="indicador-numero"><%= resumen.talleres %></span>
-    <span class="indicador-texto">Talleres registrados</span>
-  </div>
-  <div class="indicador">
-    <span class="indicador-numero"><%= resumen.finalizados %></span>
-    <span class="indicador-texto">Talleres finalizados</span>
-  </div>
-  <div class="indicador">
-    <span class="indicador-numero"><%= totalRecetas %></span>
-    <span class="indicador-texto">Recetas disponibles</span>
-  </div>
-</section>
-
-<h2>Últimos talleres</h2>
-<% if (ultimos.length === 0) { %>
+<% if (talleres.length === 0) { %>
   <p class="ayuda">Todavía no hay talleres registrados.</p>
 <% } else { %>
-  <ul class="lista-tarjetas">
-    <% ultimos.forEach(function (taller) { %>
-      <li class="tarjeta">
-        <p class="etiqueta"><%= taller.tematica %></p>
-        <h3><%= taller.nombre %></h3>
-        <p class="ayuda">
-          Estado: <%= etiquetaEstado[taller.estado] || taller.estado %>
-          · Fecha: <%= fecha(taller.fecha_planificada) %>
-          · Ejecuciones: <%= taller.ejecuciones %>
-        </p>
-      </li>
+  <%
+    // El fichero se agrupa por temática: una carpeta por temática, con sus fichas.
+    const porTematica = new Map();
+    talleres.forEach(function (taller) {
+      const clave = taller.tematica || 'Sin temática';
+      if (!porTematica.has(clave)) porTematica.set(clave, []);
+      porTematica.get(clave).push(taller);
+    });
+    const grupos = Array.from(porTematica.entries()).slice(0, 3);
+  %>
+
+  <div class="carpetas">
+    <% grupos.forEach(function (grupo) { const tematica = grupo[0]; const lista = grupo[1]; %>
+      <section class="carpeta">
+        <div class="carpeta-tab">
+          <h2><%= tematica %></h2>
+          <span><%= porTematica.get(tematica).length %></span>
+        </div>
+        <div class="carpeta-cuerpo">
+          <ul class="fichas-archivo">
+            <% lista.slice(0, 3).forEach(function (taller) { %>
+              <%- include('../partials/ficha-taller', { taller: taller }) %>
+            <% }) %>
+          </ul>
+        </div>
+      </section>
     <% }) %>
-  </ul>
+  </div>
+
+  <% if (porTematica.size > grupos.length) { %>
+    <p class="ayuda">
+      Quedan <%= porTematica.size - grupos.length %> temáticas más en el fichero.
+      <a href="/talleres">Ver todos los talleres</a>.
+    </p>
+  <% } %>
 <% } %>
 
 <%- include('../partials/footer') %>

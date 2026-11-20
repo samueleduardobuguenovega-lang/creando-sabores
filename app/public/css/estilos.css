@@ -537,3 +537,250 @@ code {
   .tabla { display: block; overflow-x: auto; white-space: nowrap; }
   .filtros input, .filtros select { width: 100%; }
 }
+
+/* ------------------------------------------------------------ fichero público
+   El sitio público se lee como un archivo de talleres: carátula con resumen,
+   una carpeta por temática y una ficha por taller. Reusa los colores de estado
+   de las insignias y no cambia nada del panel. */
+
+:root {
+  --borde-fuerte: #c9b8a2;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.rotulo {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--primario);
+  margin-bottom: 0.8rem;
+}
+
+.caratula {
+  padding: 2.2rem 0 1.8rem;
+  border-bottom: 3px double var(--borde-fuerte);
+}
+
+.caratula-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 2.6rem;
+  align-items: start;
+}
+
+.caratula h1 {
+  font-size: clamp(2rem, 3.6vw, 2.9rem);
+  letter-spacing: -0.03em;
+  max-width: 17ch;
+  margin: 0;
+}
+
+.caratula-texto {
+  margin-top: 0.9rem;
+  font-size: 1.05rem;
+  color: var(--tinta-suave);
+  max-width: 48ch;
+}
+
+.maestra {
+  background: var(--superficie);
+  border: 1px solid var(--borde-fuerte);
+  box-shadow: 3px 3px 0 rgba(138, 59, 18, 0.08);
+  padding: 1.05rem 1.15rem;
+}
+
+.maestra h2 {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--borde);
+  margin: 0 0 0.45rem;
+}
+
+.maestra dl { margin: 0; }
+
+.campo-maestra {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+}
+
+.campo-maestra dt {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+  white-space: nowrap;
+}
+
+.campo-maestra .linea {
+  flex: 1;
+  border-bottom: 1px dotted var(--borde-fuerte);
+  transform: translateY(-3px);
+}
+
+.campo-maestra dd {
+  margin: 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.carpetas {
+  display: grid;
+  gap: 2.2rem;
+  padding: 1.8rem 0 2.4rem;
+}
+
+.carpeta {
+  position: relative;
+  margin-top: 1.4rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: 0 4px 4px 4px;
+  box-shadow: 4px 4px 0 rgba(138, 59, 18, 0.06);
+}
+
+.carpeta-tab {
+  position: absolute;
+  bottom: calc(100% - 1px);
+  left: -1px;
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  padding: 0.3rem 0.9rem 0.35rem;
+  background: #efe8db;
+  border: 1px solid var(--borde-fuerte);
+  border-bottom: none;
+  border-radius: 4px 12px 0 0;
+}
+
+.carpeta-tab h2 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.carpeta-tab span {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--primario);
+  font-weight: 700;
+}
+
+.carpeta-cuerpo { padding: 0.3rem 1.1rem 0.8rem; }
+
+.fichas-archivo {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ficha-archivo {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  gap: 0.95rem;
+  align-items: start;
+  padding: 0.85rem 0;
+  border-bottom: 1px dashed var(--borde);
+}
+
+.ficha-archivo:last-child { border-bottom: 0; }
+
+.foto-hueco {
+  width: 52px;
+  height: 52px;
+  border: 1px dashed var(--borde-fuerte);
+  border-radius: 3px;
+  background: repeating-linear-gradient(45deg, transparent 0 5px, rgba(138, 59, 18, 0.05) 5px 10px);
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+  text-align: center;
+  line-height: 1.25;
+}
+
+.ficha-texto h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.ficha-desc {
+  margin: 0.2rem 0 0;
+  color: var(--tinta-suave);
+  font-size: 0.93rem;
+}
+
+.ficha-campos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.2rem;
+  margin: 0.5rem 0 0;
+}
+
+.campo-archivo {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+.campo-archivo b {
+  display: block;
+  margin-top: 0.05rem;
+  font-family: inherit;
+  font-size: 0.88rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+.sello-archivo {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.45rem;
+  border: 2px solid;
+  border-radius: 3px;
+  transform: rotate(-2.5deg);
+  white-space: nowrap;
+}
+
+.sello-planificado {
+  color: var(--aviso);
+  border-color: #b99b34;
+  background: var(--aviso-fondo);
+}
+
+.sello-en_ejecucion {
+  color: var(--primario);
+  border-color: var(--primario);
+  background: var(--primario-claro);
+}
+
+.sello-finalizado {
+  color: var(--exito);
+  border-color: var(--exito);
+  background: var(--exito-fondo);
+}
+
+@media (max-width: 860px) {
+  .caratula-grid { grid-template-columns: 1fr; gap: 1.6rem; }
+  .ficha-archivo { grid-template-columns: 44px 1fr; gap: 0.7rem; }
+  .ficha-archivo .sello-archivo { grid-column: 2; justify-self: start; margin-top: 0.35rem; }
+  .foto-hueco { width: 44px; height: 44px; }
+}

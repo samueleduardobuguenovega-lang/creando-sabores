@@ -1,35 +1,55 @@
 <%- include('../partials/head') %>
 
-<h1>Talleres</h1>
+<section class="caratula">
+  <p class="rotulo">Fichero de talleres<% if (anio) { %> · <%= anio %><% } %></p>
+  <h1>Talleres</h1>
+  <p class="caratula-texto">
+    Cada ficha guarda la fecha, cuántas personas pasaron por el taller y cuántas recetas
+    quedaron asociadas.
+  </p>
 
-<form method="get" action="/talleres" class="filtros">
-  <label for="anio">Filtrar por año</label>
-  <select id="anio" name="anio">
-    <option value="">Todos</option>
-    <% anios.forEach(function (fila) { %>
-      <option value="<%= fila.anio %>" <%= String(anio) === String(fila.anio) ? 'selected' : '' %>><%= fila.anio %></option>
-    <% }) %>
-  </select>
-  <button type="submit" class="boton">Filtrar</button>
-</form>
+  <form method="get" action="/talleres" class="filtros">
+    <label for="anio">Filtrar por año</label>
+    <select id="anio" name="anio">
+      <option value="">Todos</option>
+      <% anios.forEach(function (fila) { %>
+        <option value="<%= fila.anio %>" <%= String(anio) === String(fila.anio) ? 'selected' : '' %>><%= fila.anio %></option>
+      <% }) %>
+    </select>
+    <button type="submit" class="boton">Filtrar</button>
+  </form>
+</section>
 
 <% if (talleres.length === 0) { %>
   <p class="ayuda">No hay talleres para mostrar con ese filtro.</p>
 <% } else { %>
-  <ul class="lista-tarjetas">
-    <% talleres.forEach(function (taller) { %>
-      <li class="tarjeta">
-        <p class="etiqueta"><%= taller.tematica %></p>
-        <h2><%= taller.nombre %></h2>
-        <p><%= taller.descripcion %></p>
-        <p class="ayuda">
-          <%= taller.estado === 'finalizado' ? 'Realizado' : 'Programado' %>:
-          <%= fecha(taller.fecha_planificada) %>
-          · Recetas asociadas: <%= taller.recetas %>
-        </p>
-      </li>
+  <%
+    // Misma agrupación que la portada: una carpeta por temática.
+    const porTematica = new Map();
+    talleres.forEach(function (taller) {
+      const clave = taller.tematica || 'Sin temática';
+      if (!porTematica.has(clave)) porTematica.set(clave, []);
+      porTematica.get(clave).push(taller);
+    });
+  %>
+
+  <div class="carpetas">
+    <% Array.from(porTematica.entries()).forEach(function (grupo) { const tematica = grupo[0]; const lista = grupo[1]; %>
+      <section class="carpeta">
+        <div class="carpeta-tab">
+          <h2><%= tematica %></h2>
+          <span><%= lista.length %></span>
+        </div>
+        <div class="carpeta-cuerpo">
+          <ul class="fichas-archivo">
+            <% lista.forEach(function (taller) { %>
+              <%- include('../partials/ficha-taller', { taller: taller }) %>
+            <% }) %>
+          </ul>
+        </div>
+      </section>
     <% }) %>
-  </ul>
+  </div>
 <% } %>
 
 <%- include('../partials/footer') %>

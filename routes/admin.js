@@ -53,16 +53,16 @@ router.get('/panel', requiereSesion, async (req, res, next) => {
     const pendientes = revision
       .map((fila) => {
         if (fila.ejecuciones === 0) {
-          return { ...fila, falta: 'sin ejecución registrada', accion: `/admin/ejecuciones?taller=${fila.id}`, etiquetaAccion: 'Registrar ejecución' };
+          return { ...fila, falta: 'Falta registrar la ejecución', accion: `/admin/ejecuciones?taller=${fila.id}`, etiquetaAccion: 'Registrar ejecución' };
         }
         if (fila.recetas === 0) {
-          return { ...fila, falta: 'sin recetas asociadas', accion: `/admin/talleres/${fila.id}`, etiquetaAccion: 'Asignar receta' };
+          return { ...fila, falta: 'Falta asociar una receta', accion: `/admin/talleres/${fila.id}`, etiquetaAccion: 'Asignar receta' };
         }
         if (fila.documentos === 0) {
-          return { ...fila, falta: 'sin documentos', accion: `/admin/documentos?destino=taller:${fila.id}`, etiquetaAccion: 'Subir PDF' };
+          return { ...fila, falta: 'Falta el PDF del taller', accion: `/admin/documentos?destino=taller:${fila.id}`, etiquetaAccion: 'Subir PDF' };
         }
         if (fila.videos === 0) {
-          return { ...fila, falta: 'sin video de la clase', accion: `/admin/videos?destino=taller:${fila.id}`, etiquetaAccion: 'Agregar video' };
+          return { ...fila, falta: 'Falta el video de la clase', accion: `/admin/videos?destino=taller:${fila.id}`, etiquetaAccion: 'Agregar video' };
         }
         return null;
       })

@@ -6,7 +6,7 @@
 <%# Bandeja de pendientes: responde “¿qué me falta?” sin abrir ninguna otra
     pantalla. Cada fila lleva directo al formulario ya precargado. %>
 <section class="pendientes" aria-labelledby="titulo-pendientes">
-  <h2 id="titulo-pendientes">Pendientes</h2>
+  <h2 id="titulo-pendientes">Falta documentar</h2>
   <% if (!pendientes || pendientes.length === 0) { %>
     <p class="pendientes-vacio">Todo al día: cada taller tiene su ejecución, sus recetas y sus documentos.</p>
   <% } else { %>
@@ -15,10 +15,8 @@
         <li class="pendiente">
           <div class="pendiente-texto">
             <strong><a href="/admin/talleres/<%= fila.id %>"><%= fila.nombre %></a></strong>
-            <span class="pendiente-falta">
-              <%= fila.estado === 'en_ejecucion' ? 'En ejecución' : fila.estado === 'finalizado' ? 'Finalizado' : 'Planificado' %>
-              · <%= fila.falta %>
-            </span>
+            <span class="insignia insignia-<%= fila.estado %>"><%= etiquetaEstado[fila.estado] %></span>
+            <span class="pendiente-falta"><%= fila.falta %></span>
           </div>
           <a class="boton boton-primario pendiente-accion" href="<%= fila.accion %>"><%= fila.etiquetaAccion %></a>
         </li>

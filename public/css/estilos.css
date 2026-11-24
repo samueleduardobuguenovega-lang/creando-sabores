@@ -1855,3 +1855,142 @@ textarea:focus-visible {
     padding: 0.9rem;
   }
 }
+
+/* --- Ajustes medidos: pisos tipográficos y objetivos del encabezado ------ */
+.ficha-abrir,
+.sello-archivo,
+.insignia {
+  font-size: 0.8125rem; /* 13 px, antes 11,56 px */
+}
+
+@media (max-width: 720px) {
+  .ficha-abrir,
+  .sello-archivo,
+  .insignia {
+    font-size: 0.875rem; /* 14 px en el teléfono */
+  }
+
+  .marca {
+    min-height: var(--toque-minimo);
+  }
+
+  .busqueda-escritorio {
+    display: none;
+  }
+}
+/* --- Cabecera en una sola línea ----------------------------------------- */
+.cabecera-fila {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.marca {
+  flex: 0 0 auto;
+}
+
+details.menu {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.navegacion {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.navegacion::-webkit-scrollbar {
+  display: none;
+}
+
+.navegacion a {
+  white-space: nowrap;
+}
+
+.busqueda-escritorio {
+  flex: 0 0 270px;
+  margin: 0;
+}
+
+.busqueda-escritorio input {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.cuenta {
+  flex: 0 0 auto;
+  gap: 0.5rem;
+}
+
+/* Salir es acción de sesión: no compite con el botón principal. */
+.cuenta .boton-texto {
+  background: none;
+  border: 0;
+  color: var(--tinta-suave);
+  font-weight: 500;
+  text-decoration: underline;
+  padding: 0.4rem 0.3rem;
+}
+
+.cuenta .boton-texto:hover {
+  color: var(--tinta);
+  background: none;
+}
+
+/* Enlace de acción secundaria, sin peso de botón. */
+.enlace-suave {
+  color: var(--primario);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0.5rem 0.25rem;
+}
+
+.enlace-suave:hover {
+  color: var(--primario-oscuro, #0f5132);
+}
+
+/* --- Fila de pendiente: nombre, estado y qué falta ---------------------- */
+.pendiente-texto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+}
+
+.pendiente-texto strong {
+  flex: 1 1 100%;
+}
+
+.pendiente .insignia {
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 1024px) {
+  .navegacion {
+    flex-direction: column;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 720px) {
+  .cabecera-fila {
+    gap: 0.5rem;
+  }
+
+  .pendiente-accion {
+    width: 100%;
+  }
+
+  .pendiente-texto strong {
+    flex: 1 1 auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .pendiente-accion {
+    width: 100%;
+  }
+}

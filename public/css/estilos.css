@@ -1994,3 +1994,114 @@ details.menu {
     width: 100%;
   }
 }
+
+/* --- La cuenta no puede comerse la navegación --------------------------- */
+@media (min-width: 1025px) {
+  .cuenta-nombre {
+    max-width: 13rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  details.menu .navegacion {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  details.menu .navegacion::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1240px) {
+  .cuenta-nombre {
+    max-width: 7.5rem;
+  }
+
+  details.menu .navegacion {
+    font-size: 0.88rem;
+    gap: 0.15rem;
+  }
+}
+
+/* --- Desplegable "Más" del encabezado ----------------------------------- */
+details.mas {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+details.mas > summary.menu-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 40px;
+  padding: 0 0.6rem;
+  border: 1px solid transparent;
+  border-radius: var(--radio-control);
+  cursor: pointer;
+  list-style: none;
+  color: var(--tinta-suave);
+  font-weight: 600;
+}
+
+details.mas > summary.menu-boton::-webkit-details-marker {
+  display: none;
+}
+
+details.mas[open] > summary.menu-boton,
+details.mas > summary.menu-boton:hover {
+  background: var(--primario-claro);
+  color: var(--primario);
+}
+
+.mas-lista {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  min-width: 12rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0.4rem;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  box-shadow: var(--sombra-caja-alta);
+  z-index: 40;
+}
+
+.mas-lista a {
+  padding: 0.6rem 0.7rem;
+  border-radius: 8px;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.mas-lista a:hover,
+.mas-lista a.activo {
+  background: var(--primario-claro);
+  color: var(--primario);
+}
+
+@media (max-width: 1024px) {
+  details.mas {
+    display: block;
+  }
+
+  details.mas > summary.menu-boton {
+    width: 100%;
+    justify-content: flex-start;
+    border: 0;
+  }
+
+  .mas-lista {
+    position: static;
+    min-width: 0;
+    padding: 0 0 0 0.6rem;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}

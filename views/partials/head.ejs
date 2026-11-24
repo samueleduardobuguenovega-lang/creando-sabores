@@ -28,16 +28,21 @@
             <a href="/panel" class="<%= rutaActual === '/panel' ? 'activo' : '' %>" <%= rutaActual === '/panel' ? 'aria-current="page"' : '' %>>Panel</a>
             <a href="/admin/talleres" class="<%= rutaActual.startsWith('/admin/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/talleres') ? 'aria-current="page"' : '' %>>Talleres</a>
             <a href="/admin/recetas" class="<%= rutaActual.startsWith('/admin/recetas') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/recetas') ? 'aria-current="page"' : '' %>>Recetas</a>
-            <a href="/admin/documentos" class="<%= rutaActual.startsWith('/admin/documentos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/documentos') ? 'aria-current="page"' : '' %>>Documentos</a>
-            <a href="/admin/videos" class="<%= rutaActual.startsWith('/admin/videos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/videos') ? 'aria-current="page"' : '' %>>Videos</a>
             <a href="/admin/ejecuciones" class="<%= rutaActual.startsWith('/admin/ejecuciones') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/ejecuciones') ? 'aria-current="page"' : '' %>>Ejecuciones</a>
-            <span class="menu-separador" aria-hidden="true"></span>
-            <% if (usuario.rol === 'admin') { %>
-              <a href="/admin/usuarios" class="<%= rutaActual.startsWith('/admin/usuarios') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/usuarios') ? 'aria-current="page"' : '' %>>Usuarios</a>
-              <a href="/admin/auditoria" class="<%= rutaActual.startsWith('/admin/auditoria') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/auditoria') ? 'aria-current="page"' : '' %>>Auditoría</a>
-              <span class="menu-separador" aria-hidden="true"></span>
-            <% } %>
-            <a href="/">Sitio público</a>
+            <%# El resto del archivo y la administración viven en un desplegable:
+                cinco destinos se leen de un vistazo, nueve no. %>
+            <details class="mas">
+              <summary class="menu-boton">Más <span aria-hidden="true">▾</span></summary>
+              <div class="mas-lista">
+                <a href="/admin/documentos" class="<%= rutaActual.startsWith('/admin/documentos') ? 'activo' : '' %>">Documentos</a>
+                <a href="/admin/videos" class="<%= rutaActual.startsWith('/admin/videos') ? 'activo' : '' %>">Videos</a>
+                <% if (usuario.rol === 'admin') { %>
+                  <a href="/admin/usuarios" class="<%= rutaActual.startsWith('/admin/usuarios') ? 'activo' : '' %>">Usuarios</a>
+                  <a href="/admin/auditoria" class="<%= rutaActual.startsWith('/admin/auditoria') ? 'activo' : '' %>">Auditoría</a>
+                <% } %>
+                <a href="/">Sitio público</a>
+              </div>
+            </details>
           <% } else { %>
             <a href="/" class="<%= rutaActual === '/' ? 'activo' : '' %>" <%= rutaActual === '/' ? 'aria-current="page"' : '' %>>Inicio</a>
             <a href="/talleres" class="<%= rutaActual.startsWith('/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/talleres') ? 'aria-current="page"' : '' %>>Talleres</a>

@@ -2140,3 +2140,22 @@ details.mas > summary.menu-boton:hover {
     max-width: 16rem;
   }
 }
+
+/* Rejilla de cabecera: marca · navegación · búsqueda · cuenta. La navegación
+   es la única columna flexible, así nada empuja el contenido fuera de pantalla. */
+@media (min-width: 1025px) {
+  .cabecera-fila {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  .busqueda-escritorio {
+    width: 230px;
+  }
+
+  .cuenta-nombre {
+    max-width: 14rem;
+  }
+}

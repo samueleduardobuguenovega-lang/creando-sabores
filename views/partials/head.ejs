@@ -67,7 +67,7 @@
 
       <div class="cuenta">
         <% if (usuario) { %>
-          <span class="cuenta-nombre" title="<%= usuario.nombre %> · <%= usuario.rol === 'admin' ? 'Administrador' : 'Docente' %>"><%= usuario.nombre %></span>
+          <span class="cuenta-nombre" title="<%= usuario.nombre %> · <%= usuario.rol === 'admin' ? 'Administrador' : 'Docente' %>"><%= usuario.nombre.length > 18 ? (usuario.rol === 'admin' ? 'Administrador' : 'Docente') : usuario.nombre %></span>
           <form method="post" action="/salir" class="en-linea">
             <button type="submit" class="boton boton-texto">Salir</button>
           </form>

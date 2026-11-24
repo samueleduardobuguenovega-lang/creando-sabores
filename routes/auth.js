@@ -1,7 +1,8 @@
 // Login y cierre de sesión (RF-02 / CU-01).
 const express = require('express');
 const { query } = require('../src/db');
-const { verificar } = require('../src/auth');
+const { verificar, hashear, requiereSesion } = require('../src/auth');
+const { registrar } = require('../src/auditoria');
 
 const router = express.Router();
 
@@ -85,5 +86,41 @@ async function cerrarSesion(req, res) {
 
 router.post('/salir', cerrarSesion);
 router.get('/salir', cerrarSesion);
+
+// Cambio de clave propia (RF-08). Sin esta pantalla cada docente depende de la
+// administración para rotar su clave, y en la práctica nadie la rota.
+router.get('/mi-clave', requiereSesion, (req, res) => {
+  res.render('mi-clave', { titulo: 'Cambiar mi clave', errores: [] });
+});
+
+router.post('/mi-clave', requiereSesion, async (req, res, next) => {
+  const actual = (req.body.actual ?? '').toString();
+  const nueva = (req.body.nueva ?? '').toString();
+  const repetir = (req.body.repetir ?? '').toString();
+  const errores = [];
+
+  try {
+    const { rows } = await query('SELECT clave_hash FROM usuario WHERE id = $1', [req.session.usuario.id]);
+    if (!rows[0] || !(await verificar(actual, rows[0].clave_hash))) {
+      errores.push('La clave actual no coincide.');
+    }
+    if (nueva.length < 8) errores.push('La clave nueva debe tener al menos 8 caracteres.');
+    if (nueva !== repetir) errores.push('La clave nueva y su repetición no coinciden.');
+    if (nueva && nueva === actual) errores.push('La clave nueva debe ser distinta de la actual.');
+
+    if (errores.length > 0) {
+      return res.status(400).render('mi-clave', { titulo: 'Cambiar mi clave', errores });
+    }
+
+    await query('UPDATE usuario SET clave_hash = $1 WHERE id = $2', [
+      await hashear(nueva),
+      req.session.usuario.id,
+    ]);
+    await registrar(req.session.usuario.id, 'cambiar_clave', 'usuario', req.session.usuario.id, {});
+    res.redirect('/mi-clave?ok=Clave actualizada.');
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;

@@ -7,7 +7,7 @@
     Cada taller muestra cuándo se hizo, cuántas personas participaron y qué recetas se prepararon.
   </p>
   <p class="ayuda">
-    <%= total %> taller<%= total === 1 ? '' : 'es' %><% if (tematica) { %> en <%= tematica %><% } %><% if (estado) { %> · <%= etiquetaEstado[estado] %><% } %>
+    <%= total %> taller<%= total === 1 ? '' : 'es' %><% if (tematica) { %> en <%= tematica %><% } %><% if (estado) { %> · <%= etiquetaEstado[estado] %><% } %><% if (anio) { %> · año <%= anio %><% } %>
   </p>
 </section>
 
@@ -20,6 +20,16 @@
     </a>
   <% }) %>
 </nav>
+
+<% if (anios && anios.length > 1) { %>
+  <nav class="chips chips-anio" aria-label="Filtrar por año">
+    <a class="chip <%= anio ? '' : 'chip-activo' %>" href="/talleres<%= tematica ? '?tematica=' + encodeURIComponent(tematica) : '' %>">Todos los años</a>
+    <% anios.forEach(function (valor) { %>
+      <a class="chip <%= anio === valor ? 'chip-activo' : '' %>"
+         href="/talleres?anio=<%= valor %><%= tematica ? '&tematica=' + encodeURIComponent(tematica) : '' %><%= estado ? '&estado=' + estado : '' %>"><%= valor %></a>
+    <% }) %>
+  </nav>
+<% } %>
 
 <nav class="chips chips-estado" aria-label="Filtrar por estado">
   <% [['', 'Todos'], ['planificado', 'Planificados'], ['en_ejecucion', 'En curso'], ['finalizado', 'Finalizados']].forEach(function (par) { %>

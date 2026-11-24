@@ -72,6 +72,12 @@
               <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB</span>
           </div>
           <a class="boton" href="/admin/documentos/<%= documento.id %>/ver">Abrir archivo</a>
+          <% if (usuario.rol === 'admin') { %>
+            <form method="post" action="/admin/documentos/<%= documento.id %>/eliminar" class="en-linea"
+                  onsubmit="return confirm('¿Enviar este documento a la papelera? Se puede recuperar.');">
+              <button type="submit" class="boton boton-peligro">Eliminar</button>
+            </form>
+          <% } %>
         </li>
       <% }) %>
     </ul>

@@ -12,6 +12,7 @@
         <p class="etiqueta"><%= fecha(ejecucion.fecha_ejecucion) %></p>
         <h2><a class="enlace-ficha" href="/talleres/<%= ejecucion.id_taller %>"><%= ejecucion.taller %></a></h2>
         <p class="ayuda"><%= ejecucion.tematica %> · Participantes: <%= ejecucion.cantidad_participantes %></p>
+        <% if (ejecucion.observaciones) { %><p><%= ejecucion.observaciones %></p><% } %>
 
         <span class="ficha-abrir" aria-hidden="true">Ver taller →</span>
       </li>

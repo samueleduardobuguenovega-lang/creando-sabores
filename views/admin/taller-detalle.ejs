@@ -5,11 +5,17 @@
 <div class="barra-titulo">
   <h1><%= taller.nombre %></h1>
   <div class="acciones">
-    <a class="boton" href="/admin/talleres/<%= taller.id %>/editar">Editar</a>
+    <% if (puedeEditar) { %>
+      <a class="boton" href="/admin/talleres/<%= taller.id %>/editar">Editar</a>
+    <% } %>
     <% if (usuario.rol === 'admin') { %>
       <form method="post" action="/admin/talleres/<%= taller.id %>/eliminar" class="en-linea"
             onsubmit="return confirm('¿Eliminar el taller y todo lo asociado (recetas, documentos, videos y ejecuciones)?');">
         <button type="submit" class="boton boton-peligro">Eliminar</button>
+      </form>
+      <form method="post" action="/admin/talleres/<%= taller.id %>/publicacion" class="en-linea">
+        <input type="hidden" name="publicar" value="<%= taller.publicado ? '0' : '1' %>">
+        <button type="submit" class="boton"><%= taller.publicado ? 'Ocultar del sitio' : 'Publicar en el sitio' %></button>
       </form>
     <% } %>
   </div>
@@ -18,6 +24,11 @@
 <dl class="ficha">
   <dt>Estado</dt>
   <dd><span class="insignia insignia-<%= taller.estado %>"><%= etiquetaEstado[taller.estado] %></span></dd>
+  <dt>Sitio público</dt>
+  <dd>
+    <span class="insignia insignia-<%= taller.publicado ? 'finalizado' : 'planificado' %>"><%= taller.publicado ? 'Publicado' : 'Oculto' %></span>
+    <% if (!taller.publicado) { %><span class="ayuda">Solo se ve en el archivo interno.</span><% } %>
+  </dd>
   <dt>Temática</dt>
   <dd><%= taller.tematica %></dd>
   <dt>Fecha planificada</dt>

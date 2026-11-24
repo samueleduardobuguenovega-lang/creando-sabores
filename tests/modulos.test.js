@@ -18,20 +18,16 @@ after(async () => {
   await pool.end();
 });
 
-const PENDIENTES = [
-  ['/admin/ejecuciones', 'Francisco Puelles', 'T6'],
-];
+// Ya no quedan módulos anunciados como pendientes: ejecuciones se entregó y estas
+// pruebas dejaron de tener sujeto. Se conserva la comprobación de que la página
+// existe de verdad, para que nadie la vuelva a poner en construcción sin notarlo.
+test('/admin/ejecuciones es un módulo real, no un aviso de construcción', async () => {
+  const respuesta = await cliente.get('/admin/ejecuciones');
 
-for (const [ruta, responsable, tarea] of PENDIENTES) {
-  test(`${ruta} avisa quién lo está construyendo`, async () => {
-    const respuesta = await cliente.get(ruta);
-
-    assert.equal(respuesta.estado, 200);
-    assert.match(respuesta.texto, /Módulo en construcción/);
-    assert.ok(respuesta.texto.includes(responsable));
-    assert.ok(respuesta.texto.includes(tarea));
-  });
-}
+  assert.equal(respuesta.estado, 200);
+  assert.doesNotMatch(respuesta.texto, /Módulo en construcción/);
+  assert.match(respuesta.texto, /<form/);
+});
 
 test('las páginas de módulos pendientes también exigen sesión', async () => {
   const anonimo = crearCliente(app.base);

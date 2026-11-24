@@ -110,7 +110,7 @@ test('un taller inexistente responde 404', async () => {
   assert.match(respuesta.texto, /no existe/);
 });
 
-test('un docente no puede eliminar talleres; un administrador sí', async () => {
+test('un docente no puede eliminar talleres; un administrador los manda a la papelera', async () => {
   const { rows } = await pool.query(`SELECT id FROM taller ORDER BY id LIMIT 1`);
   const id = rows[0].id;
 
@@ -120,8 +120,9 @@ test('un docente no puede eliminar talleres; un administrador sí', async () => 
   const intentoAdmin = await admin.post(`/admin/talleres/${id}/eliminar`);
   assert.equal(intentoAdmin.estado, 302);
 
-  const { rows: quedan } = await pool.query(`SELECT COUNT(*)::int AS total FROM taller WHERE id = $1`, [id]);
-  assert.equal(quedan[0].total, 0);
+  const { rows: quedan } = await pool.query('SELECT eliminado_en FROM taller WHERE id = $1', [id]);
+  assert.equal(quedan.length, 1, 'el taller sigue existiendo');
+  assert.ok(quedan[0].eliminado_en, 'quedó marcado en la papelera');
 });
 
 test('cada cambio queda registrado en la auditoría con su responsable', async () => {

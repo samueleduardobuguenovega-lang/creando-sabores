@@ -4,6 +4,7 @@ const { query, transaccion } = require('../src/db');
 const { requiereSesion, requiereRol } = require('../src/auth');
 const { registrar } = require('../src/auditoria');
 const v = require('../src/validaciones');
+const { puedeTocar, recetaDe, sinPermiso } = require('../src/permisos');
 
 const router = express.Router();
 
@@ -91,7 +92,8 @@ router.get('/admin/recetas', requiereSesion, async (req, res, next) => {
               (SELECT d.id FROM documento d WHERE d.id_receta = r.id ORDER BY d.id LIMIT 1) AS id_documento
          FROM receta r
          LEFT JOIN receta_taller rt ON rt.id_receta = r.id
-        WHERE ($1 = '' OR r.codigo ILIKE '%' || $1 || '%' OR r.nombre ILIKE '%' || $1 || '%')
+        WHERE r.eliminado_en IS NULL
+          AND ($1 = '' OR r.codigo ILIKE '%' || $1 || '%' OR r.nombre ILIKE '%' || $1 || '%')
         GROUP BY r.id
         ORDER BY r.nombre, r.codigo`,
       [busqueda]
@@ -195,12 +197,19 @@ router.get('/admin/recetas/:id/editar', requiereSesion, async (req, res, next) =
     if (!Number.isInteger(id) || id < 1) return next();
 
     const { rows } = await query(
-      `SELECT id, codigo, nombre, descripcion, enlace_pdf
+      `SELECT id, codigo, nombre, descripcion, enlace_pdf, id_usuario
          FROM receta
-        WHERE id = $1`,
+        WHERE id = $1 AND eliminado_en IS NULL`,
       [id]
     );
     if (!rows[0]) return next();
+    if (!puedeTocar(req.session.usuario, rows[0])) {
+      return sinPermiso(
+        res,
+        'Esta receta la documenta otra persona.',
+        'Puedes consultarla, pero solo quien la creó o la administración pueden editarla.'
+      );
+    }
 
     const { rows: vinculaciones } = await query(
       'SELECT id_taller FROM receta_taller WHERE id_receta = $1',
@@ -223,6 +232,20 @@ router.get('/admin/recetas/:id/editar', requiereSesion, async (req, res, next) =
 router.post('/admin/recetas/:id', requiereSesion, async (req, res, next) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id < 1) return next();
+
+  // La propiedad se comprueba antes de validar: no se corrige la receta de otro.
+  try {
+    const duena = await recetaDe(id);
+    if (duena && !puedeTocar(req.session.usuario, duena)) {
+      return sinPermiso(
+        res,
+        'Esta receta la documenta otra persona.',
+        'Puedes consultarla, pero solo quien la creó o la administración pueden guardarla.'
+      );
+    }
+  } catch (error) {
+    return next(error);
+  }
 
   const receta = leerReceta(req.body);
   if (receta.errores.length > 0) {
@@ -305,8 +328,11 @@ router.post('/admin/recetas/:id/eliminar', requiereRol('admin'), async (req, res
   if (!Number.isInteger(id) || id < 1) return next();
 
   try {
+    // A la papelera (RF-09): se recupera desde /admin/papelera mientras siga ahí.
     const { rows } = await query(
-      'DELETE FROM receta WHERE id = $1 RETURNING codigo, nombre',
+      `UPDATE receta SET eliminado_en = now()
+        WHERE id = $1 AND eliminado_en IS NULL
+        RETURNING codigo, nombre`,
       [id]
     );
     if (!rows[0]) return next();
@@ -315,7 +341,7 @@ router.post('/admin/recetas/:id/eliminar', requiereRol('admin'), async (req, res
       codigo: rows[0].codigo,
       nombre: rows[0].nombre,
     });
-    res.redirect(`/admin/recetas?ok=${encodeURIComponent('Receta eliminada.')}`);
+    res.redirect(`/admin/recetas?ok=${encodeURIComponent('Receta enviada a la papelera. Se puede recuperar.')}`);
   } catch (error) {
     next(error);
   }

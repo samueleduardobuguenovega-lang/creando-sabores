@@ -13,10 +13,16 @@ router.get('/', async (req, res, next) => {
               COUNT(*) FILTER (WHERE estado = 'planificado')::int AS planificados,
               COUNT(*) FILTER (WHERE estado = 'en_ejecucion')::int AS en_ejecucion,
               COUNT(*) FILTER (WHERE estado = 'finalizado')::int AS finalizados
-         FROM taller`
+         FROM taller
+        WHERE publicado AND eliminado_en IS NULL`
     );
-    const { rows: recetas } = await query('SELECT COUNT(*)::int AS total FROM receta');
-    const { rows: ejecuciones } = await query('SELECT COUNT(*)::int AS total FROM ejecucion');
+    const { rows: recetas } = await query('SELECT COUNT(*)::int AS total FROM receta WHERE eliminado_en IS NULL');
+    const { rows: ejecuciones } = await query(
+      `SELECT COUNT(*)::int AS total
+         FROM ejecucion e
+         JOIN taller t ON t.id = e.id_taller
+        WHERE t.publicado AND t.eliminado_en IS NULL AND e.eliminado_en IS NULL`
+    );
 
     // Para el fichero: cada taller con sus dos contadores, agrupable por temática.
     const { rows: talleres } = await query(
@@ -29,8 +35,9 @@ router.get('/', async (req, res, next) => {
                 WHERE d.id_taller = t.id AND d.tipo_mime LIKE 'image/%'
                 ORDER BY d.id LIMIT 1) AS id_imagen
          FROM taller t
-         LEFT JOIN ejecucion e ON e.id_taller = t.id
+         LEFT JOIN ejecucion e ON e.id_taller = t.id AND e.eliminado_en IS NULL
          LEFT JOIN receta_taller r ON r.id_taller = t.id
+        WHERE t.publicado AND t.eliminado_en IS NULL
         GROUP BY t.id
         ORDER BY t.tematica, t.fecha_planificada DESC NULLS LAST, t.id DESC`
     );
@@ -53,10 +60,13 @@ router.get('/talleres', async (req, res, next) => {
     const estado = ['planificado', 'en_ejecucion', 'finalizado'].includes(req.query.estado)
       ? req.query.estado
       : null;
+    // Filtro por año escolar: es la forma en que el colegio busca ("lo de 2026").
+    const anio = /^\d{4}$/.test(req.query.anio || '') ? Number(req.query.anio) : null;
 
     const { rows: tematicas } = await query(
       `SELECT t.tematica, COUNT(*)::int AS total
          FROM taller t
+        WHERE t.publicado AND t.eliminado_en IS NULL
         GROUP BY t.tematica
         ORDER BY t.tematica`
     );
@@ -73,11 +83,20 @@ router.get('/talleres', async (req, res, next) => {
          FROM taller t
          LEFT JOIN receta_taller r ON r.id_taller = t.id
          LEFT JOIN ejecucion e ON e.id_taller = t.id
-        WHERE ($1::text IS NULL OR t.tematica = $1)
+        WHERE t.publicado AND t.eliminado_en IS NULL
+          AND ($1::text IS NULL OR t.tematica = $1)
           AND ($2::text IS NULL OR t.estado = $2)
+          AND ($3::int IS NULL OR EXTRACT(YEAR FROM t.fecha_planificada) = $3)
         GROUP BY t.id
         ORDER BY t.tematica, t.fecha_planificada DESC NULLS LAST, t.id DESC`,
-      [tematica, estado]
+      [tematica, estado, anio]
+    );
+
+    const { rows: anios } = await query(
+      `SELECT DISTINCT EXTRACT(YEAR FROM t.fecha_planificada)::int AS anio
+         FROM taller t
+        WHERE t.publicado AND t.eliminado_en IS NULL AND t.fecha_planificada IS NOT NULL
+        ORDER BY anio DESC`
     );
 
     res.render('publico/talleres', {
@@ -86,6 +105,8 @@ router.get('/talleres', async (req, res, next) => {
       tematicas,
       tematica,
       estado,
+      anio,
+      anios: anios.map((fila) => fila.anio),
       total: talleres.length,
     });
   } catch (error) {
@@ -106,7 +127,7 @@ router.get('/talleres/:id', async (req, res, next) => {
               u.nombre AS responsable
          FROM taller t
          JOIN usuario u ON u.id = t.id_usuario
-        WHERE t.id = $1`,
+        WHERE t.id = $1 AND t.publicado AND t.eliminado_en IS NULL`,
       [id]
     );
     const taller = talleres[0];
@@ -178,6 +199,7 @@ router.get('/ejecuciones', async (req, res, next) => {
               t.nombre AS taller, t.tematica
          FROM ejecucion e
          JOIN taller t ON t.id = e.id_taller
+        WHERE t.publicado AND t.eliminado_en IS NULL AND e.eliminado_en IS NULL
         ORDER BY e.fecha_ejecucion DESC, e.id DESC
         LIMIT 50`
     );
@@ -202,6 +224,10 @@ router.get('/recetas', async (req, res, next) => {
          LEFT JOIN taller t ON t.id = rt.id_taller
         WHERE ($1 = '' OR r.codigo ILIKE '%' || $1 || '%' OR r.nombre ILIKE '%' || $1 || '%'
                OR r.descripcion ILIKE '%' || $1 || '%')
+          AND (NOT EXISTS (SELECT 1 FROM receta_taller rt2 WHERE rt2.id_receta = r.id)
+               OR EXISTS (SELECT 1 FROM receta_taller rt3
+                            JOIN taller t3 ON t3.id = rt3.id_taller
+                           WHERE rt3.id_receta = r.id AND t3.publicado AND t3.eliminado_en IS NULL))
         GROUP BY r.id
         ORDER BY r.nombre, r.codigo`,
       [busqueda.length >= 2 ? busqueda.replace(/[\\%_]/g, '\\$&') : '']
@@ -229,6 +255,18 @@ router.get('/recetas/:id', async (req, res, next) => {
     const receta = recetas[0];
     if (!receta) return next();
 
+    // Una receta sin talleres es del catálogo y se muestra; si está vinculada,
+    // sigue la suerte de sus talleres y se oculta cuando ninguno está publicado.
+    const { rows: visibles } = await query(
+      `SELECT COUNT(*)::int AS publicados
+         FROM receta_taller rt
+         JOIN taller t ON t.id = rt.id_taller
+        WHERE rt.id_receta = $1 AND t.publicado AND t.eliminado_en IS NULL`,
+      [id]
+    );
+    const { rows: vinculos } = await query('SELECT COUNT(*)::int AS total FROM receta_taller WHERE id_receta = $1', [id]);
+    if (vinculos[0].total > 0 && visibles[0].publicados === 0) return next();
+
     const { rows: documentos } = await query(
       `SELECT id, nombre, archivo, tamano, tipo_mime
          FROM documento
@@ -241,7 +279,7 @@ router.get('/recetas/:id', async (req, res, next) => {
       `SELECT t.id, t.nombre, t.tematica, t.descripcion, t.fecha_planificada, t.estado
          FROM taller t
          JOIN receta_taller rt ON rt.id_taller = t.id
-        WHERE rt.id_receta = $1
+        WHERE rt.id_receta = $1 AND t.publicado AND t.eliminado_en IS NULL
         ORDER BY t.fecha_planificada DESC NULLS LAST, t.nombre`,
       [id]
     );

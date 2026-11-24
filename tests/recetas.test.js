@@ -148,14 +148,15 @@ test('solo administración puede eliminar una receta y la baja queda auditada', 
   assert.equal((await docente.post(`/admin/recetas/${id}/eliminar`)).estado, 403);
   assert.equal((await admin.post(`/admin/recetas/${id}/eliminar`)).estado, 302);
 
-  const { rows: eliminada } = await pool.query('SELECT id FROM receta WHERE id = $1', [id]);
+  const { rows: eliminada } = await pool.query('SELECT eliminado_en FROM receta WHERE id = $1', [id]);
   const { rows: asociaciones } = await pool.query('SELECT id_receta FROM receta_taller WHERE id_receta = $1', [id]);
   const { rows: auditoria } = await pool.query(
     `SELECT accion, entidad FROM auditoria
       WHERE entidad = 'receta' AND entidad_id = $1 ORDER BY id DESC LIMIT 1`,
     [id]
   );
-  assert.equal(eliminada.length, 0);
-  assert.equal(asociaciones.length, 0);
+  assert.equal(eliminada.length, 1, 'la receta sigue en la papelera');
+  assert.ok(eliminada[0].eliminado_en);
+  assert.equal(asociaciones.length, 1, 'el vínculo con el taller se conserva para restaurarla');
   assert.deepEqual(auditoria[0], { accion: 'eliminar', entidad: 'receta' });
 });

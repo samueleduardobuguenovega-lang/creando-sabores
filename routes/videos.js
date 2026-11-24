@@ -1,9 +1,10 @@
 // Registro de videos de YouTube y Vimeo (RF-05 / CU-05).
 const express = require('express');
 const { query } = require('../src/db');
-const { requiereSesion } = require('../src/auth');
+const { requiereSesion, requiereRol } = require('../src/auth');
 const { registrar } = require('../src/auditoria');
 const v = require('../src/validaciones');
+const { puedeTocar } = require('../src/permisos');
 
 const router = express.Router();
 
@@ -16,10 +17,11 @@ async function cargarDatos() {
          FROM video v
          LEFT JOIN taller t ON t.id = v.id_taller
          LEFT JOIN receta r ON r.id = v.id_receta
+        WHERE v.eliminado_en IS NULL
         ORDER BY v.creado_en DESC, v.id DESC`
     ),
-    query('SELECT id, nombre FROM taller ORDER BY nombre'),
-    query('SELECT id, codigo, nombre FROM receta ORDER BY nombre'),
+    query('SELECT id, nombre FROM taller WHERE eliminado_en IS NULL ORDER BY nombre'),
+    query('SELECT id, codigo, nombre FROM receta WHERE eliminado_en IS NULL ORDER BY nombre'),
   ]);
   return {
     videos: videos.rows.map((video) => {
@@ -88,11 +90,20 @@ router.post('/admin/videos', requiereSesion, async (req, res, next) => {
   try {
     const tabla = destino[1] === 'taller' ? 'taller' : 'receta';
     const idDestino = Number(destino[2]);
-    const asociado = await query(`SELECT id FROM ${tabla} WHERE id = $1`, [idDestino]);
+    const asociado = await query(`SELECT id, id_usuario FROM ${tabla} WHERE id = $1`, [idDestino]);
     if (!asociado.rows[0]) {
       return renderListado(req, res, next, {
         estado: 400,
         errores: ['El taller o la receta seleccionados ya no existen.'],
+        valores: cuerpo,
+      });
+    }
+    if (!puedeTocar(req.session.usuario, asociado.rows[0])) {
+      return renderListado(req, res, next, {
+        estado: 403,
+        errores: [
+          'Ese taller o receta lo documenta otra persona: solo su autor o la administración pueden sumarle videos.',
+        ],
         valores: cuerpo,
       });
     }
@@ -120,6 +131,23 @@ router.post('/admin/videos', requiereSesion, async (req, res, next) => {
     return res.redirect(`/admin/videos?ok=${encodeURIComponent('Video registrado correctamente.')}`);
   } catch (error) {
     return next(error);
+  }
+});
+
+// Borrar un video suelto (RF-09), sin tocar el taller al que pertenece.
+router.post('/admin/videos/:id/eliminar', requiereRol('admin'), async (req, res, next) => {
+  const id = Number(req.params.id) || 0;
+  try {
+    const { rows } = await query(
+      'UPDATE video SET eliminado_en = now() WHERE id = $1 AND eliminado_en IS NULL RETURNING nombre',
+      [id]
+    );
+    if (!rows[0]) return next();
+
+    await registrar(req.session.usuario.id, 'eliminar', 'video', id, { nombre: rows[0].nombre });
+    res.redirect(`/admin/videos?ok=${encodeURIComponent('Video enviado a la papelera.')}`);
+  } catch (error) {
+    next(error);
   }
 });
 

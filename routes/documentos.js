@@ -3,9 +3,10 @@ const crypto = require('crypto');
 const express = require('express');
 const multer = require('multer');
 const { pool, query } = require('../src/db');
-const { requiereSesion } = require('../src/auth');
+const { requiereSesion, requiereRol } = require('../src/auth');
 const { registrar } = require('../src/auditoria');
 const v = require('../src/validaciones');
+const { puedeTocar } = require('../src/permisos');
 const archivos = require('../src/archivos');
 
 const router = express.Router();
@@ -36,10 +37,11 @@ async function cargarDatos() {
          FROM documento d
          LEFT JOIN taller t ON t.id = d.id_taller
          LEFT JOIN receta r ON r.id = d.id_receta
+        WHERE d.eliminado_en IS NULL
         ORDER BY d.creado_en DESC, d.id DESC`
     ),
-    query('SELECT id, nombre FROM taller ORDER BY nombre'),
-    query('SELECT id, codigo, nombre FROM receta ORDER BY nombre'),
+    query('SELECT id, nombre FROM taller WHERE eliminado_en IS NULL ORDER BY nombre'),
+    query('SELECT id, codigo, nombre FROM receta WHERE eliminado_en IS NULL ORDER BY nombre'),
   ]);
   return { documentos: documentos.rows, talleres: talleres.rows, recetas: recetas.rows };
 }
@@ -112,8 +114,8 @@ router.post('/admin/documentos', requiereSesion, (req, res, next) => {
         if (!archivos.contenidoValido(archivo.buffer, archivo.tipoArchivo.tipoMime)) {
           errores.push(
             archivo.tipoArchivo.tipoMime === 'application/pdf'
-              ? `«${archivo.originalname}» no es un PDF válido.`
-              : `«${archivo.originalname}» no es una imagen válida.`
+              ? `«${archivo.originalname}» no corresponde a un PDF válido.`
+              : `«${archivo.originalname}» no corresponde a una imagen válida.`
           );
         }
       });
@@ -130,11 +132,20 @@ router.post('/admin/documentos', requiereSesion, (req, res, next) => {
           valores: cuerpo,
         });
       }
-      const asociado = await query(`SELECT id FROM ${tabla} WHERE id = $1`, [idDestino]);
+      const asociado = await query(`SELECT id, id_usuario FROM ${tabla} WHERE id = $1`, [idDestino]);
       if (!asociado.rows[0]) {
         return renderListado(req, res, next, {
           estado: 400,
           errores: ['El taller o la receta seleccionados ya no existen.'],
+          valores: cuerpo,
+        });
+      }
+      if (!puedeTocar(req.session.usuario, asociado.rows[0])) {
+        return renderListado(req, res, next, {
+          estado: 403,
+          errores: [
+            'Ese taller o receta lo documenta otra persona: solo su autor o la administración pueden sumarle archivos.',
+          ],
           valores: cuerpo,
         });
       }
@@ -265,5 +276,22 @@ router.get('/admin/documentos/:id/ver', requiereSesion, enviarPdf);
 // que el mismo envío se expone sin sesión. El documento se busca por id; no se
 // listan documentos sueltos ni se exponen los de recetas sin taller.
 router.get('/documentos/:id/ver', enviarPdf);
+
+// Borrar un documento suelto (RF-09): no hay que borrar el taller para quitarlo.
+router.post('/admin/documentos/:id/eliminar', requiereRol('admin'), async (req, res, next) => {
+  const id = Number(req.params.id) || 0;
+  try {
+    const { rows } = await query(
+      'UPDATE documento SET eliminado_en = now() WHERE id = $1 AND eliminado_en IS NULL RETURNING nombre',
+      [id]
+    );
+    if (!rows[0]) return next();
+
+    await registrar(req.session.usuario.id, 'eliminar', 'documento', id, { nombre: rows[0].nombre });
+    res.redirect(`/admin/documentos?ok=${encodeURIComponent('Documento enviado a la papelera.')}`);
+  } catch (error) {
+    next(error);
+  }
+});
 
 module.exports = router;

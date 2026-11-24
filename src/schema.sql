@@ -21,9 +21,16 @@ CREATE TABLE IF NOT EXISTS taller (
   estado            VARCHAR(20)  NOT NULL DEFAULT 'planificado'
                     CHECK (estado IN ('planificado', 'en_ejecucion', 'finalizado')),
   id_usuario        INTEGER      NOT NULL REFERENCES usuario(id),
+  -- Un taller existe en el archivo interno desde que se crea, pero solo aparece
+  -- en el sitio público cuando la administración lo publica (RF-07).
+  publicado         BOOLEAN      NOT NULL DEFAULT TRUE,
   creado_en         TIMESTAMPTZ  NOT NULL DEFAULT now(),
   actualizado_en    TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
+
+-- Bases creadas antes de la publicación: se suman sin tocar los datos, y lo ya
+-- cargado queda visible para no vaciar el sitio de un golpe.
+ALTER TABLE taller ADD COLUMN IF NOT EXISTS publicado BOOLEAN NOT NULL DEFAULT TRUE;
 
 -- Una receta es una ficha independiente (PDF) que se puede reutilizar
 -- en varios talleres; por eso el vínculo vive en su propia tabla.
@@ -107,3 +114,12 @@ CREATE INDEX IF NOT EXISTS idx_ejecucion_taller ON ejecucion (id_taller);
 CREATE INDEX IF NOT EXISTS idx_documento_taller ON documento (id_taller);
 CREATE INDEX IF NOT EXISTS idx_video_taller ON video (id_taller);
 CREATE INDEX IF NOT EXISTS idx_auditoria_fecha ON auditoria (creado_en);
+
+-- Papelera (RF-09): borrar no destruye. Cada tabla de contenido guarda cuándo se
+-- mandó a la papelera; las consultas normales la ignoran y la administración
+-- puede restaurar o purgar desde /admin/papelera.
+ALTER TABLE taller    ADD COLUMN IF NOT EXISTS eliminado_en TIMESTAMPTZ;
+ALTER TABLE receta    ADD COLUMN IF NOT EXISTS eliminado_en TIMESTAMPTZ;
+ALTER TABLE documento ADD COLUMN IF NOT EXISTS eliminado_en TIMESTAMPTZ;
+ALTER TABLE video     ADD COLUMN IF NOT EXISTS eliminado_en TIMESTAMPTZ;
+ALTER TABLE ejecucion ADD COLUMN IF NOT EXISTS eliminado_en TIMESTAMPTZ;

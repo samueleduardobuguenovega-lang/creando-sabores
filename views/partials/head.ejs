@@ -39,7 +39,9 @@
                 <% if (usuario.rol === 'admin') { %>
                   <a href="/admin/usuarios" class="<%= rutaActual.startsWith('/admin/usuarios') ? 'activo' : '' %>">Usuarios</a>
                   <a href="/admin/auditoria" class="<%= rutaActual.startsWith('/admin/auditoria') ? 'activo' : '' %>">Auditoría</a>
+                  <a href="/admin/papelera" class="<%= rutaActual.startsWith('/admin/papelera') ? 'activo' : '' %>">Papelera</a>
                 <% } %>
+                <a href="/mi-clave" class="<%= rutaActual.startsWith('/mi-clave') ? 'activo' : '' %>">Mi clave</a>
                 <a href="/">Sitio público</a>
               </div>
             </details>

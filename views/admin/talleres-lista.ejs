@@ -37,7 +37,10 @@
     <tbody>
       <% talleres.forEach(function (taller) { %>
         <tr>
-          <td><a href="/admin/talleres/<%= taller.id %>"><%= taller.nombre %></a></td>
+          <td>
+            <a href="/admin/talleres/<%= taller.id %>"><%= taller.nombre %></a>
+            <% if (!taller.publicado) { %><span class="insignia insignia-planificado">Sin publicar</span><% } %>
+          </td>
           <td><%= taller.tematica %></td>
           <td><%= fecha(taller.fecha_planificada) %></td>
           <td><span class="insignia insignia-<%= taller.estado %>"><%= etiquetaEstado[taller.estado] %></span></td>

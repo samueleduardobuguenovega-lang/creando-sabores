@@ -69,7 +69,8 @@ test('el sitio público se ve sin sesión y no muestra datos personales', async 
 
   assert.equal(inicio.estado, 200);
   assert.match(inicio.texto, /Creando Sabores/);
-  assert.match(inicio.texto, /Talleres registrados/);
+  assert.match(inicio.texto, /clases registradas/);
+  assert.match(inicio.texto, /recetas/);
 
   const talleres = await anonimo.get('/talleres');
   assert.equal(talleres.estado, 200);

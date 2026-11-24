@@ -69,6 +69,7 @@
           <th scope="col">Participantes</th>
           <th scope="col">Video</th>
           <th scope="col">Observaciones</th>
+          <th scope="col">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -79,6 +80,14 @@
             <td data-columna="Participantes"><%= ejecucion.cantidad_participantes %></td>
             <td data-columna="Video"><%= ejecucion.video || '—' %></td>
             <td data-columna="Observaciones"><%= ejecucion.observaciones || '—' %></td>
+            <td data-columna="Acciones">
+              <% if (usuario.rol === 'admin') { %>
+                <form method="post" action="/admin/ejecuciones/<%= ejecucion.id %>/eliminar" class="en-linea"
+                      onsubmit="return confirm('¿Enviar esta ejecución a la papelera?');">
+                  <button type="submit" class="boton boton-peligro">Eliminar</button>
+                </form>
+              <% } else { %>—<% } %>
+            </td>
           </tr>
         <% }) %>
       </tbody>

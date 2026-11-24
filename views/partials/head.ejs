@@ -54,14 +54,14 @@
         </nav>
         <form class="busqueda busqueda-menu" method="get" action="/buscar" role="search">
           <label class="visualmente-oculto" for="q-menu">Buscar en el sitio</label>
-          <input id="q-menu" name="q" type="search" placeholder="Buscar taller o receta" value="<%= terminoBusqueda || '' %>">
+          <input id="q-menu" name="q" type="search" placeholder="Buscar…" aria-label="Buscar taller, receta o documento" value="<%= terminoBusqueda || '' %>">
           <button type="submit" class="boton">Buscar</button>
         </form>
       </details>
 
       <form class="busqueda busqueda-escritorio" method="get" action="/buscar" role="search">
         <label class="visualmente-oculto" for="q-cabecera">Buscar en el sitio</label>
-        <input id="q-cabecera" name="q" type="search" placeholder="Buscar taller o receta" value="<%= terminoBusqueda || '' %>">
+        <input id="q-cabecera" name="q" type="search" placeholder="Buscar…" aria-label="Buscar taller, receta o documento" value="<%= terminoBusqueda || '' %>">
         <button type="submit" class="boton">Buscar</button>
       </form>
 

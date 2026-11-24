@@ -2159,3 +2159,67 @@ details.mas > summary.menu-boton:hover {
     max-width: 14rem;
   }
 }
+
+@media (max-width: 720px) {
+  details.mas > summary.menu-boton,
+  .enlace-suave {
+    min-height: var(--toque-minimo);
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* Cierre de la cabecera: cada pieza ocupa su ancho real y el navegador solo
+   aprieta la navegación, nunca la recorta por la mitad. */
+@media (min-width: 1025px) {
+  .cabecera-fila {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  details.menu .navegacion {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    overflow: visible;
+  }
+
+  .busqueda-escritorio {
+    flex: 0 0 230px;
+    width: auto;
+  }
+
+  .cuenta-nombre {
+    max-width: 14rem;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1240px) {
+  details.menu .navegacion {
+    font-size: 0.86rem;
+    gap: 0.05rem;
+  }
+
+  .busqueda-escritorio {
+    flex: 0 0 175px;
+  }
+
+  .cuenta-nombre {
+    max-width: 8rem;
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1080px) {
+  .cabecera-fila {
+    gap: 0.55rem;
+  }
+
+  .busqueda-escritorio {
+    flex: 0 0 135px;
+  }
+
+  details.menu .navegacion {
+    font-size: 0.82rem;
+  }
+}

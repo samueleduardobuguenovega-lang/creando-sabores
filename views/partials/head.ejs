@@ -5,10 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Registro, administración y consulta de talleres gastronómicos de Creando Sabores.">
   <title><%= titulo %> · Creando Sabores</title>
-  <link rel="stylesheet" href="/css/estilos.css">
+  <link rel="stylesheet" href="/css/estilos.css?v=<%= versionAssets %>">
+  <script src="/js/app.js?v=<%= versionAssets %>" defer></script>
 </head>
 <body>
   <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
+
+  <%# Aviso de carga: barra arriba y esqueleto de la página. Se activan desde
+      /js/app.js solo cuando la navegación se demora más de 200 ms. %>
+  <div id="barra-progreso" aria-hidden="true"></div>
+  <div id="esqueleto-pagina" aria-hidden="true">
+    <div class="esqueleto esqueleto-titulo"></div>
+    <div class="esqueleto esqueleto-linea"></div>
+    <div class="esqueleto esqueleto-linea"></div>
+    <div class="esqueleto esqueleto-bloque"></div>
+    <div class="esqueleto-fila">
+      <div class="esqueleto"></div>
+      <div class="esqueleto"></div>
+      <div class="esqueleto"></div>
+    </div>
+  </div>
 
   <header class="cabecera">
     <div class="contenedor cabecera-fila">
@@ -74,7 +90,7 @@
             <button type="submit" class="boton boton-texto">Salir</button>
           </form>
         <% } else { %>
-          <a class="boton boton-primario" href="/login">Ingresar</a>
+          <a class="boton boton-secundario" href="/login">Ingresar</a>
         <% } %>
       </div>
     </div>

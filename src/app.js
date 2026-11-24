@@ -1,5 +1,6 @@
 // Armado de la aplicación Express. Vive aparte de server.js para que las
 // pruebas puedan levantarla en un puerto libre sin tocar el proceso real.
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
@@ -7,6 +8,25 @@ const PgStore = require('connect-pg-simple')(session);
 
 const { pool } = require('./db');
 const { ETIQUETA_ESTADO } = require('./validaciones');
+
+// Sello de los estáticos: fecha de modificación de los dos archivos que
+// importan. Cambian, cambia la URL, y el navegador no puede servir lo viejo.
+function selloDeArchivos() {
+  const archivos = [
+    path.join(__dirname, '..', 'public', 'css', 'estilos.css'),
+    path.join(__dirname, '..', 'public', 'js', 'app.js'),
+  ];
+  const marcas = archivos.map((ruta) => {
+    try {
+      return Math.floor(fs.statSync(ruta).mtimeMs).toString(36);
+    } catch {
+      return '0';
+    }
+  });
+  return marcas.join('-');
+}
+
+const versionAssets = selloDeArchivos();
 
 const rutasPublicas = require('../routes/publico');
 const rutasAuth = require('../routes/auth');
@@ -94,6 +114,11 @@ function crearApp() {
     res.locals.rutaActual = req.path;
     res.locals.terminoBusqueda = typeof req.query.q === 'string' ? req.query.q : '';
     res.locals.anioActual = new Date().getFullYear();
+
+    // Versión de los archivos estáticos para que el navegador estrene el CSS y
+    // el JS nuevos al primer clic. Sin esto, un docente puede quedarse semanas
+    // viendo la hoja de estilos vieja desde la caché.
+    res.locals.versionAssets = versionAssets;
     res.locals.fecha = (valor) => {
       if (!valor) return '—';
       const soloFecha = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(valor));

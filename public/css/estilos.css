@@ -2,20 +2,53 @@
    Reglas base: letra grande, buen contraste y foco visible (RNF de accesibilidad). */
 
 :root {
-  --tinta: #1f2328;
-  --tinta-suave: #57606a;
-  --fondo: #fbf7f2;
+  /* Paleta institucional: blanco, verde y azul. El verde es la marca y lo
+     positivo; el azul marca lo informativo y lo seleccionado; el rojo queda
+     reservado para lo que borra o no se puede deshacer. */
+  --tinta: #10222e;
+  --tinta-suave: #56636b;
+  --titulo: #123c63;
+  --fondo: #ffffff;
   --superficie: #ffffff;
-  --borde: #e3d9cc;
-  --primario: #8a3b12;
-  --primario-claro: #f4e3d7;
-  --exito: #1a6b3c;
-  --exito-fondo: #e4f3e9;
-  --alerta: #9a1d1d;
-  --alerta-fondo: #fbe7e7;
-  --aviso: #7a5a00;
-  --aviso-fondo: #fdf3d7;
-  --radio: 12px;
+  --superficie-alt: #f2f8f4;
+  --borde: #cfe3d8;        /* decorativo: separa cajas sin gritar */
+  --borde-fuerte: #2f8555; /* controles y foco: 4,0:1 sobre blanco (WCAG 1.4.11) */
+  --linea-suave: #e4ece7;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --radio-caja: 14px;
+  --toque-minimo: 44px;
+
+  --primario: #157347;
+  --primario-oscuro: #0f5132;
+  --primario-claro: #e6f4ec;
+  --primario-tinte: #f4faf6;
+
+  --acento: #123c63;
+  --acento-oscuro: #0d2b47;
+  --acento-claro: #e7eef7;
+
+  --exito: #0f6b3f;
+  --exito-fondo: #e3f1e8;
+  --alerta: #9c1c1c;
+  --alerta-oscuro: #7d1414;
+  --alerta-fondo: #fdeaea;
+  --aviso: #7a5300;
+  --aviso-fondo: #fdf1d6;
+
+  --radio: 14px;
+  --radio-control: 10px;
+  --sombra-1: 0 1px 2px rgba(22, 33, 27, 0.06), 0 1px 1px rgba(22, 33, 27, 0.04);
+  --sombra-2: 0 4px 14px rgba(22, 33, 27, 0.10), 0 2px 4px rgba(22, 33, 27, 0.06);
+  --sombra-3: 0 12px 28px rgba(16, 34, 46, 0.14), 0 4px 8px rgba(16, 34, 46, 0.08);
+  --sombra-caja: 0 1px 2px rgba(16, 34, 46, 0.05);
+  --sombra-caja-alta: 0 6px 18px rgba(16, 34, 46, 0.10);
+
+  --dur-micro: 120ms;
+  --dur-salida: 160ms;
+  --dur-entrada: 260ms;
+  --ease-micro: cubic-bezier(0.2, 0, 0, 1);
+  --ease-entrada: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-salida: cubic-bezier(0.3, 0, 0.8, 0.15);
 }
 
 * {
@@ -292,7 +325,6 @@ a:hover {
 
 .boton:hover {
   border-color: var(--primario);
-  color: var(--primario);
 }
 
 .boton-primario {
@@ -302,8 +334,8 @@ a:hover {
 }
 
 .boton-primario:hover {
-  background: #6d2d0b;
-  border-color: #6d2d0b;
+  background: var(--primario-oscuro);
+  border-color: var(--primario-oscuro);
   color: #fff;
 }
 
@@ -464,7 +496,7 @@ a:hover {
 }
 
 .tabla th {
-  background: #f6efe7;
+  background: var(--superficie-alt);
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -526,7 +558,7 @@ a:hover {
 
 code {
   font-size: 0.9em;
-  background: #f1ece5;
+  background: #eef6f1;
   padding: 0.1rem 0.35rem;
   border-radius: 6px;
 }
@@ -552,11 +584,6 @@ code {
    El sitio público se lee como un archivo de talleres: carátula con resumen,
    una carpeta por temática y una ficha por taller. Reusa los colores de estado
    de las insignias y no cambia nada del panel. */
-
-:root {
-  --borde-fuerte: #c9b8a2;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
 
 .rotulo {
   font-family: var(--mono);
@@ -664,8 +691,9 @@ code {
   align-items: baseline;
   gap: 0.55rem;
   padding: 0.3rem 0.9rem 0.35rem;
-  background: #efe8db;
+  background: var(--primario-claro);
   border: 1px solid var(--borde-fuerte);
+  color: var(--primario-oscuro);
   border-bottom: none;
   border-radius: 4px 12px 0 0;
 }
@@ -873,7 +901,7 @@ details.menu > summary.menu-boton::-webkit-details-marker { display: none; }
   .caratula h1 { font-size: 1.7rem; max-width: none; }
   .caratula-texto {
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     font-size: 0.95rem;
@@ -1031,11 +1059,6 @@ details.menu > summary.menu-boton::-webkit-details-marker { display: none; }
    256 -> 178 px, carátula de taller 664 -> 575 px, controles de 44 px.
    ===================================================================== */
 
-:root {
-  --borde: #9c8b73;        /* 3,30:1 sobre blanco; mínimo WCAG 1.4.11 */
-  --borde-fuerte: #8a7a63;
-}
-
 .visualmente-oculto {
   position: absolute;
   width: 1px;
@@ -1144,7 +1167,7 @@ details.menu > summary.menu-boton::-webkit-details-marker { display: none; }
   color: #fff;
 }
 
-.chip-activo span { color: #f4e3d7; }
+.chip-activo span { color: #d7ece0; }
 
 /* Tarjeta entera clicable sin anidar enlaces. */
 .tarjeta-enlace { position: relative; }
@@ -1532,20 +1555,9 @@ main > h1:first-child,
    reglas anteriores, y conserva los pisos de contraste del RNF de accesibilidad.
    Contrastes medidos sobre blanco: tinta 16,3:1 · titulo 11,3:1 · secundario
    6,2:1 · boton 5,9:1 · borde 3,2:1 (minimo WCAG 1.4.11).
+   Los tokens viven arriba, en un solo bloque, para que cambiar el verde o el
+   azul sea una línea y no una cacería por el archivo.
    --------------------------------------------------------------------------- */
-:root {
-  --tinta: #10222e;
-  --tinta-suave: #56636b;
-  --fondo: #ffffff;
-  --superficie: #ffffff;
-  --borde: #5f9e77;
-  --borde-fuerte: #2f8555;
-  --primario: #157347;
-  --primario-claro: #e6f4ec;
-  --titulo: #123c63;
-  --exito: #0f6b3f;
-  --exito-fondo: #e6f4ec;
-}
 h1,
 h2,
 h3,
@@ -1563,7 +1575,6 @@ h3,
 }
 .boton:hover {
   border-color: var(--primario);
-  color: var(--primario);
 }
 .tabla th {
   background: #f2f8f4;
@@ -1600,15 +1611,6 @@ code {
    corrige jerarquía, densidad y tamaño de los objetivos de toque.
    Paleta institucional fijada por la docente: blanco, verde y azul.
    ========================================================================== */
-
-:root {
-  --radio-caja: 14px;
-  --radio-control: 10px;
-  --toque-minimo: 44px;
-  --sombra-caja: 0 1px 2px rgba(16, 34, 46, 0.05);
-  --sombra-caja-alta: 0 6px 18px rgba(16, 34, 46, 0.10);
-  --linea-suave: #e4ece7;
-}
 
 /* --- Foco visible en todo control ---------------------------------------- */
 a:focus-visible,
@@ -2222,4 +2224,550 @@ details.mas > summary.menu-boton:hover {
   details.menu .navegacion {
     font-size: 0.82rem;
   }
+}
+
+/* ===========================================================================
+   RESPUESTA AL USO: la app contesta cuando la tocas
+   Regla: todo lo que se puede tocar avisa al pasar por encima y confirma al
+   apretar. Nada de animaciones largas: 120 ms para el detalle, 260 ms para la
+   entrada de contenido. Solo se animan transform, opacity, color y sombra.
+   =========================================================================== */
+
+.boton,
+.chip,
+.tarjeta,
+.tarjeta-enlace,
+.insignia,
+.elemento-simple,
+.enlace-ficha,
+.ficha-abrir,
+.navegacion a,
+.mas-lista a,
+.tabla tbody tr,
+input,
+select,
+textarea,
+summary {
+  transition:
+    background-color var(--dur-micro) var(--ease-micro),
+    border-color var(--dur-micro) var(--ease-micro),
+    color var(--dur-micro) var(--ease-micro),
+    box-shadow var(--dur-micro) var(--ease-micro),
+    transform var(--dur-micro) var(--ease-micro),
+    opacity var(--dur-micro) var(--ease-micro);
+}
+
+/* ---------------------------------------------------------------- botones */
+.boton {
+  position: relative;
+  cursor: pointer;
+  will-change: transform;
+}
+
+.boton:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--sombra-2);
+}
+
+.boton:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: var(--sombra-1);
+}
+
+/* El botón que borra se pone rojo al acercarse: el color avisa antes del clic. */
+.boton-peligro:hover {
+  background: var(--alerta);
+  border-color: var(--alerta-oscuro);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(156, 28, 28, 0.20);
+}
+
+/* Lo que no se puede apretar tampoco se levanta. */
+.boton:disabled,
+.boton[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Guardando: el botón gira y deja de aceptar doble envío. */
+/* El texto del botón principal no puede cambiar de color al pasar el mouse:
+   quedaba verde sobre verde y el rótulo desaparecía. */
+.boton-primario:hover,
+.boton-primario:focus-visible {
+  color: #fff;
+}
+
+.boton-peligro:hover,
+.boton-peligro:focus-visible {
+  color: #fff;
+}
+
+.boton-cargando {
+  pointer-events: none;
+  padding-left: 2.4em;
+}
+
+.boton-cargando::before {
+  content: "";
+  position: absolute;
+  left: 0.9em;
+  top: 50%;
+  width: 0.9em;
+  height: 0.9em;
+  margin-top: -0.45em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: girar 0.7s linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+/* ----------------------------------------------------------------- enlaces */
+a {
+  transition: color var(--dur-micro) var(--ease-micro), text-decoration-color var(--dur-micro) var(--ease-micro);
+}
+
+p a,
+li a,
+.ayuda a,
+.mensaje a {
+  text-decoration-color: transparent;
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+}
+
+p a:hover,
+li a:hover,
+.ayuda a:hover,
+.mensaje a:hover {
+  text-decoration-color: currentColor;
+}
+
+/* ------------------------------------------------------------------- menú */
+.navegacion a:hover {
+  background: var(--primario-tinte);
+  color: var(--primario-oscuro);
+}
+
+.mas-lista a:hover {
+  background: var(--primario-tinte);
+  color: var(--primario-oscuro);
+  transform: translateX(2px);
+}
+
+.menu-boton:hover {
+  background: var(--primario-claro);
+  border-color: var(--borde-fuerte);
+}
+
+/* ------------------------------------------------- tarjetas, filas y listas */
+/* Lo clicable se levanta; lo que solo informa no. */
+a.tarjeta:hover,
+.tarjeta-enlace:hover,
+a .tarjeta:hover {
+  border-color: var(--borde-fuerte);
+  box-shadow: var(--sombra-2);
+  transform: translateY(-2px);
+}
+
+.elemento-simple:hover {
+  background: var(--primario-tinte);
+  border-color: var(--borde-fuerte);
+}
+
+.tabla tbody tr:hover {
+  background: var(--primario-tinte);
+}
+
+/* La fila que se puede abrir muestra la mano. */
+.tabla tbody tr[data-enlace] {
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--borde-fuerte);
+  background: var(--primario-claro);
+  color: var(--primario-oscuro);
+  transform: translateY(-1px);
+}
+
+.chip-activo:hover {
+  background: var(--primario-oscuro);
+  color: #fff;
+}
+
+/* --------------------------------------------------------------- foco claro */
+:focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(18, 60, 99, 0.16);
+}
+
+.boton-peligro:focus-visible,
+a[href*="eliminar"]:focus-visible {
+  outline-color: var(--alerta);
+  box-shadow: 0 0 0 6px rgba(156, 28, 28, 0.16);
+}
+
+/* --------------------------------------------------------------- semántica */
+/* Verde: quedó hecho. Rojo: borra o falló. Ámbar: ojo con esto. */
+.mensaje-ok {
+  background: var(--exito-fondo);
+  border-left: 6px solid var(--exito);
+  color: var(--exito);
+}
+
+.mensaje-error {
+  background: var(--alerta-fondo);
+  border-left: 6px solid var(--alerta);
+  color: var(--alerta);
+}
+
+.mensaje-aviso {
+  background: var(--aviso-fondo);
+  border-left: 6px solid var(--aviso);
+  color: var(--aviso);
+}
+
+/* ------------------------------------------------- entrada del contenido */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+main > * {
+  animation: aparecer var(--dur-entrada) var(--ease-entrada) both;
+}
+
+main > *:nth-child(2) { animation-delay: 40ms; }
+main > *:nth-child(3) { animation-delay: 80ms; }
+main > *:nth-child(4) { animation-delay: 120ms; }
+main > *:nth-child(5) { animation-delay: 160ms; }
+main > *:nth-child(6) { animation-delay: 200ms; }
+
+/* ------------------------------------------------- barra de progreso de carga */
+#barra-progreso {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 120;
+  background: linear-gradient(90deg, var(--primario), var(--acento));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  opacity: 0;
+  transition: transform 0.2s linear, opacity 0.2s linear;
+  pointer-events: none;
+}
+
+body.navegando #barra-progreso {
+  opacity: 1;
+  animation: progreso 2.6s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes progreso {
+  0% { transform: scaleX(0.08); }
+  30% { transform: scaleX(0.35); }
+  60% { transform: scaleX(0.62); }
+  85% { transform: scaleX(0.82); }
+  100% { transform: scaleX(0.92); }
+}
+
+/* ------------------------------------------- esqueleto mientras carga la página */
+#esqueleto-pagina {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: none;
+  padding: 6.5rem 1.25rem 1.25rem;
+  background: var(--fondo);
+}
+
+body.navegando-lento #esqueleto-pagina {
+  display: block;
+}
+
+.esqueleto {
+  position: relative;
+  overflow: hidden;
+  background: #dfe8e2;
+  border-radius: 10px;
+}
+
+.esqueleto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  animation: brillo 1.3s ease-in-out infinite;
+}
+
+@keyframes brillo {
+  to { transform: translateX(100%); }
+}
+
+.esqueleto-titulo { height: 2rem; width: min(22rem, 60%); margin-bottom: 1rem; }
+.esqueleto-linea { height: 1rem; margin-bottom: 0.7rem; }
+.esqueleto-linea:nth-child(2) { width: 92%; }
+.esqueleto-linea:nth-child(3) { width: 78%; }
+.esqueleto-bloque { height: 6rem; margin-top: 1.2rem; }
+.esqueleto-fila { display: grid; gap: 0.8rem; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin-top: 1.4rem; }
+.esqueleto-fila .esqueleto { height: 7.5rem; }
+
+/* ------------------------------------------------ movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 150ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 150ms !important;
+  }
+
+  main > * {
+    animation: none;
+  }
+
+  .boton:hover,
+  .chip:hover,
+  .mas-lista a:hover,
+  a.tarjeta:hover,
+  .tarjeta-enlace:hover {
+    transform: none;
+  }
+
+  .esqueleto::after {
+    animation: none;
+  }
+}
+
+
+/* ===========================================================================
+   JERARQUÍA DE COLOR: cada color dice una sola cosa
+   Verde  = acción principal y algo que salió bien.
+   Azul   = lo que se puede leer o elegir (enlaces, sección activa, filtro).
+   Rojo   = borrar o algo que falló.
+   Gris   = estado neutro: todavía no pasó nada.
+   Antes el verde hacía los cuatro trabajos y por eso no se entendía qué se
+   podía tocar; ahora el color avisa antes del clic.
+   =========================================================================== */
+
+a,
+p a,
+li a,
+.ayuda a {
+  color: var(--acento);
+}
+
+a:hover,
+p a:hover,
+li a:hover {
+  color: var(--acento-oscuro);
+}
+
+/* Sección activa: azul con barra inferior, no verde. */
+.navegacion a:hover {
+  background: var(--acento-claro);
+  color: var(--acento-oscuro);
+}
+
+.navegacion a.activo {
+  background: var(--acento-claro);
+  color: var(--acento);
+  box-shadow: inset 0 -3px 0 var(--acento);
+}
+
+.mas-lista a:hover {
+  background: var(--acento-claro);
+  color: var(--acento-oscuro);
+}
+
+.mas-lista a.activo {
+  color: var(--acento);
+  font-weight: 700;
+}
+
+/* Filtro elegido: azul. El chip no es una acción que cambia datos. */
+.chip {
+  color: var(--tinta);
+}
+
+.chip:hover {
+  border-color: var(--acento);
+  background: var(--acento-claro);
+  color: var(--acento-oscuro);
+}
+
+.chip-activo,
+.chip-activo:hover {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: #fff;
+}
+
+.chip-activo span {
+  color: #d8e6f8;
+}
+
+/* Rótulos pequeños: legibles, sin gritar. */
+.rotulo {
+  color: #3d5462;
+}
+
+/* Botón de la cabecera: secundario, para que no compita con la acción de la
+   página. Sigue siendo verde porque es la puerta de entrada del docente. */
+.boton-secundario {
+  background: #fff;
+  color: var(--primario);
+  border: 2px solid var(--primario);
+  box-shadow: none;
+}
+
+.boton-secundario:hover {
+  background: var(--primario-claro);
+  color: var(--primario-oscuro);
+  border-color: var(--primario-oscuro);
+  transform: translateY(-1px);
+}
+
+/* Estados: neutro / en marcha / listo. */
+.insignia-planificado,
+.sello-planificado {
+  border-color: #8a97a1;
+  background: #f1f4f6;
+  color: #3d4f5a;
+}
+
+.insignia-en_ejecucion {
+  border-color: #1d4e89;
+  background: #e8f0fa;
+  color: #16406f;
+}
+
+.insignia-finalizado {
+  border-color: var(--exito);
+  background: var(--exito-fondo);
+  color: var(--exito);
+}
+
+/* ---------------------------------------------------- ajustes de celular */
+@media (max-width: 720px) {
+  /* Los chips son el filtro principal en la mano: 44 px de alto real. */
+  .chip,
+  .chip-activo {
+    min-height: var(--toque-minimo);
+    display: inline-flex;
+    align-items: center;
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+
+  /* La fila de cifras deja de dejar una chip sola en la segunda línea. */
+  .resumen-chips,
+  .chips {
+    row-gap: 0.5rem;
+  }
+
+  /* El menú abierto ocupa el ancho y sus enlaces también son de 44 px. */
+  .mas-lista a,
+  .navegacion a {
+    min-height: var(--toque-minimo);
+    display: flex;
+    align-items: center;
+  }
+}
+
+
+/* Los enlaces de la cabecera también son un blanco de 44 px en el celular:
+   «Salir» quedaba con un área de toque de una línea de texto. */
+@media (max-width: 720px) {
+  .cuenta a,
+  .cuenta .boton,
+  .menu-boton,
+  .marca a {
+    min-height: var(--toque-minimo);
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+/* ------------------------------------------------- fichas del archivo */
+/* La ficha del listado avisa al pasar por encima: fondo verde tenue y barra
+   azul a la izquierda, para que se note qué se va a abrir. */
+.ficha-archivo {
+  position: relative;
+  transition:
+    background-color var(--dur-micro) var(--ease-micro),
+    box-shadow var(--dur-micro) var(--ease-micro),
+    transform var(--dur-micro) var(--ease-micro);
+}
+
+.ficha-archivo::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--acento);
+  opacity: 0;
+  transform: scaleY(0.4);
+  transition:
+    opacity var(--dur-salida) var(--ease-micro),
+    transform var(--dur-salida) var(--ease-micro);
+}
+
+.ficha-archivo:hover {
+  background: var(--primario-tinte);
+  box-shadow: var(--sombra-1);
+}
+
+.ficha-archivo:hover::before {
+  opacity: 1;
+  transform: none;
+}
+
+.ficha-archivo:hover .enlace-ficha {
+  color: var(--acento-oscuro);
+  text-decoration-color: currentColor;
+}
+
+/* El enlace «ver ficha» muestra el subrayado cuando la ficha está bajo el mouse. */
+.enlace-ficha {
+  text-decoration-color: transparent;
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+}
+
+/* La pestaña de la carpeta responde con el azul de lo seleccionado. */
+.carpeta-tab {
+  transition: background-color var(--dur-micro) var(--ease-micro), color var(--dur-micro) var(--ease-micro);
+}
+
+.carpeta:hover .carpeta-tab {
+  background: var(--acento-claro);
+  color: var(--acento);
+}
+
+/* Filas de tabla que se pueden abrir. */
+.tabla tbody tr[data-enlace]:hover {
+  box-shadow: inset 3px 0 0 var(--acento);
+}
+
+.chip-activo:hover {
+  background: var(--acento-oscuro);
 }

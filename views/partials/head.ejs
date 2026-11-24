@@ -13,6 +13,10 @@
   <header class="cabecera">
     <div class="contenedor cabecera-fila">
       <a class="marca" href="/">
+        <%# Logo del colegio: si el archivo no está, el navegador lo descarta y
+            queda el punto verde con la marca. Basta dejar el PNG en
+            public/img/logo-colegio.png para que aparezca. %>
+        <img class="marca-logo" src="/img/logo-colegio.png" alt="Colegio Santo Tomás" onerror="this.remove()">
         <span class="marca-punto" aria-hidden="true"></span>
         Creando Sabores
       </a>
@@ -27,10 +31,13 @@
             <a href="/admin/documentos" class="<%= rutaActual.startsWith('/admin/documentos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/documentos') ? 'aria-current="page"' : '' %>>Documentos</a>
             <a href="/admin/videos" class="<%= rutaActual.startsWith('/admin/videos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/videos') ? 'aria-current="page"' : '' %>>Videos</a>
             <a href="/admin/ejecuciones" class="<%= rutaActual.startsWith('/admin/ejecuciones') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/ejecuciones') ? 'aria-current="page"' : '' %>>Ejecuciones</a>
+            <span class="menu-separador" aria-hidden="true"></span>
             <% if (usuario.rol === 'admin') { %>
               <a href="/admin/usuarios" class="<%= rutaActual.startsWith('/admin/usuarios') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/usuarios') ? 'aria-current="page"' : '' %>>Usuarios</a>
               <a href="/admin/auditoria" class="<%= rutaActual.startsWith('/admin/auditoria') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/auditoria') ? 'aria-current="page"' : '' %>>Auditoría</a>
+              <span class="menu-separador" aria-hidden="true"></span>
             <% } %>
+            <a href="/">Sitio público</a>
           <% } else { %>
             <a href="/" class="<%= rutaActual === '/' ? 'activo' : '' %>" <%= rutaActual === '/' ? 'aria-current="page"' : '' %>>Inicio</a>
             <a href="/talleres" class="<%= rutaActual.startsWith('/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/talleres') ? 'aria-current="page"' : '' %>>Talleres</a>

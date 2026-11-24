@@ -34,6 +34,41 @@ router.get('/panel', requiereSesion, async (req, res, next) => {
          FROM taller ORDER BY creado_en DESC LIMIT 5`
     );
 
+    // Bandeja de pendientes: un taller puede carecer de varias cosas, pero
+    // mostramos solo la más urgente para que la lista siga siendo una acción
+    // por fila. Prioridad: ejecución > recetas > documentos > video.
+    const { rows: revision } = await query(
+      `SELECT t.id, t.nombre, t.estado,
+              (SELECT COUNT(*) FROM ejecucion e WHERE e.id_taller = t.id)::int      AS ejecuciones,
+              (SELECT COUNT(*) FROM receta_taller r WHERE r.id_taller = t.id)::int  AS recetas,
+              (SELECT COUNT(*) FROM documento d WHERE d.id_taller = t.id)::int      AS documentos,
+              (SELECT COUNT(*) FROM video v WHERE v.id_taller = t.id)::int          AS videos
+         FROM taller t
+        ORDER BY (t.estado = 'en_ejecucion') DESC,
+                 (t.estado = 'finalizado') DESC,
+                 t.fecha_planificada ASC NULLS LAST,
+                 t.id`
+    );
+
+    const pendientes = revision
+      .map((fila) => {
+        if (fila.ejecuciones === 0) {
+          return { ...fila, falta: 'sin ejecución registrada', accion: `/admin/ejecuciones?taller=${fila.id}`, etiquetaAccion: 'Registrar ejecución' };
+        }
+        if (fila.recetas === 0) {
+          return { ...fila, falta: 'sin recetas asociadas', accion: `/admin/talleres/${fila.id}`, etiquetaAccion: 'Asignar receta' };
+        }
+        if (fila.documentos === 0) {
+          return { ...fila, falta: 'sin documentos', accion: `/admin/documentos?destino=taller:${fila.id}`, etiquetaAccion: 'Subir PDF' };
+        }
+        if (fila.videos === 0) {
+          return { ...fila, falta: 'sin video de la clase', accion: `/admin/videos?destino=taller:${fila.id}`, etiquetaAccion: 'Agregar video' };
+        }
+        return null;
+      })
+      .filter(Boolean)
+      .slice(0, 6);
+
     res.render('admin/panel', {
       titulo: 'Panel principal',
       resumen: resumen[0],
@@ -41,6 +76,7 @@ router.get('/panel', requiereSesion, async (req, res, next) => {
       totalEjecuciones: ejecuciones[0].total,
       ultimasEjecuciones,
       ultimosTalleres,
+      pendientes,
     });
   } catch (error) {
     next(error);

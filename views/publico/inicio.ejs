@@ -9,34 +9,22 @@
         Cada taller guarda sus recetas, sus documentos y sus videos. Toca una ficha
         para abrirla completa.
       </p>
-      <p class="ayuda"><%= resumen.talleres %> talleres · <%= resumen.tematicas %> temáticas</p>
       <div class="acciones">
-        <a class="boton boton-primario" href="/talleres">Abrir el archivo</a>
-        <a class="boton" href="/recetas">Ver recetas</a>
-        <a class="boton" href="/ejecuciones">Ver clases</a>
+        <a class="boton boton-primario" href="/talleres">Ver los <%= resumen.talleres %> talleres</a>
+        <a class="boton" href="/recetas">Recetas</a>
+        <a class="boton" href="/ejecuciones">Clases</a>
       </div>
-    </div>
 
-    <details class="maestra resumen-archivo" data-plegable>
-      <summary class="resumen-titulo">Resumen del archivo</summary>
-      <dl>
-        <div class="campo-maestra">
-          <dt>Talleres registrados</dt><span class="linea"></span><dd><%= resumen.talleres %></dd>
-        </div>
-        <div class="campo-maestra">
-          <dt>Finalizados</dt><span class="linea"></span><dd><%= resumen.finalizados %></dd>
-        </div>
-        <div class="campo-maestra">
-          <dt>En ejecución</dt><span class="linea"></span><dd><%= resumen.en_ejecucion %></dd>
-        </div>
-        <div class="campo-maestra">
-          <dt>Recetas</dt><span class="linea"></span><dd><%= totalRecetas %></dd>
-        </div>
-        <div class="campo-maestra">
-          <dt>Ejecuciones</dt><span class="linea"></span><dd><%= totalEjecuciones %></dd>
-        </div>
-      </dl>
-    </details>
+      <%# Las cifras van como una sola tira de datos: antes competían con el
+          título en una segunda columna y repetían el total de talleres. %>
+      <ul class="resumen-chips" aria-label="Cifras del archivo">
+        <li><b><%= resumen.finalizados %></b> finalizados</li>
+        <li><b><%= resumen.en_ejecucion %></b> en ejecución</li>
+        <li><b><%= totalRecetas %></b> recetas</li>
+        <li><b><%= totalEjecuciones %></b> clases registradas</li>
+        <li><b><%= resumen.tematicas %></b> temáticas</li>
+      </ul>
+    </div>
   </div>
 </section>
 

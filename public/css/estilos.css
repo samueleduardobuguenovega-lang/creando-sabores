@@ -1593,3 +1593,265 @@ code {
 .cabecera {
   border-color: var(--borde-fuerte);
 }
+
+/* ============================================================================
+   Rediseño de presentación · 2026-11-24
+   Capa añadida al final para ganar en cascada. No reescribe las reglas previas:
+   corrige jerarquía, densidad y tamaño de los objetivos de toque.
+   Paleta institucional fijada por la docente: blanco, verde y azul.
+   ========================================================================== */
+
+:root {
+  --radio-caja: 14px;
+  --radio-control: 10px;
+  --toque-minimo: 44px;
+  --sombra-caja: 0 1px 2px rgba(16, 34, 46, 0.05);
+  --sombra-caja-alta: 0 6px 18px rgba(16, 34, 46, 0.10);
+  --linea-suave: #e4ece7;
+}
+
+/* --- Foco visible en todo control ---------------------------------------- */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--titulo);
+  outline-offset: 2px;
+  border-radius: var(--radio-control);
+}
+
+/* --- Encabezado ---------------------------------------------------------- */
+.marca-logo {
+  height: 40px;
+  width: auto;
+  display: block;
+  border-radius: 6px;
+}
+
+/* Sin logo disponible, el punto verde sigue marcando la marca. */
+.marca-logo + .marca-punto {
+  display: none;
+}
+
+.navegacion {
+  gap: 0.15rem 0.35rem;
+}
+
+.navegacion a {
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--radio-control);
+  border-bottom: 0;
+}
+
+.navegacion a:hover,
+.navegacion a.activo {
+  background: var(--primario-claro);
+  border-bottom-color: transparent;
+}
+
+.navegacion a.activo {
+  color: var(--primario);
+  font-weight: 700;
+}
+
+.menu-separador {
+  display: block;
+  width: 1px;
+  align-self: stretch;
+  margin: 0.35rem 0.35rem;
+  background: var(--linea-suave);
+}
+
+/* --- Portada: una sola jerarquía ---------------------------------------- */
+.caratula {
+  padding-bottom: 1.25rem;
+}
+
+.caratula-grid {
+  align-items: end;
+}
+
+.caratula h1 {
+  max-width: 22ch;
+  letter-spacing: -0.015em;
+}
+
+.caratula-texto {
+  max-width: 58ch;
+}
+
+.caratula .acciones {
+  margin-top: 1.1rem;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Cifras del archivo como tira de datos, no como segunda columna competidora */
+.resumen-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resumen-chips li {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--linea-suave);
+  border-radius: 999px;
+  background: var(--superficie);
+  font-size: 0.875rem;
+  color: var(--tinta-suave);
+}
+
+.resumen-chips b {
+  color: var(--titulo);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Ficha del archivo: se abre desde cualquier punto -------------------- */
+.ficha-archivo {
+  position: relative;
+  border-radius: var(--radio-caja);
+  box-shadow: var(--sombra-caja);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.ficha-archivo .enlace-ficha::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radio-caja);
+}
+
+.ficha-archivo:hover,
+.ficha-archivo:focus-within {
+  border-color: var(--borde-fuerte);
+  box-shadow: var(--sombra-caja-alta);
+}
+
+.ficha-archivo:active {
+  transform: translateY(1px);
+}
+
+.ficha-archivo .ficha-abrir {
+  color: var(--primario);
+  font-weight: 600;
+}
+
+/* --- Panel: bandeja de pendientes --------------------------------------- */
+.pendientes {
+  border: 1px solid var(--linea-suave);
+  border-radius: var(--radio-caja);
+  padding: 1rem 1.15rem;
+  background: var(--superficie);
+  box-shadow: var(--sombra-caja);
+}
+
+.pendientes h2 {
+  margin-top: 0;
+}
+
+.pendientes-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pendiente {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--linea-suave);
+}
+
+.pendiente:first-child {
+  border-top: 0;
+  padding-top: 0.2rem;
+}
+
+.pendiente-texto {
+  min-width: 12rem;
+  flex: 1 1 16rem;
+}
+
+.pendiente-texto strong {
+  color: var(--tinta);
+}
+
+.pendiente-falta {
+  display: block;
+  color: var(--tinta-suave);
+  font-size: 0.875rem;
+}
+
+.pendiente-accion {
+  flex: 0 0 auto;
+}
+
+.pendientes-vacio {
+  color: var(--tinta-suave);
+  margin: 0;
+}
+
+/* --- Móvil: objetivos de toque y piso tipográfico ----------------------- */
+@media (max-width: 720px) {
+  .navegacion a,
+  .menu-boton,
+  .boton,
+  .pendiente-accion .boton {
+    min-height: var(--toque-minimo);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .navegacion {
+    gap: 0.1rem;
+  }
+
+  .navegacion a {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .menu-separador {
+    width: auto;
+    height: 1px;
+    margin: 0.35rem 0.6rem;
+  }
+
+  .ayuda,
+  .rotulo,
+  .ficha-campos,
+  .campo-archivo,
+  .pendiente-falta,
+  small {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .caratula h1 {
+    max-width: none;
+    font-size: 1.75rem;
+    line-height: 1.2;
+  }
+
+  .caratula .acciones .boton {
+    flex: 1 1 100%;
+  }
+
+  .ficha-archivo {
+    padding: 0.9rem;
+  }
+}

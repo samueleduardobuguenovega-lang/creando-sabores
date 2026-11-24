@@ -1525,3 +1525,71 @@ main > h1:first-child,
 }
 
 .foto-hueco.folio::before { content: "Nº "; font-size: .55rem; letter-spacing: .12em; opacity: .75; }
+/* ---------------------------------------------------------------------------
+   Paleta institucional pedida por la docente (2026-11-24):
+   fondo blanco, botones y bordes verdes, titulos azules, texto secundario gris.
+   Se declara al final del archivo para ganar en la cascada, sin reescribir las
+   reglas anteriores, y conserva los pisos de contraste del RNF de accesibilidad.
+   Contrastes medidos sobre blanco: tinta 16,3:1 · titulo 11,3:1 · secundario
+   6,2:1 · boton 5,9:1 · borde 3,2:1 (minimo WCAG 1.4.11).
+   --------------------------------------------------------------------------- */
+:root {
+  --tinta: #10222e;
+  --tinta-suave: #56636b;
+  --fondo: #ffffff;
+  --superficie: #ffffff;
+  --borde: #5f9e77;
+  --borde-fuerte: #2f8555;
+  --primario: #157347;
+  --primario-claro: #e6f4ec;
+  --titulo: #123c63;
+  --exito: #0f6b3f;
+  --exito-fondo: #e6f4ec;
+}
+h1,
+h2,
+h3,
+.caratula h1 {
+  color: var(--titulo);
+}
+/* Rotulos pequenos: gris azulado, como pidio la docente para los textos
+   que acompanan a una caja. */
+.rotulo {
+  color: #4a6272;
+}
+.boton-primario:hover {
+  background: #0f5132;
+  border-color: #0f5132;
+}
+.boton:hover {
+  border-color: var(--primario);
+  color: var(--primario);
+}
+.tabla th {
+  background: #f2f8f4;
+}
+code {
+  background: #eef6f1;
+}
+.insignia-planificado,
+.sello-planificado {
+  border-color: #b07d00;
+}
+.insignia-en_ejecucion {
+  border-color: var(--borde);
+  background: #eaf1f8;
+  color: #1d4e89;
+}
+.insignia-finalizado {
+  border-color: #2f8555;
+}
+.maestra,
+.tarjeta,
+.ficha,
+.carpeta {
+  box-shadow: 3px 3px 0 rgba(21, 115, 71, 0.10);
+}
+.caratula,
+.cabecera {
+  border-color: var(--borde-fuerte);
+}

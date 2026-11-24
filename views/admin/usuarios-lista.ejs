@@ -1,0 +1,28 @@
+<%- include('../partials/head') %>
+
+<div class="barra-titulo">
+  <h1>Usuarios</h1>
+  <a class="boton boton-primario" href="/admin/usuarios/nuevo">Nuevo usuario</a>
+</div>
+
+<p class="ayuda">Solo la administración crea cuentas y asigna roles. No se pide correo: el acceso es con nombre de usuario.</p>
+
+<table class="tabla">
+  <thead>
+    <tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Creado</th><th></th></tr>
+  </thead>
+  <tbody>
+    <% usuarios.forEach(function (cuenta) { %>
+      <tr>
+        <td><%= cuenta.nombre %></td>
+        <td><code><%= cuenta.usuario %></code></td>
+        <td><%= cuenta.rol === 'admin' ? 'Administrador' : 'Docente' %></td>
+        <td><%= cuenta.activo ? 'Activo' : 'Desactivado' %></td>
+        <td><%= fecha(cuenta.creado_en) %></td>
+        <td><a href="/admin/usuarios/<%= cuenta.id %>/editar">Editar</a></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../partials/footer') %>

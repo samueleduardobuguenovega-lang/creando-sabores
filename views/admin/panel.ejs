@@ -1,0 +1,80 @@
+<%- include('../partials/head') %>
+
+<h1>Panel principal</h1>
+<p class="ayuda">Resumen de la plataforma y accesos rápidos.</p>
+
+<section class="indicadores" aria-label="Totales de talleres">
+  <div class="indicador">
+    <span class="indicador-numero"><%= resumen.total %></span>
+    <span class="indicador-texto">Talleres registrados</span>
+  </div>
+  <div class="indicador">
+    <span class="indicador-numero"><%= resumen.planificados %></span>
+    <span class="indicador-texto">Planificados</span>
+  </div>
+  <div class="indicador">
+    <span class="indicador-numero"><%= resumen.en_ejecucion %></span>
+    <span class="indicador-texto">En ejecución</span>
+  </div>
+  <div class="indicador">
+    <span class="indicador-numero"><%= resumen.finalizados %></span>
+    <span class="indicador-texto">Finalizados</span>
+  </div>
+  <div class="indicador">
+    <span class="indicador-numero"><%= totalRecetas %></span>
+    <span class="indicador-texto">Recetas</span>
+  </div>
+  <div class="indicador">
+    <span class="indicador-numero"><%= totalEjecuciones %></span>
+    <span class="indicador-texto">Ejecuciones</span>
+  </div>
+</section>
+
+<section class="acciones accesos">
+  <a class="boton boton-primario" href="/admin/talleres/nuevo">Nuevo taller</a>
+  <a class="boton" href="/admin/talleres">Consultar talleres</a>
+  <a class="boton" href="/admin/ejecuciones">Registrar ejecución</a>
+</section>
+
+<div class="dos-columnas">
+  <section>
+    <h2>Últimos talleres ejecutados</h2>
+    <% if (ultimasEjecuciones.length === 0) { %>
+      <p class="ayuda">Todavía no hay ejecuciones registradas.</p>
+    <% } else { %>
+      <table class="tabla">
+        <thead>
+          <tr><th>Fecha</th><th>Taller</th><th class="numero">Participantes</th></tr>
+        </thead>
+        <tbody>
+          <% ultimasEjecuciones.forEach(function (fila) { %>
+            <tr>
+              <td><%= fecha(fila.fecha_ejecucion) %></td>
+              <td><a href="/admin/talleres/<%= fila.id_taller %>"><%= fila.taller %></a></td>
+              <td class="numero"><%= fila.cantidad_participantes %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </section>
+
+  <section>
+    <h2>Últimos talleres registrados</h2>
+    <% if (ultimosTalleres.length === 0) { %>
+      <p class="ayuda">Aún no hay talleres. Parte con “Nuevo taller”.</p>
+    <% } else { %>
+      <ul class="lista-simple">
+        <% ultimosTalleres.forEach(function (taller) { %>
+          <li>
+            <a href="/admin/talleres/<%= taller.id %>"><%= taller.nombre %></a>
+            <span class="insignia insignia-<%= taller.estado %>"><%= etiquetaEstado[taller.estado] %></span>
+            <span class="ayuda"><%= fecha(taller.fecha_planificada) %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

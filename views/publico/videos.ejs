@@ -1,0 +1,38 @@
+<%- include('../partials/head') %>
+
+<section class="caratula caratula-corta">
+  <p class="rotulo">Grabaciones del archivo</p>
+  <h1>Videos</h1>
+  <p class="caratula-texto">
+    Lo que quedó grabado en cada taller: técnicas, preparaciones y cierres de sesión.
+  </p>
+</section>
+
+<% if (videos.length === 0) { %>
+  <p class="ayuda">Todavía no hay videos registrados.</p>
+<% } else { %>
+  <div class="carpetas">
+    <% videos.forEach(function (video) { %>
+      <section class="carpeta">
+        <div class="carpeta-tab">
+          <h2><a href="<%= video.destino %>"><%= video.nombre %></a></h2>
+          <span><%= video.tematica || 'Video' %></span>
+        </div>
+        <div class="carpeta-cuerpo">
+          <p class="ayuda" style="margin:.6rem 0">
+            En <a href="<%= video.destino %>"><%= video.asociado %></a>
+          </p>
+          <% if (video.embedUrl) { %>
+            <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"
+                    loading="lazy" allowfullscreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+          <% } else { %>
+            <p class="ayuda">El enlace de este video no se puede mostrar aquí.</p>
+          <% } %>
+        </div>
+      </section>
+    <% }) %>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

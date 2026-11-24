@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Registro, administración y consulta de talleres gastronómicos de Creando Sabores.">
+  <title><%= titulo %> · Creando Sabores</title>
+  <link rel="stylesheet" href="/css/estilos.css">
+</head>
+<body>
+  <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-fila">
+      <a class="marca" href="/">
+        <span class="marca-punto" aria-hidden="true"></span>
+        Creando Sabores
+      </a>
+
+      <details class="menu" data-plegable>
+        <summary class="menu-boton">Menú <span aria-hidden="true">☰</span></summary>
+        <nav class="navegacion" aria-label="Menú principal">
+          <% if (usuario) { %>
+            <a href="/panel" class="<%= rutaActual === '/panel' ? 'activo' : '' %>" <%= rutaActual === '/panel' ? 'aria-current="page"' : '' %>>Panel</a>
+            <a href="/admin/talleres" class="<%= rutaActual.startsWith('/admin/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/talleres') ? 'aria-current="page"' : '' %>>Talleres</a>
+            <a href="/admin/recetas" class="<%= rutaActual.startsWith('/admin/recetas') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/recetas') ? 'aria-current="page"' : '' %>>Recetas</a>
+            <a href="/admin/documentos" class="<%= rutaActual.startsWith('/admin/documentos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/documentos') ? 'aria-current="page"' : '' %>>Documentos</a>
+            <a href="/admin/videos" class="<%= rutaActual.startsWith('/admin/videos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/videos') ? 'aria-current="page"' : '' %>>Videos</a>
+            <a href="/admin/ejecuciones" class="<%= rutaActual.startsWith('/admin/ejecuciones') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/ejecuciones') ? 'aria-current="page"' : '' %>>Ejecuciones</a>
+            <% if (usuario.rol === 'admin') { %>
+              <a href="/admin/usuarios" class="<%= rutaActual.startsWith('/admin/usuarios') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/usuarios') ? 'aria-current="page"' : '' %>>Usuarios</a>
+              <a href="/admin/auditoria" class="<%= rutaActual.startsWith('/admin/auditoria') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/auditoria') ? 'aria-current="page"' : '' %>>Auditoría</a>
+            <% } %>
+          <% } else { %>
+            <a href="/" class="<%= rutaActual === '/' ? 'activo' : '' %>" <%= rutaActual === '/' ? 'aria-current="page"' : '' %>>Inicio</a>
+            <a href="/talleres" class="<%= rutaActual.startsWith('/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/talleres') ? 'aria-current="page"' : '' %>>Talleres</a>
+            <a href="/recetas" class="<%= rutaActual.startsWith('/recetas') ? 'activo' : '' %>" <%= rutaActual.startsWith('/recetas') ? 'aria-current="page"' : '' %>>Recetas</a>
+            <a href="/videos" class="<%= rutaActual.startsWith('/videos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/videos') ? 'aria-current="page"' : '' %>>Videos</a>
+            <a href="/documentos" class="<%= rutaActual.startsWith('/documentos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/documentos') ? 'aria-current="page"' : '' %>>Documentos</a>
+            <a href="/ejecuciones" class="<%= rutaActual.startsWith('/ejecuciones') ? 'activo' : '' %>" <%= rutaActual.startsWith('/ejecuciones') ? 'aria-current="page"' : '' %>>Clases</a>
+          <% } %>
+        </nav>
+        <form class="busqueda busqueda-menu" method="get" action="/buscar" role="search">
+          <label class="visualmente-oculto" for="q-menu">Buscar en el sitio</label>
+          <input id="q-menu" name="q" type="search" placeholder="Buscar taller, receta, PDF…" value="<%= terminoBusqueda || '' %>">
+          <button type="submit" class="boton">Buscar</button>
+        </form>
+      </details>
+
+      <form class="busqueda busqueda-escritorio" method="get" action="/buscar" role="search">
+        <label class="visualmente-oculto" for="q-cabecera">Buscar en el sitio</label>
+        <input id="q-cabecera" name="q" type="search" placeholder="Buscar taller, receta, PDF…" value="<%= terminoBusqueda || '' %>">
+        <button type="submit" class="boton">Buscar</button>
+      </form>
+
+      <div class="cuenta">
+        <% if (usuario) { %>
+          <span class="cuenta-nombre"><%= usuario.nombre %> · <%= usuario.rol === 'admin' ? 'Administrador' : 'Docente' %></span>
+          <form method="post" action="/salir" class="en-linea">
+            <button type="submit" class="boton boton-texto">Salir</button>
+          </form>
+        <% } else { %>
+          <a class="boton boton-primario" href="/login">Ingresar</a>
+        <% } %>
+      </div>
+    </div>
+  </header>
+
+  <script>
+    // En pantallas angostas el menú y el resumen del archivo arrancan plegados; en
+    // escritorio quedan abiertos. Se vuelve a aplicar al girar o redimensionar.
+    (function () {
+      var angosto = window.matchMedia('(max-width: 1024px)');
+      function plegar() {
+        var detalles = document.querySelectorAll('details[data-plegable]');
+        Array.prototype.forEach.call(detalles, function (detalle) {
+          detalle.open = !angosto.matches;
+        });
+      }
+      plegar();
+      if (angosto.addEventListener) {
+        angosto.addEventListener('change', plegar);
+      }
+      // Chrome restaura el estado abierto/cerrado de <details> después de cargar:
+      // se vuelve a aplicar al terminar para que escritorio siempre quede desplegado.
+      window.addEventListener('load', plegar);
+
+      // Escape cierra el menú y devuelve el foco a su botón.
+      var menu = document.querySelector('details.menu');
+      if (menu) {
+        var boton = menu.querySelector('summary');
+        document.addEventListener('keydown', function (evento) {
+          if (evento.key === 'Escape' && menu.open && angosto.matches) {
+            menu.open = false;
+            if (boton) boton.focus();
+          }
+        });
+      }
+    })();
+  </script>
+
+  <main id="contenido" class="contenedor">
+    <% if (aviso) { %><p class="mensaje mensaje-ok" role="status"><%= aviso %></p><% } %>
+    <% if (error) { %><p class="mensaje mensaje-error" role="alert"><%= error %></p><% } %>

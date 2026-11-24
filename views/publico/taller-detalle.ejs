@@ -1,0 +1,160 @@
+<%- include('../partials/head') %>
+
+<%- include('../partials/migas', { migas: [
+  { texto: 'Inicio', href: '/' },
+  { texto: 'Talleres', href: '/talleres' },
+  { texto: taller.tematica, href: '/talleres?tematica=' + encodeURIComponent(taller.tematica) },
+  { texto: taller.nombre }
+] }) %>
+
+<%
+  const portada = documentos.find(function (documento) {
+    return (documento.tipo_mime || '').startsWith('image/');
+  });
+%>
+
+<section class="caratula caratula-con-foto">
+  <p class="rotulo">
+    <%= taller.tematica %> · <%= etiquetaEstado[taller.estado] || taller.estado %>
+  </p>
+
+  <div class="caratula-grid">
+    <div class="caratula-principal">
+      <h1><%= taller.nombre %></h1>
+      <p class="caratula-texto"><%= taller.descripcion || 'Sin descripción.' %></p>
+      <p class="ayuda">
+        <%= /^Administraci/i.test(taller.responsable || '')
+          ? 'A cargo del equipo docente.'
+          : 'Taller a cargo de ' + taller.responsable + '.' %>
+      </p>
+      <div class="acciones">
+        <a class="boton boton-primario" href="#recetas">Recetas (<%= recetas.length %>)</a>
+        <a class="boton" href="#documentos">Archivos (<%= documentos.length %>)</a>
+        <a class="boton" href="#videos">Videos (<%= videos.length %>)</a>
+      </div>
+    </div>
+
+    <% if (portada) { %>
+      <figure class="portada-entidad portada-caratula">
+        <img src="/documentos/<%= portada.id %>/ver" alt="Foto de <%= taller.nombre %>" loading="eager">
+      </figure>
+    <% } %>
+
+    <div class="maestra">
+      <h2>Ficha del taller</h2>
+      <dl>
+        <div class="campo-maestra">
+          <dt>Fecha</dt><span class="linea"></span><dd><%= fecha(taller.fecha_planificada) %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>Participantes</dt><span class="linea"></span><dd><%= participantes > 0 ? participantes : (taller.estado === 'planificado' ? 'por definir' : '0') %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>Recetas</dt><span class="linea"></span><dd><%= recetas.length %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>Archivos</dt><span class="linea"></span><dd><%= documentos.length %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>Videos</dt><span class="linea"></span><dd><%= videos.length %></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<section class="bloque-ficha" id="recetas">
+  <h2>Recetas del taller</h2>
+  <% if (recetas.length === 0) { %>
+    <p class="ayuda">Todavía no hay recetas asociadas a este taller.</p>
+  <% } else { %>
+    <ul class="lista-tarjetas">
+      <% recetas.forEach(function (receta) { %>
+        <li class="tarjeta tarjeta-enlace">
+          <p class="etiqueta"><%= receta.codigo %></p>
+          <h3><a class="enlace-ficha" href="/recetas/<%= receta.id %>"><%= receta.nombre %></a></h3>
+          <p><%= receta.descripcion || 'Sin descripción.' %></p>
+          <span class="ficha-abrir" aria-hidden="true">Ver receta →</span>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+
+<section class="bloque-ficha" id="documentos">
+  <h2>Archivos del taller</h2>
+  <% if (documentos.length === 0) { %>
+    <p class="ayuda">Este taller todavía no tiene archivos. Mientras tanto, puedes <a href="/documentos">ver el material de otros talleres</a>.</p>
+  <% } else { %>
+    <ul class="lista-archivos">
+      <% documentos.forEach(function (documento) { %>
+        <% const esImagen = (documento.tipo_mime || '').startsWith('image/'); %>
+        <li class="archivo-item">
+          <% if (esImagen) { %>
+            <img class="archivo-miniatura" src="/documentos/<%= documento.id %>/ver" alt="" loading="lazy">
+          <% } else { %>
+            <span class="archivo-icono" aria-hidden="true">PDF</span>
+          <% } %>
+          <div class="archivo-datos">
+            <strong><%= documento.nombre %></strong>
+            <span class="ayuda"><%= esImagen ? 'Imagen' : 'PDF' %> · <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB</span>
+          </div>
+          <a class="boton" href="/documentos/<%= documento.id %>/ver" target="_blank" rel="noopener">
+            Abrir <%= esImagen ? 'imagen' : 'PDF' %>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+
+<section class="bloque-ficha" id="videos">
+  <h2>Videos</h2>
+  <% if (videos.length === 0) { %>
+    <p class="ayuda">Este taller todavía no tiene videos. Mientras tanto, puedes <a href="/videos">ver los de otros talleres</a>.</p>
+  <% } else { %>
+    <ul class="lista-simple">
+      <% videos.forEach(function (video) { %>
+        <li class="elemento-simple elemento-video">
+          <div>
+            <strong><%= video.nombre %></strong>
+            <p class="ayuda"><%= video.descripcion || 'Sin descripción.' %></p>
+            <% if (video.embedUrl) { %>
+              <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"
+                      loading="lazy" allowfullscreen
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+            <% } else { %>
+              <p class="ayuda">El enlace de este video no se puede mostrar aquí.</p>
+            <% } %>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+
+<section class="bloque-ficha" id="ejecuciones">
+  <h2>Ejecuciones</h2>
+  <% if (ejecuciones.length === 0) { %>
+    <p class="ayuda">Este taller todavía no tiene ejecuciones registradas.</p>
+  <% } else { %>
+    <ul class="lista-donde">
+      <% ejecuciones.forEach(function (ejecucion) { %>
+        <li>
+          <span class="donde-fila">
+            <strong><%= fecha(ejecucion.fecha_ejecucion) %></strong>
+            <span class="donde-meta"><%= ejecucion.cantidad_participantes %> participantes</span>
+            <% if (ejecucion.video) { %><span class="insignia insignia-finalizado">Con video</span><% } %>
+          </span>
+          <% if (ejecucion.observaciones) { %>
+            <p class="ayuda"><%= ejecucion.observaciones %></p>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+
+<p><a class="boton" href="/talleres">Volver a talleres</a></p>
+
+<%- include('../partials/footer') %>

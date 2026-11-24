@@ -1,0 +1,77 @@
+<%- include('../partials/head') %>
+
+<section class="caratula">
+  <p class="rotulo">Archivo de talleres · <%= anioActual %></p>
+  <div class="caratula-grid">
+    <div>
+      <h1>Los talleres del colegio, con sus recetas y sus clases</h1>
+      <p class="caratula-texto">
+        Cada taller guarda sus recetas, sus documentos y sus videos. Toca una ficha
+        para abrirla completa.
+      </p>
+      <p class="ayuda"><%= resumen.talleres %> talleres · <%= resumen.tematicas %> temáticas</p>
+      <div class="acciones">
+        <a class="boton boton-primario" href="/talleres">Abrir el archivo</a>
+        <a class="boton" href="/recetas">Ver recetas</a>
+        <a class="boton" href="/ejecuciones">Ver clases</a>
+      </div>
+    </div>
+
+    <details class="maestra resumen-archivo" data-plegable>
+      <summary class="resumen-titulo">Resumen del archivo</summary>
+      <dl>
+        <div class="campo-maestra">
+          <dt>Talleres registrados</dt><span class="linea"></span><dd><%= resumen.talleres %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>Finalizados</dt><span class="linea"></span><dd><%= resumen.finalizados %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>En ejecución</dt><span class="linea"></span><dd><%= resumen.en_ejecucion %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>Recetas</dt><span class="linea"></span><dd><%= totalRecetas %></dd>
+        </div>
+        <div class="campo-maestra">
+          <dt>Ejecuciones</dt><span class="linea"></span><dd><%= totalEjecuciones %></dd>
+        </div>
+      </dl>
+    </details>
+  </div>
+</section>
+
+<% if (talleres.length === 0) { %>
+  <p class="ayuda">Todavía no hay talleres registrados.</p>
+<% } else { %>
+  <%
+    // El archivo se agrupa por temática: una carpeta por temática, con sus fichas.
+    const porTematica = new Map();
+    talleres.forEach(function (taller) {
+      const clave = taller.tematica || 'Sin temática';
+      if (!porTematica.has(clave)) porTematica.set(clave, []);
+      porTematica.get(clave).push(taller);
+    });
+    const grupos = Array.from(porTematica.entries());
+  %>
+
+  <div class="carpetas">
+    <% grupos.forEach(function (grupo) { const tematica = grupo[0]; const lista = grupo[1]; %>
+      <section class="carpeta">
+        <div class="carpeta-tab">
+          <h2><%= tematica %></h2>
+          <span><%= porTematica.get(tematica).length %></span>
+        </div>
+        <div class="carpeta-cuerpo">
+          <ul class="fichas-archivo">
+            <% lista.forEach(function (taller) { %>
+              <%- include('../partials/ficha-taller', { taller: taller }) %>
+            <% }) %>
+          </ul>
+        </div>
+      </section>
+    <% }) %>
+  </div>
+
+<% } %>
+
+<%- include('../partials/footer') %>

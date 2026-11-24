@@ -1,0 +1,95 @@
+<%- include('../partials/head') %>
+
+<%- include('../partials/migas', { migas: [
+  { texto: 'Inicio', href: '/' },
+  { texto: 'Recetas', href: '/recetas' },
+  { texto: receta.codigo + ' · ' + receta.nombre }
+] }) %>
+
+<%
+  // Si entre los archivos hay una foto, se usa como portada de la receta.
+  const portada = documentos.find(function (documento) {
+    return (documento.tipo_mime || '').startsWith('image/');
+  });
+%>
+
+<article class="ficha-entidad">
+  <% if (portada) { %>
+    <figure class="portada-entidad">
+      <img src="/documentos/<%= portada.id %>/ver" alt="Foto de <%= receta.nombre %>" loading="eager">
+    </figure>
+  <% } %>
+
+  <div class="ficha-entidad-texto">
+    <p class="etiqueta"><%= receta.codigo %></p>
+    <h1><%= receta.nombre %></h1>
+    <p class="ayuda">
+      Compartida por
+      <strong><%= /^Administraci/i.test(receta.autor) ? 'el equipo de Creando Sabores' : receta.autor %></strong>
+      el <%= fecha(receta.creado_en) %>.
+    </p>
+    <p class="destacado"><%= receta.descripcion || 'Sin descripción.' %></p>
+  </div>
+</article>
+
+<section class="bloque-ficha" id="talleres">
+  <h2>Taller donde se preparó</h2>
+  <% if (talleres.length === 0) { %>
+    <p class="ayuda">Esta receta todavía no está asociada a un taller. <a href="/talleres">Ver los talleres</a>.</p>
+  <% } else { %>
+    <ul class="lista-donde">
+      <% talleres.forEach(function (taller) { %>
+        <li>
+          <a href="/talleres/<%= taller.id %>">
+            <span class="donde-nombre"><%= taller.nombre %></span>
+            <span class="donde-meta">
+              <%= taller.tematica %> ·
+              <%= taller.estado === 'finalizado' ? 'Realizado' : 'Programado' %> el <%= fecha(taller.fecha_planificada) %>
+            </span>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+
+<section class="bloque-ficha" id="documentos">
+  <h2><%= documentos.length + (receta.enlace_pdf ? 1 : 0) %> archivo<%= documentos.length + (receta.enlace_pdf ? 1 : 0) === 1 ? '' : 's' %></h2>
+  <% if (documentos.length === 0 && !receta.enlace_pdf) { %>
+    <p class="ayuda">La ficha de esta receta todavía no está cargada.</p>
+  <% } else { %>
+    <ul class="lista-archivos">
+      <% documentos.forEach(function (documento) { %>
+        <% const esImagen = (documento.tipo_mime || '').startsWith('image/'); %>
+        <li class="archivo-item">
+          <% if (esImagen) { %>
+            <img class="archivo-miniatura" src="/documentos/<%= documento.id %>/ver" alt="" loading="lazy">
+          <% } else { %>
+            <span class="archivo-icono" aria-hidden="true">PDF</span>
+          <% } %>
+          <div class="archivo-datos">
+            <strong><%= documento.nombre %></strong>
+            <span class="ayuda"><%= esImagen ? 'Imagen' : 'PDF' %> · <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB</span>
+          </div>
+          <a class="boton" href="/documentos/<%= documento.id %>/ver" target="_blank" rel="noopener">
+            Abrir <%= esImagen ? 'imagen' : 'PDF' %>
+          </a>
+        </li>
+      <% }) %>
+      <% if (receta.enlace_pdf) { %>
+        <li class="archivo-item">
+          <span class="archivo-icono" aria-hidden="true">WEB</span>
+          <div class="archivo-datos">
+            <strong>Ficha original</strong>
+            <span class="ayuda">Enlace externo</span>
+          </div>
+          <a class="boton" href="<%= receta.enlace_pdf %>" target="_blank" rel="noopener">Abrir enlace</a>
+        </li>
+      <% } %>
+    </ul>
+  <% } %>
+</section>
+
+<p><a class="boton" href="/recetas">Volver a recetas</a></p>
+
+<%- include('../partials/footer') %>

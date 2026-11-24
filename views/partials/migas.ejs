@@ -1,0 +1,11 @@
+<%# Migas de pan: espera un array de {texto, href}; el último elemento es la página actual. %>
+<nav class="migas" aria-label="Ruta de navegación">
+  <% migas.forEach(function (miga, indice) { %>
+    <% if (indice > 0) { %><span aria-hidden="true">›</span><% } %>
+    <% if (miga.href && indice < migas.length - 1) { %>
+      <a href="<%= miga.href %>"><%= miga.texto %></a>
+    <% } else { %>
+      <span aria-current="page"><%= miga.texto %></span>
+    <% } %>
+  <% }) %>
+</nav>

@@ -1,0 +1,27 @@
+<%- include('../partials/head') %>
+
+<h1>Auditoría</h1>
+<p class="ayuda">Últimas 100 acciones registradas. Cada línea dice quién hizo qué y sobre qué registro.</p>
+
+<% if (registros.length === 0) { %>
+  <p class="ayuda">Todavía no hay acciones registradas.</p>
+<% } else { %>
+  <table class="tabla">
+    <thead>
+      <tr><th>Fecha</th><th>Responsable</th><th>Acción</th><th>Entidad</th><th>Detalle</th></tr>
+    </thead>
+    <tbody>
+      <% registros.forEach(function (registro) { %>
+        <tr>
+          <td><%= fecha(registro.creado_en) %></td>
+          <td><%= registro.responsable || 'Cuenta eliminada' %></td>
+          <td><%= registro.accion %></td>
+          <td><%= registro.entidad %> #<%= registro.entidad_id || '—' %></td>
+          <td><code><%= JSON.stringify(registro.detalle) %></code></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<%- include('../partials/footer') %>

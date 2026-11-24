@@ -1,0 +1,46 @@
+<%- include('../partials/head') %>
+
+<section class="caratula caratula-corta">
+  <p class="rotulo">Recetario del archivo</p>
+  <h1>Recetas</h1>
+  <p class="caratula-texto">
+    Cada receta guarda su ficha PDF, los talleres donde se hizo y quién la subió.
+  </p>
+  <form method="get" action="/recetas" class="filtros">
+    <label for="q">Buscar por código, nombre o ingrediente</label>
+    <input id="q" name="q" type="search" value="<%= busqueda %>" placeholder="Ej.: REC-001, mermelada o ciruela">
+    <button type="submit" class="boton">Buscar</button>
+  </form>
+  <% if (busqueda) { %>
+    <p class="ayuda">
+      <%= recetas.length %> resultado<%= recetas.length === 1 ? '' : 's' %> para «<%= busqueda %>».
+      <a href="/recetas">Ver todas</a>
+    </p>
+  <% } %>
+</section>
+
+<% if (recetas.length === 0) { %>
+  <p class="ayuda">
+    No hay recetas para esa búsqueda.
+    <a class="boton" href="/recetas">Ver todas las recetas</a>
+  </p>
+<% } else { %>
+  <ul class="lista-tarjetas">
+    <% recetas.forEach(function (receta) { %>
+      <li class="tarjeta tarjeta-enlace">
+        <% if (receta.id_imagen) { %>
+          <img class="miniatura-tarjeta" src="/documentos/<%= receta.id_imagen %>/ver" alt="" loading="lazy">
+        <% } %>
+        <p class="etiqueta"><%= receta.codigo %></p>
+        <h3><a class="enlace-ficha" href="/recetas/<%= receta.id %>"><%= receta.nombre %></a></h3>
+        <p><%= receta.descripcion || 'Sin descripción.' %></p>
+        <p class="ayuda">
+          <%= receta.talleres_nombres ? 'Se preparó en: ' + receta.talleres_nombres : 'Todavía no está asociada a un taller' %>
+        </p>
+        <span class="ficha-abrir" aria-hidden="true">Ver receta →</span>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<%- include('../partials/footer') %>

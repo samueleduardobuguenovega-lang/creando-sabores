@@ -1,0 +1,89 @@
+<%- include('../partials/head') %>
+
+<div class="barra-titulo">
+  <div>
+    <p class="etiqueta">Clases dictadas</p>
+    <h1>Ejecuciones</h1>
+  </div>
+  <a class="boton" href="/panel">Volver al panel</a>
+</div>
+
+<section class="tarjeta">
+  <h2>Registrar una ejecución</h2>
+  <p class="ayuda">La fecha, cuántas personas asistieron y lo que pasó en la sesión.</p>
+
+  <% if (errores.length > 0) { %>
+    <div class="mensaje mensaje-error" role="alert">
+      <ul>
+        <% errores.forEach(function (mensaje) { %><li><%= mensaje %></li><% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <form method="post" action="/admin/ejecuciones" class="formulario">
+    <label for="id_taller">Taller</label>
+    <select id="id_taller" name="id_taller" required>
+      <option value="">Selecciona un taller</option>
+      <% talleres.forEach(function (taller) { %>
+        <option value="<%= taller.id %>" <%= String(valores.id_taller) === String(taller.id) ? 'selected' : '' %>><%= taller.nombre %></option>
+      <% }) %>
+    </select>
+
+    <label for="fecha_ejecucion">Fecha de la sesión</label>
+    <input id="fecha_ejecucion" name="fecha_ejecucion" type="date" required
+           value="<%= valores.fecha_ejecucion || '' %>">
+
+    <label for="cantidad_participantes">Participantes</label>
+    <input id="cantidad_participantes" name="cantidad_participantes" type="number"
+           min="0" max="1000" required value="<%= valores.cantidad_participantes || '' %>">
+
+    <label for="id_video">Video de la sesión (opcional)</label>
+    <select id="id_video" name="id_video">
+      <option value="">Sin video</option>
+      <% videos.forEach(function (video) { %>
+        <option value="<%= video.id %>" <%= String(valores.id_video) === String(video.id) ? 'selected' : '' %>><%= video.nombre %></option>
+      <% }) %>
+    </select>
+
+    <label for="observaciones">Observaciones</label>
+    <textarea id="observaciones" name="observaciones" rows="3" maxlength="2000"
+              placeholder="Qué salió bien, qué ajustar, quién faltó…"><%= valores.observaciones || '' %></textarea>
+
+    <div class="acciones">
+      <button type="submit" class="boton boton-primario">Registrar ejecución</button>
+    </div>
+  </form>
+</section>
+
+<section class="tarjeta">
+  <h2>Registradas (<%= ejecuciones.length %>)</h2>
+  <% if (ejecuciones.length === 0) { %>
+    <p class="ayuda">Todavía no hay ejecuciones. Registra la primera con el formulario de arriba.</p>
+  <% } else { %>
+    <table class="tabla">
+      <caption class="visualmente-oculto">Ejecuciones registradas</caption>
+      <thead>
+        <tr>
+          <th scope="col">Fecha</th>
+          <th scope="col">Taller</th>
+          <th scope="col">Participantes</th>
+          <th scope="col">Video</th>
+          <th scope="col">Observaciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% ejecuciones.forEach(function (ejecucion) { %>
+          <tr>
+            <td data-columna="Fecha"><%= fecha(ejecucion.fecha_ejecucion) %></td>
+            <td data-columna="Taller"><a href="/admin/talleres/<%= ejecucion.id_taller %>"><%= ejecucion.taller %></a></td>
+            <td data-columna="Participantes"><%= ejecucion.cantidad_participantes %></td>
+            <td data-columna="Video"><%= ejecucion.video || '—' %></td>
+            <td data-columna="Observaciones"><%= ejecucion.observaciones || '—' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

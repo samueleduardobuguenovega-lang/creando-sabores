@@ -1,0 +1,28 @@
+<%# Una ficha del archivo público: hueco de foto, datos como campos y sello de estado.
+    Espera: taller (con id, nombre, tematica, descripcion, estado, fecha_planificada,
+    ejecuciones y recetas), y los locals etiquetaEstado y fecha. %>
+<li class="ficha-archivo">
+  <% if (taller.id_imagen) { %>
+    <img class="foto-hueco foto-real" src="/documentos/<%= taller.id_imagen %>/ver" alt="" loading="lazy">
+  <% } else { %>
+    <span class="foto-hueco folio" aria-hidden="true"><%= String(taller.id).padStart(2, '0') %></span>
+  <% } %>
+
+  <div class="ficha-texto">
+    <h3><a class="enlace-ficha" href="/talleres/<%= taller.id %>"><%= taller.nombre %></a></h3>
+    <% if (taller.descripcion) { %>
+      <p class="ficha-desc"><%= taller.descripcion %></p>
+    <% } %>
+    <p class="ficha-campos">
+      <span class="campo-archivo">Fecha<b><%= fecha(taller.fecha_planificada) %></b></span>
+      <span class="campo-archivo">Participantes<b><%= taller.participantes ? taller.participantes : (taller.estado === 'planificado' ? 'por definir' : '0') %></b></span>
+      <span class="campo-archivo">Ejecuciones<b><%= taller.ejecuciones %></b></span>
+      <span class="campo-archivo">Recetas<b><%= taller.recetas %></b></span>
+    </p>
+    <span class="ficha-abrir" aria-hidden="true">Ver taller →</span>
+  </div>
+
+  <span class="sello-archivo sello-<%= taller.estado %>">
+    <%= etiquetaEstado[taller.estado] || taller.estado %>
+  </span>
+</li>

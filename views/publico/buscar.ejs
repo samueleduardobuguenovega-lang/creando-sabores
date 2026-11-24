@@ -1,0 +1,95 @@
+<%- include('../partials/head') %>
+
+<section class="caratula caratula-corta">
+  <p class="rotulo">Buscador del archivo</p>
+  <h1>Buscar</h1>
+  <form class="filtros" method="get" action="/buscar" role="search">
+    <label for="q">Buscar por taller, receta, documento o video</label>
+    <input id="q" name="q" type="search" value="<%= termino %>" placeholder="Ej.: pan, masa madre, cazuela">
+    <button type="submit" class="boton boton-primario">Buscar</button>
+  </form>
+  <% if (termino && total > 0) { %>
+    <p class="ayuda">
+      <%= total %> resultado<%= total === 1 ? '' : 's' %> para «<%= termino %>».
+    </p>
+  <% } %>
+</section>
+
+<% if (!termino) { %>
+  <p class="ayuda">Escribe una palabra para revisar talleres, recetas, documentos y videos a la vez.</p>
+<% } else if (total === 0) { %>
+  <p class="ayuda">
+    No encontramos nada para «<%= termino %>». Prueba con el nombre de un taller, una receta o un ingrediente.
+    <a href="/talleres">Ver todos los talleres</a> o <a href="/recetas">todas las recetas</a>.
+  </p>
+<% } else { %>
+  <% if (talleres.length > 0) { %>
+    <section class="bloque-ficha">
+      <h2>Talleres (<%= talleres.length %>)</h2>
+      <ul class="lista-simple">
+        <% talleres.forEach(function (taller) { %>
+          <li class="elemento-simple">
+            <div>
+              <strong><a href="/talleres/<%= taller.id %>"><%= taller.nombre %></a></strong>
+              <span class="ayuda"><%= taller.tematica %> · <%= etiquetaEstado[taller.estado] || taller.estado %></span>
+            </div>
+            <a class="boton" href="/talleres/<%= taller.id %>">Abrir</a>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+  <% } %>
+
+  <% if (recetas.length > 0) { %>
+    <section class="bloque-ficha">
+      <h2>Recetas (<%= recetas.length %>)</h2>
+      <ul class="lista-simple">
+        <% recetas.forEach(function (receta) { %>
+          <li class="elemento-simple">
+            <div>
+              <strong><a href="/recetas/<%= receta.id %>"><%= receta.nombre %></a></strong>
+              <span class="ayuda"><%= receta.codigo %> · <%= receta.descripcion %></span>
+            </div>
+            <a class="boton" href="/recetas/<%= receta.id %>">Abrir</a>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+  <% } %>
+
+  <% if (documentos.length > 0) { %>
+    <section class="bloque-ficha">
+      <h2>Documentos (<%= documentos.length %>)</h2>
+      <ul class="lista-simple">
+        <% documentos.forEach(function (documento) { %>
+          <li class="elemento-simple">
+            <div>
+              <strong><%= documento.nombre %></strong>
+              <span class="ayuda">PDF de <a href="<%= documento.destino %>"><%= documento.asociado_a %></a></span>
+            </div>
+            <a class="boton" href="/documentos/<%= documento.id %>/ver" target="_blank" rel="noopener">Abrir archivo</a>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+  <% } %>
+
+  <% if (videos.length > 0) { %>
+    <section class="bloque-ficha">
+      <h2>Videos (<%= videos.length %>)</h2>
+      <ul class="lista-simple">
+        <% videos.forEach(function (video) { %>
+          <li class="elemento-simple">
+            <div>
+              <strong><%= video.nombre %></strong>
+              <span class="ayuda">En <a href="<%= video.destino %>"><%= video.asociado_a %></a></span>
+            </div>
+            <a class="boton" href="<%= video.destino %>#videos">Ver</a>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+  <% } %>
+<% } %>
+
+<%- include('../partials/footer') %>

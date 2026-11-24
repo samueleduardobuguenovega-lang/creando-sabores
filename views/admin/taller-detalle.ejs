@@ -1,0 +1,106 @@
+<%- include('../partials/head') %>
+
+<p class="migas"><a href="/admin/talleres">Talleres</a> / <%= taller.nombre %></p>
+
+<div class="barra-titulo">
+  <h1><%= taller.nombre %></h1>
+  <div class="acciones">
+    <a class="boton" href="/admin/talleres/<%= taller.id %>/editar">Editar</a>
+    <% if (usuario.rol === 'admin') { %>
+      <form method="post" action="/admin/talleres/<%= taller.id %>/eliminar" class="en-linea"
+            onsubmit="return confirm('¿Eliminar el taller y todo lo asociado (recetas, documentos, videos y ejecuciones)?');">
+        <button type="submit" class="boton boton-peligro">Eliminar</button>
+      </form>
+    <% } %>
+  </div>
+</div>
+
+<dl class="ficha">
+  <dt>Estado</dt>
+  <dd><span class="insignia insignia-<%= taller.estado %>"><%= etiquetaEstado[taller.estado] %></span></dd>
+  <dt>Temática</dt>
+  <dd><%= taller.tematica %></dd>
+  <dt>Fecha planificada</dt>
+  <dd><%= fecha(taller.fecha_planificada) %></dd>
+  <dt>Responsable</dt>
+  <dd><%= responsable %></dd>
+  <dt>Descripción</dt>
+  <dd><%= taller.descripcion || '—' %></dd>
+</dl>
+
+<div class="dos-columnas">
+  <section>
+    <h2>Recetas asociadas</h2>
+    <a class="boton" href="/admin/recetas">Asignar una receta</a>
+    <% if (recetas.length === 0) { %>
+      <p class="ayuda">Todavía no hay recetas en este taller.</p>
+    <% } else { %>
+      <ul class="lista-simple">
+        <% recetas.forEach(function (receta) { %>
+          <li><a href="/admin/recetas/<%= receta.id %>/editar"><strong><%= receta.codigo %></strong> · <%= receta.nombre %></a></li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+
+  <section>
+    <h2>Ejecuciones</h2>
+    <a class="boton" href="/admin/ejecuciones?taller=<%= taller.id %>">Registrar ejecución</a>
+    <% if (ejecuciones.length === 0) { %>
+      <p class="ayuda">Todavía no hay ejecuciones de este taller.</p>
+    <% } else { %>
+      <ul class="lista-simple">
+        <% ejecuciones.forEach(function (ejecucion) { %>
+          <li>
+            <%= fecha(ejecucion.fecha_ejecucion) %> ·
+            <%= ejecucion.cantidad_participantes %> participantes
+            <% if (ejecucion.observaciones) { %><br><span class="ayuda"><%= ejecucion.observaciones %></span><% } %>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+
+  <section>
+    <h2>Documentos</h2>
+    <a class="boton" href="/admin/documentos?destino=taller:<%= taller.id %>">Subir archivos</a>
+    <% if (documentos.length === 0) { %>
+      <p class="ayuda">Todavía no hay documentos en este taller.</p>
+    <% } else { %>
+      <ul class="lista-simple">
+        <% documentos.forEach(function (documento) { %>
+          <li><a href="/admin/documentos/<%= documento.id %>/ver" type="application/pdf"><%= documento.nombre %></a></li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+
+  <section>
+    <h2>Videos</h2>
+    <a class="boton" href="/admin/videos?destino=taller:<%= taller.id %>">Registrar un video</a>
+    <% if (videos.length === 0) { %>
+      <p class="ayuda">Todavía no hay videos en este taller.</p>
+    <% } else { %>
+      <ul class="lista-simple">
+        <% videos.forEach(function (video) { %>
+          <li>
+            <div>
+              <strong><%= video.nombre %></strong>
+              <% if (video.embedUrl) { %>
+                <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"
+                        loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen></iframe>
+              <% } %>
+              <% if (video.enlaceValidado) { %>
+                <a href="<%= video.enlaceValidado %>" target="_blank" rel="noopener noreferrer">Abrir en <%= video.proveedor === 'youtube' ? 'YouTube' : 'Vimeo' %></a>
+              <% } %>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,25 @@
+<%- include('partials/head') %>
+
+<section class="tarjeta tarjeta-angosta">
+  <h1>Ingresar</h1>
+  <p class="ayuda">Plataforma de gestión de talleres. Si no tienes cuenta, pídesela a la administración.</p>
+
+  <% if (mensajeError) { %>
+    <p class="mensaje mensaje-error" role="alert"><%= mensajeError %></p>
+  <% } %>
+
+  <form method="post" action="/login" class="formulario">
+    <input type="hidden" name="volver" value="<%= volver %>">
+
+    <label for="usuario">Usuario</label>
+    <input id="usuario" name="usuario" type="text" autocomplete="username" required
+           value="<%= usuarioIntentado %>" maxlength="60">
+
+    <label for="clave">Contraseña</label>
+    <input id="clave" name="clave" type="password" autocomplete="current-password" required>
+
+    <button type="submit" class="boton boton-primario boton-ancho">Entrar</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

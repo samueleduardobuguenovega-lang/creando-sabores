@@ -1,0 +1,22 @@
+<%- include('../partials/head') %>
+
+<h1>Clases realizadas</h1>
+<p class="ayuda">Lo que pasó en cada clase, ordenado por fecha. Se muestra la fecha y cuántas personas participaron; las notas del docente quedan en el panel.</p>
+
+<% if (ejecuciones.length === 0) { %>
+  <p class="ayuda">Todavía no hay ejecuciones registradas.</p>
+<% } else { %>
+  <ul class="lista-tarjetas">
+    <% ejecuciones.forEach(function (ejecucion) { %>
+      <li class="tarjeta tarjeta-enlace">
+        <p class="etiqueta"><%= fecha(ejecucion.fecha_ejecucion) %></p>
+        <h2><a class="enlace-ficha" href="/talleres/<%= ejecucion.id_taller %>"><%= ejecucion.taller %></a></h2>
+        <p class="ayuda"><%= ejecucion.tematica %> · Participantes: <%= ejecucion.cantidad_participantes %></p>
+
+        <span class="ficha-abrir" aria-hidden="true">Ver taller →</span>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<%- include('../partials/footer') %>

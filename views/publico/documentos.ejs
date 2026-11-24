@@ -1,0 +1,30 @@
+<%- include('../partials/head') %>
+
+<section class="caratula caratula-corta">
+  <p class="rotulo">Material del taller</p>
+  <h1>Documentos</h1>
+  <p class="caratula-texto">
+    Las pautas, las listas de materiales y las hojas de receta que se repartieron en cada taller, en PDF para imprimir.
+  </p>
+</section>
+
+<% if (documentos.length === 0) { %>
+  <p class="ayuda">Todavía no hay documentos cargados.</p>
+<% } else { %>
+  <ul class="lista-simple">
+    <% documentos.forEach(function (documento) { %>
+      <li class="elemento-simple">
+        <div>
+          <strong><a href="<%= documento.destino %>"><%= documento.nombre %></a></strong>
+          <span class="ayuda">
+            <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB ·
+            <%= documento.taller ? documento.taller : documento.codigo + ' · ' + documento.receta %>
+          </span>
+        </div>
+        <a class="boton" href="/documentos/<%= documento.id %>/ver" target="_blank" rel="noopener">Abrir archivo</a>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<%- include('../partials/footer') %>

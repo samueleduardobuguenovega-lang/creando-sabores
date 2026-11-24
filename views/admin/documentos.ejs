@@ -1,0 +1,81 @@
+<%- include('../partials/head') %>
+
+<div class="barra-titulo">
+  <div>
+    <p class="etiqueta">Material del taller</p>
+    <h1>Documentos PDF</h1>
+  </div>
+</div>
+
+<section class="tarjeta">
+  <h2>Subir documento</h2>
+  <p class="ayuda">PDF o foto de hasta 10 MB. El archivo se comprime al subirlo (un PDF de 8 MB puede quedar en 1 MB) y queda disponible desde la ficha del taller o de la receta.</p>
+
+  <% if (errores.length > 0) { %>
+    <div class="mensaje mensaje-error" role="alert">
+      <p>Revisa estos puntos:</p>
+      <ul>
+        <% errores.forEach(function (linea) { %><li><%= linea %></li><% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <form method="post" action="/admin/documentos" enctype="multipart/form-data" class="formulario">
+    <label for="nombre">Nombre del documento</label>
+    <input id="nombre" name="nombre" type="text" required maxlength="160" value="<%= valores.nombre || '' %>">
+
+    <label for="destino">Asociar a taller o receta</label>
+    <select id="destino" name="destino" required>
+      <option value="">Selecciona un taller o receta</option>
+      <% if (talleres.length > 0) { %>
+        <optgroup label="Talleres">
+          <% talleres.forEach(function (taller) { %>
+            <option value="taller:<%= taller.id %>" <%= valores.destino === `taller:${taller.id}` ? 'selected' : '' %>><%= taller.nombre %></option>
+          <% }) %>
+        </optgroup>
+      <% } %>
+      <% if (recetas.length > 0) { %>
+        <optgroup label="Recetas">
+          <% recetas.forEach(function (receta) { %>
+            <option value="receta:<%= receta.id %>" <%= valores.destino === `receta:${receta.id}` ? 'selected' : '' %>><%= receta.codigo %> · <%= receta.nombre %></option>
+          <% }) %>
+        </optgroup>
+      <% } %>
+    </select>
+
+    <label for="archivos">Archivos (PDF o fotos)</label>
+    <input id="archivos" name="archivos" type="file" multiple accept=".pdf,application/pdf,image/jpeg,image/png,image/webp" required>
+    <p class="ayuda">Puedes elegir varios a la vez: hasta 8 archivos de 10 MB cada uno. La primera foto queda como portada de la ficha.</p>
+
+    <div class="acciones">
+      <button type="submit" class="boton boton-primario">Subir archivos</button>
+    </div>
+  </form>
+</section>
+
+<section class="tarjeta">
+  <h2>Documentos subidos</h2>
+  <% if (documentos.length === 0) { %>
+    <p class="ayuda">Todavía no hay documentos PDF.</p>
+  <% } else { %>
+    <ul class="lista-simple">
+      <% documentos.forEach(function (documento) { %>
+        <li class="archivo-item">
+          <% if ((documento.tipo_mime || '').startsWith('image/')) { %>
+            <img class="archivo-miniatura" src="/admin/documentos/<%= documento.id %>/ver" alt="" loading="lazy">
+          <% } else { %>
+            <span class="archivo-icono" aria-hidden="true">PDF</span>
+          <% } %>
+          <div class="archivo-datos">
+            <strong><%= documento.nombre %></strong>
+            <span class="ayuda"><%= documento.tipo_asociacion %>: <%= documento.asociado_a %> ·
+              <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB</span>
+          </div>
+          <a class="boton" href="/admin/documentos/<%= documento.id %>/ver">Abrir archivo</a>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

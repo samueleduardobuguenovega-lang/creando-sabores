@@ -2105,3 +2105,38 @@ details.mas > summary.menu-boton:hover {
     box-shadow: none;
   }
 }
+
+/* La navegación cede ancho antes que empujar la cuenta fuera de pantalla. */
+@media (min-width: 1025px) {
+  details.menu .navegacion {
+    flex: 1 1 0;
+  }
+
+  .busqueda-escritorio {
+    flex: 0 0 230px;
+  }
+
+  .cuenta-nombre {
+    max-width: 11rem;
+  }
+}
+
+/* Contador de la bandeja y ancho de la cuenta */
+.pendientes-cuenta {
+  display: inline-block;
+  min-width: 1.6rem;
+  padding: 0.05rem 0.5rem;
+  margin-left: 0.35rem;
+  border-radius: 999px;
+  background: var(--primario-claro);
+  color: var(--primario);
+  font-size: 0.9375rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+@media (min-width: 1300px) {
+  .cuenta-nombre {
+    max-width: 16rem;
+  }
+}

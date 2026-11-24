@@ -54,20 +54,20 @@
         </nav>
         <form class="busqueda busqueda-menu" method="get" action="/buscar" role="search">
           <label class="visualmente-oculto" for="q-menu">Buscar en el sitio</label>
-          <input id="q-menu" name="q" type="search" placeholder="Buscar taller, receta, PDF…" value="<%= terminoBusqueda || '' %>">
+          <input id="q-menu" name="q" type="search" placeholder="Buscar taller o receta" value="<%= terminoBusqueda || '' %>">
           <button type="submit" class="boton">Buscar</button>
         </form>
       </details>
 
       <form class="busqueda busqueda-escritorio" method="get" action="/buscar" role="search">
         <label class="visualmente-oculto" for="q-cabecera">Buscar en el sitio</label>
-        <input id="q-cabecera" name="q" type="search" placeholder="Buscar taller, receta, PDF…" value="<%= terminoBusqueda || '' %>">
+        <input id="q-cabecera" name="q" type="search" placeholder="Buscar taller o receta" value="<%= terminoBusqueda || '' %>">
         <button type="submit" class="boton">Buscar</button>
       </form>
 
       <div class="cuenta">
         <% if (usuario) { %>
-          <span class="cuenta-nombre"><%= usuario.nombre %> · <%= usuario.rol === 'admin' ? 'Administrador' : 'Docente' %></span>
+          <span class="cuenta-nombre" title="<%= usuario.nombre %> · <%= usuario.rol === 'admin' ? 'Administrador' : 'Docente' %>"><%= usuario.nombre %></span>
           <form method="post" action="/salir" class="en-linea">
             <button type="submit" class="boton boton-texto">Salir</button>
           </form>

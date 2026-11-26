@@ -1,13 +1,13 @@
 <%- include('../partials/head') %>
 
 <%- include('../partials/migas', { migas: [
-  { texto: 'Inicio', href: '/' },
   { texto: 'Recetas', href: '/recetas' },
   { texto: receta.codigo + ' · ' + receta.nombre }
 ] }) %>
 
 <%
-  // Si entre los archivos hay una foto, se usa como portada de la receta.
+  // Portada: la primera foto que subieron. Si no hay foto no se muestra nada:
+  // la ficha en PDF se lee más abajo, en su visor.
   const portada = documentos.find(function (documento) {
     return (documento.tipo_mime || '').startsWith('image/');
   });
@@ -28,6 +28,9 @@
       <strong><%= /^Administraci/i.test(receta.autor) ? 'el equipo de Creando Sabores' : receta.autor %></strong>
       el <%= fecha(receta.creado_en) %>.
     </p>
+    <% if (documentos.filter(function (d) { return (d.tipo_mime || '').startsWith('image/'); }).length > 1) { %>
+      <p class="ayuda">La primera foto es la portada; las demás quedan en la galería de abajo.</p>
+    <% } %>
     <p class="destacado"><%= receta.descripcion || 'Sin descripción.' %></p>
   </div>
 </article>
@@ -61,19 +64,30 @@
     <ul class="lista-archivos">
       <% documentos.forEach(function (documento) { %>
         <% const esImagen = (documento.tipo_mime || '').startsWith('image/'); %>
-        <li class="archivo-item">
-          <% if (esImagen) { %>
-            <img class="archivo-miniatura" src="/documentos/<%= documento.id %>/ver" alt="" loading="lazy">
-          <% } else { %>
-            <span class="archivo-icono" aria-hidden="true">PDF</span>
-          <% } %>
+        <li class="archivo-item archivo-con-visor">
+          <div class="visor">
+            <% if (esImagen) { %>
+              <img class="visor-imagen" src="/documentos/<%= documento.id %>/ver"
+                   alt="<%= documento.nombre %>" loading="lazy">
+            <% } else if (documento.paginas > 0) { %>
+              <div class="visor-paginas">
+                <% for (let pagina = 1; pagina <= documento.paginas; pagina += 1) { %>
+                  <img class="visor-pagina" src="/documentos/<%= documento.id %>/vista.png?p=<%= pagina %>"
+                       alt="Página <%= pagina %> de <%= documento.nombre %>" loading="lazy">
+                <% } %>
+              </div>
+            <% } else { %>
+              <p class="visor-nota">No se pudo preparar la vista previa. El archivo se descarga completo.</p>
+            <% } %>
+          </div>
           <div class="archivo-datos">
             <strong><%= documento.nombre %></strong>
-            <span class="ayuda"><%= esImagen ? 'Imagen' : 'PDF' %> · <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB</span>
+            <span class="ayuda"><%= esImagen ? 'Imagen' : 'PDF' %><%= documento.paginas > 1 ? ` · ${documento.paginas} páginas` : '' %> · <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB</span>
           </div>
-          <a class="boton" href="/documentos/<%= documento.id %>/ver" target="_blank" rel="noopener">
-            Abrir <%= esImagen ? 'imagen' : 'PDF' %>
-          </a>
+          <div class="archivo-acciones">
+            <a class="boton boton-secundario" href="/documentos/<%= documento.id %>/ver">Ver en grande</a>
+            <a class="boton" href="/documentos/<%= documento.id %>/descargar" download>Descargar</a>
+          </div>
         </li>
       <% }) %>
       <% if (receta.enlace_pdf) { %>
@@ -83,7 +97,7 @@
             <strong>Ficha original</strong>
             <span class="ayuda">Enlace externo</span>
           </div>
-          <a class="boton" href="<%= receta.enlace_pdf %>" target="_blank" rel="noopener">Abrir enlace</a>
+          <a class="boton" href="<%= receta.enlace_pdf %>">Abrir enlace</a>
         </li>
       <% } %>
     </ul>

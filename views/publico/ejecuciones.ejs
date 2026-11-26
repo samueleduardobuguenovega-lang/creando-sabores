@@ -3,8 +3,37 @@
 <h1>Clases realizadas</h1>
 <p class="ayuda">Lo que pasó en cada clase, ordenado por fecha. Se muestra la fecha y cuántas personas participaron; las notas del docente quedan en el panel.</p>
 
+<form method="get" action="/ejecuciones" class="filtros" aria-label="Filtros">
+  <div>
+    <label for="f-taller">Taller</label>
+    <select id="f-taller" name="taller">
+      <option value="">Todos los talleres</option>
+      <% talleres.forEach(function (taller) { %>
+        <option value="<%= taller.id %>" <%= idTaller === taller.id ? 'selected' : '' %>><%= taller.nombre %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="f-anio">Año</label>
+    <select id="f-anio" name="anio">
+      <option value="">Todos</option>
+      <% anios.forEach(function (valor) { %>
+        <option value="<%= valor %>" <%= anio === valor ? 'selected' : '' %>><%= valor %></option>
+      <% }) %>
+    </select>
+  </div>
+  <button type="submit" class="boton">Filtrar</button>
+</form>
+
+<p class="contador-resultados" role="status"><%= total %> clase<%= total === 1 ? '' : 's' %></p>
+
+<%- include('../partials/chips-filtros', { chips: chips, urlLimpiar: '/ejecuciones' }) %>
+
 <% if (ejecuciones.length === 0) { %>
-  <p class="ayuda">Todavía no hay ejecuciones registradas.</p>
+  <div class="estado-vacio">
+    <p>No hay clases registradas con esos filtros.</p>
+    <a class="boton" href="/ejecuciones">Ver todas</a>
+  </div>
 <% } else { %>
   <ul class="lista-tarjetas">
     <% ejecuciones.forEach(function (ejecucion) { %>

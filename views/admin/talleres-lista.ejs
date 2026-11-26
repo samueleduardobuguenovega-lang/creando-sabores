@@ -2,28 +2,55 @@
 
 <div class="barra-titulo">
   <h1>Talleres</h1>
-  <a class="boton boton-primario" href="/admin/talleres/nuevo">Nuevo taller</a>
+  <a class="boton boton-primario" href="/admin/talleres/nuevo"><%- icono('ok') %>Nuevo taller</a>
 </div>
 
-<form method="get" action="/admin/talleres" class="filtros">
-  <label for="q">Buscar</label>
-  <input id="q" name="q" type="search" value="<%= busqueda %>" placeholder="Nombre o temática">
-
-  <label for="estado">Estado</label>
-  <select id="estado" name="estado">
-    <option value="">Todos</option>
-    <% ['planificado', 'en_ejecucion', 'finalizado'].forEach(function (clave) { %>
-      <option value="<%= clave %>" <%= estado === clave ? 'selected' : '' %>><%= etiquetaEstado[clave] %></option>
-    <% }) %>
-  </select>
-
+<form method="get" action="/admin/talleres" class="filtros" aria-label="Filtros">
+  <div class="filtro-busqueda">
+    <label for="q">Buscar</label>
+    <input id="q" name="q" type="search" value="<%= busqueda %>" placeholder="Nombre o temática">
+  </div>
+  <div>
+    <label for="estado">Estado</label>
+    <select id="estado" name="estado">
+      <option value="">Todos</option>
+      <% ['planificado', 'en_ejecucion', 'finalizado'].forEach(function (clave) { %>
+        <option value="<%= clave %>" <%= estado === clave ? 'selected' : '' %>><%= etiquetaEstado[clave] %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="tematica">Temática</label>
+    <select id="tematica" name="tematica">
+      <option value="">Todas</option>
+      <% tematicas.forEach(function (fila) { %>
+        <option value="<%= fila.tematica %>" <%= tematica === fila.tematica ? 'selected' : '' %>><%= fila.tematica %> (<%= fila.total %>)</option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="publicado">Sitio público</label>
+    <select id="publicado" name="publicado">
+      <option value="">Publicados y ocultos</option>
+      <option value="1" <%= publicado === '1' ? 'selected' : '' %>>Solo publicados</option>
+      <option value="0" <%= publicado === '0' ? 'selected' : '' %>>Solo ocultos</option>
+    </select>
+  </div>
   <button type="submit" class="boton">Filtrar</button>
 </form>
 
+<p class="contador-resultados" role="status"><%= total %> taller<%= total === 1 ? '' : 'es' %></p>
+
+<%- include('../partials/chips-filtros', { chips: chips, urlLimpiar: '/admin/talleres' }) %>
+
 <% if (talleres.length === 0) { %>
-  <p class="ayuda">No hay talleres que coincidan con la búsqueda.</p>
+  <div class="estado-vacio">
+    <p>No hay talleres con esos filtros.</p>
+    <a class="boton" href="/admin/talleres">Ver todos</a>
+  </div>
 <% } else { %>
   <table class="tabla">
+    <caption class="visualmente-oculto">Talleres registrados con su temática, fecha, estado y conteos</caption>
     <thead>
       <tr>
         <th>Taller</th>
@@ -32,6 +59,7 @@
         <th>Estado</th>
         <th class="numero">Recetas</th>
         <th class="numero">Ejecuciones</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
@@ -39,13 +67,21 @@
         <tr>
           <td>
             <a href="/admin/talleres/<%= taller.id %>"><%= taller.nombre %></a>
-            <% if (!taller.publicado) { %><span class="insignia insignia-planificado">Sin publicar</span><% } %>
+            <% if (!taller.publicado) { %><span class="insignia insignia-planificado"><%- icono('candado') %>Sin publicar</span><% } %>
           </td>
           <td><%= taller.tematica %></td>
           <td><%= fecha(taller.fecha_planificada) %></td>
           <td><span class="insignia insignia-<%= taller.estado %>"><%= etiquetaEstado[taller.estado] %></span></td>
           <td class="numero"><%= taller.recetas %></td>
           <td class="numero"><%= taller.ejecuciones %></td>
+          <td class="acciones">
+            <a href="/admin/talleres/<%= taller.id %>">Gestionar</a>
+            <% if (usuario.rol === 'admin') { %>
+              <form method="post" action="/admin/talleres/<%= taller.id %>/eliminar" class="en-linea" data-confirmar="¿Enviar «<%= taller.nombre %>» a la papelera? Se puede recuperar.">
+                <button type="submit" class="boton boton-texto"><%- icono('eliminar') %>Eliminar</button>
+              </form>
+            <% } %>
+          </td>
         </tr>
       <% }) %>
     </tbody>

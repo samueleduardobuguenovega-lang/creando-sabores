@@ -1,7 +1,6 @@
 <%- include('../partials/head') %>
 
 <%- include('../partials/migas', { migas: [
-  { texto: 'Inicio', href: '/' },
   { texto: 'Talleres', href: '/talleres' },
   { texto: taller.tematica, href: '/talleres?tematica=' + encodeURIComponent(taller.tematica) },
   { texto: taller.nombre }
@@ -63,18 +62,56 @@
   </div>
 </section>
 
-<section class="bloque-ficha" id="recetas">
-  <h2>Recetas del taller</h2>
+<section class="bloque-ficha bloque-recetas" id="recetas">
+  <header class="titulo-bloque">
+    <span class="titulo-bloque-icono" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 10h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6z"/>
+        <path d="M2.5 10h19"/>
+        <path d="M9 6.5c0-1 1-1.4 1-2.5M14 6.5c0-1 1-1.4 1-2.5"/>
+      </svg>
+    </span>
+    <div>
+      <h2>Recetas de este taller</h2>
+      <p class="titulo-bloque-nota">
+        <% if (recetas.length === 0) { %>Todavía no hay recetas cargadas.
+        <% } else { %>Abre una receta para ver los ingredientes y los pasos.<% } %>
+      </p>
+    </div>
+    <% if (recetas.length > 0) { %>
+      <span class="cuenta-bloque"><%= recetas.length %></span>
+    <% } %>
+  </header>
+
   <% if (recetas.length === 0) { %>
-    <p class="ayuda">Todavía no hay recetas asociadas a este taller.</p>
+    <p class="ayuda">Cuando se cargue una receta, aparece acá con su foto.</p>
   <% } else { %>
-    <ul class="lista-tarjetas">
+    <ul class="grilla-recetas">
       <% recetas.forEach(function (receta) { %>
-        <li class="tarjeta tarjeta-enlace">
-          <p class="etiqueta"><%= receta.codigo %></p>
-          <h3><a class="enlace-ficha" href="/recetas/<%= receta.id %>"><%= receta.nombre %></a></h3>
-          <p><%= receta.descripcion || 'Sin descripción.' %></p>
-          <span class="ficha-abrir" aria-hidden="true">Ver receta →</span>
+        <li class="receta-mini">
+          <a class="receta-mini-enlace" href="/recetas/<%= receta.id %>">
+            <span class="receta-mini-medio">
+              <%# Solo una foto subida llena este espacio. La ficha en PDF no se
+                  usa aquí: una página blanca en una tarjeta blanca no se lee. %>
+              <% if (receta.foto_id && receta.foto_es_imagen) { %>
+                <img src="/documentos/<%= receta.foto_id %>/ver" alt="Foto de <%= receta.nombre %>" loading="lazy">
+              <% } else { %>
+                <span class="receta-mini-sin-foto" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 10h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6z"/>
+                    <path d="M2.5 10h19"/>
+                    <path d="M9 6.5c0-1 1-1.4 1-2.5M14 6.5c0-1 1-1.4 1-2.5"/>
+                  </svg>
+                  <span>Sin foto todavía</span>
+                </span>
+              <% } %>
+            </span>
+            <span class="receta-mini-cuerpo">
+              <span class="receta-mini-codigo"><%= receta.codigo %></span>
+              <strong><%= receta.nombre %></strong>
+              <span class="receta-mini-abrir">Ver receta →</span>
+            </span>
+          </a>
         </li>
       <% }) %>
     </ul>
@@ -99,9 +136,10 @@
             <strong><%= documento.nombre %></strong>
             <span class="ayuda"><%= esImagen ? 'Imagen' : 'PDF' %> · <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB</span>
           </div>
-          <a class="boton" href="/documentos/<%= documento.id %>/ver" target="_blank" rel="noopener">
-            Abrir <%= esImagen ? 'imagen' : 'PDF' %>
+          <a class="boton" href="/documentos/<%= documento.id %>/ver">
+            Ver <%= esImagen ? 'imagen' : 'PDF' %>
           </a>
+          <a class="boton boton-secundario" href="/documentos/<%= documento.id %>/descargar" download>Descargar</a>
         </li>
       <% }) %>
     </ul>

@@ -3,10 +3,36 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Registro, administración y consulta de talleres gastronómicos de Creando Sabores.">
+  <%
+    // Vista previa del enlace: cuando alguien pega la dirección en WhatsApp o
+    // Telegram, estas líneas son lo que se ve. Una página puede cambiarlas
+    // (su foto, su nombre); si no, van las del sitio.
+    const descripcionPagina = locals.ogDescripcion
+      || 'Talleres, recetas y clases de cocina del Colegio Urbano Yungay: el archivo completo del año.';
+    const tituloCompartir = locals.ogTitulo || (titulo + ' · Creando Sabores');
+    const imagenCompartir = locals.ogImagen
+      ? (locals.ogImagen.startsWith('http') ? locals.ogImagen : urlBase + locals.ogImagen)
+      : urlBase + '/img/compartir.jpg';
+  %>
+  <meta name="description" content="<%= descripcionPagina %>">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Creando Sabores">
+  <meta property="og:locale" content="es_CL">
+  <meta property="og:title" content="<%= tituloCompartir %>">
+  <meta property="og:description" content="<%= descripcionPagina %>">
+  <meta property="og:url" content="<%= urlActual %>">
+  <meta property="og:image" content="<%= imagenCompartir %>">
+  <meta property="og:image:alt" content="<%= locals.ogImagenAlt || 'Foto de una preparación de los talleres de Creando Sabores' %>">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="<%= tituloCompartir %>">
+  <meta name="twitter:description" content="<%= descripcionPagina %>">
+  <meta name="twitter:image" content="<%= imagenCompartir %>">
   <title><%= titulo %> · Creando Sabores</title>
+  <link rel="icon" href="/img/favicon-colegio.png" type="image/png" sizes="32x32">
   <link rel="stylesheet" href="/css/estilos.css?v=<%= versionAssets %>">
+  <link rel="stylesheet" href="/css/cartel.css?v=<%= versionAssets %>">
   <script src="/js/app.js?v=<%= versionAssets %>" defer></script>
+  <script src="/js/formularios.js?v=<%= versionAssets %>" defer></script>
 </head>
 <body>
   <a class="salto-contenido" href="#contenido">Saltar al contenido</a>
@@ -28,60 +54,70 @@
 
   <header class="cabecera">
     <div class="contenedor cabecera-fila">
+      <%# La marca lleva al inicio en todas las vistas: por eso no hay un enlace
+          "Inicio" aparte, ni en el menú ni en el pie. %>
       <a class="marca" href="/">
-        <%# Logo del colegio: si el archivo no está, el navegador lo descarta y
-            queda el punto verde con la marca. Basta dejar el PNG en
-            public/img/logo-colegio.png para que aparezca. %>
-        <img class="marca-logo" src="/img/logo-colegio.png" alt="Colegio Santo Tomás" onerror="this.remove()">
-        <span class="marca-punto" aria-hidden="true"></span>
-        Creando Sabores
+        <%# Las dos instituciones van juntas: el sello de Santo Tomás primero,
+            el del colegio después, y recién entonces el nombre del proyecto. %>
+        <span class="marca-logos">
+          <img class="marca-logo" src="/img/santo-tomas.png" alt="Santo Tomás" width="40" height="40">
+          <img class="marca-logo" src="/img/colegio-yungay.png" alt="Colegio Yungay" width="40" height="40">
+        </span>
+        <span class="marca-texto">Creando <strong>Sabores</strong></span>
       </a>
 
       <details class="menu" data-plegable>
         <summary class="menu-boton">Menú <span aria-hidden="true">☰</span></summary>
         <nav class="navegacion" aria-label="Menú principal">
           <% if (usuario) { %>
-            <a href="/panel" class="<%= rutaActual === '/panel' ? 'activo' : '' %>" <%= rutaActual === '/panel' ? 'aria-current="page"' : '' %>>Panel</a>
-            <a href="/admin/talleres" class="<%= rutaActual.startsWith('/admin/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/talleres') ? 'aria-current="page"' : '' %>>Talleres</a>
-            <a href="/admin/recetas" class="<%= rutaActual.startsWith('/admin/recetas') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/recetas') ? 'aria-current="page"' : '' %>>Recetas</a>
-            <a href="/admin/ejecuciones" class="<%= rutaActual.startsWith('/admin/ejecuciones') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/ejecuciones') ? 'aria-current="page"' : '' %>>Ejecuciones</a>
+            <a href="/panel" class="<%= rutaActual === '/panel' ? 'activo' : '' %>" <%= rutaActual === '/panel' ? 'aria-current="page"' : '' %>><%- icono('panel') %>Panel</a>
+            <a href="/admin/talleres" class="<%= rutaActual.startsWith('/admin/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/talleres') ? 'aria-current="page"' : '' %>><%- icono('talleres') %>Talleres</a>
+            <a href="/admin/recetas" class="<%= rutaActual.startsWith('/admin/recetas') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/recetas') ? 'aria-current="page"' : '' %>><%- icono('recetas') %>Recetas</a>
+            <a href="/admin/ejecuciones" class="<%= rutaActual.startsWith('/admin/ejecuciones') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/ejecuciones') ? 'aria-current="page"' : '' %>><%- icono('ejecuciones') %>Ejecuciones</a>
             <%# El resto del archivo y la administración viven en un desplegable:
                 cinco destinos se leen de un vistazo, nueve no. %>
-            <details class="mas">
+            <details class="mas" data-plegable>
               <summary class="menu-boton">Más <span aria-hidden="true">▾</span></summary>
               <div class="mas-lista">
-                <a href="/admin/documentos" class="<%= rutaActual.startsWith('/admin/documentos') ? 'activo' : '' %>">Documentos</a>
-                <a href="/admin/videos" class="<%= rutaActual.startsWith('/admin/videos') ? 'activo' : '' %>">Videos</a>
+                <a href="/admin/documentos" class="<%= rutaActual.startsWith('/admin/documentos') ? 'activo' : '' %>"><%- icono('documentos') %>Documentos</a>
+                <a href="/admin/videos" class="<%= rutaActual.startsWith('/admin/videos') ? 'activo' : '' %>"><%- icono('videos') %>Videos</a>
                 <% if (usuario.rol === 'admin') { %>
-                  <a href="/admin/usuarios" class="<%= rutaActual.startsWith('/admin/usuarios') ? 'activo' : '' %>">Usuarios</a>
-                  <a href="/admin/auditoria" class="<%= rutaActual.startsWith('/admin/auditoria') ? 'activo' : '' %>">Auditoría</a>
-                  <a href="/admin/papelera" class="<%= rutaActual.startsWith('/admin/papelera') ? 'activo' : '' %>">Papelera</a>
+                  <a href="/admin/usuarios" class="<%= rutaActual.startsWith('/admin/usuarios') ? 'activo' : '' %>"><%- icono('ojo') %>Usuarios</a>
+                  <a href="/admin/auditoria" class="<%= rutaActual.startsWith('/admin/auditoria') ? 'activo' : '' %>"><%- icono('reloj') %>Auditoría</a>
+                  <a href="/admin/papelera" class="<%= rutaActual.startsWith('/admin/papelera') ? 'activo' : '' %>"><%- icono('eliminar') %>Papelera</a>
                 <% } %>
-                <a href="/mi-clave" class="<%= rutaActual.startsWith('/mi-clave') ? 'activo' : '' %>">Mi clave</a>
-                <a href="/">Sitio público</a>
+                <a href="/mi-clave" class="<%= rutaActual.startsWith('/mi-clave') ? 'activo' : '' %>"><%- icono('candado') %>Mi clave</a>
+                <a href="/"><%- icono('panel') %>Sitio público</a>
               </div>
             </details>
           <% } else { %>
-            <a href="/" class="<%= rutaActual === '/' ? 'activo' : '' %>" <%= rutaActual === '/' ? 'aria-current="page"' : '' %>>Inicio</a>
-            <a href="/talleres" class="<%= rutaActual.startsWith('/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/talleres') ? 'aria-current="page"' : '' %>>Talleres</a>
-            <a href="/recetas" class="<%= rutaActual.startsWith('/recetas') ? 'activo' : '' %>" <%= rutaActual.startsWith('/recetas') ? 'aria-current="page"' : '' %>>Recetas</a>
-            <a href="/videos" class="<%= rutaActual.startsWith('/videos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/videos') ? 'aria-current="page"' : '' %>>Videos</a>
-            <a href="/documentos" class="<%= rutaActual.startsWith('/documentos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/documentos') ? 'aria-current="page"' : '' %>>Documentos</a>
-            <a href="/ejecuciones" class="<%= rutaActual.startsWith('/ejecuciones') ? 'activo' : '' %>" <%= rutaActual.startsWith('/ejecuciones') ? 'aria-current="page"' : '' %>>Clases</a>
+            <%# Barra pública: lo esencial para recorrer el archivo. Los índices
+                de videos y documentos siguen existiendo por URL y como enlaces
+                contextuales desde la portada y las fichas. %>
+            <a href="/talleres" class="<%= rutaActual.startsWith('/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/talleres') ? 'aria-current="page"' : '' %>><%- icono('talleres') %>Talleres</a>
+            <a href="/recetas" class="<%= rutaActual.startsWith('/recetas') ? 'activo' : '' %>" <%= rutaActual.startsWith('/recetas') ? 'aria-current="page"' : '' %>><%- icono('recetas') %>Recetas</a>
+            <details class="mas" data-plegable>
+              <summary class="menu-boton">Más <span aria-hidden="true">▾</span></summary>
+              <div class="mas-lista">
+                <a href="/videos" class="<%= rutaActual.startsWith('/videos') ? 'activo' : '' %>"><%- icono('videos') %>Videos</a>
+                <a href="/documentos" class="<%= rutaActual.startsWith('/documentos') ? 'activo' : '' %>"><%- icono('documentos') %>Documentos</a>
+                <a href="/ejecuciones" class="<%= rutaActual.startsWith('/ejecuciones') ? 'activo' : '' %>"><%- icono('ejecuciones') %>Clases</a>
+              </div>
+            </details>
           <% } %>
         </nav>
-        <form class="busqueda busqueda-menu" method="get" action="/buscar" role="search">
-          <label class="visualmente-oculto" for="q-menu">Buscar en el sitio</label>
-          <input id="q-menu" name="q" type="search" placeholder="Buscar…" aria-label="Buscar taller, receta o documento" value="<%= terminoBusqueda || '' %>">
-          <button type="submit" class="boton">Buscar</button>
-        </form>
       </details>
 
-      <form class="busqueda busqueda-escritorio" method="get" action="/buscar" role="search">
-        <label class="visualmente-oculto" for="q-cabecera">Buscar en el sitio</label>
-        <input id="q-cabecera" name="q" type="search" placeholder="Buscar…" aria-label="Buscar taller, receta o documento" value="<%= terminoBusqueda || '' %>">
-        <button type="submit" class="boton">Buscar</button>
+      <%# Un solo buscador en todo el DOM: en escritorio va en la barra y en
+          móvil ocupa la segunda fila de la cabecera. En /buscar la propia vista
+          ya trae el formulario con el término cargado, así que no se duplica. %>
+      <% if (!ocultarBusqueda) { %>
+      <form class="busqueda" method="get" action="/buscar" role="search">
+        <label class="visualmente-oculto" for="q">Buscar en el sitio</label>
+        <input id="q" name="q" type="search" placeholder="Buscar talleres, recetas…" autocomplete="off" value="<%= terminoBusqueda || '' %>">
+        <button type="submit" class="boton boton-icono" aria-label="Buscar"><%- icono('buscar') %></button>
       </form>
+      <% } %>
 
       <div class="cuenta">
         <% if (usuario) { %>
@@ -96,39 +132,97 @@
     </div>
   </header>
 
+  <%# Cinta institucional: el mismo dato en todas las páginas públicas. %>
+  <p class="cinta"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 3v7a2 2 0 0 0 4 0V3"/><path d="M8 10v11"/><path d="M16 3c-1.6 1.2-2.4 3-2.4 5.2 0 1.8.9 2.9 2.4 3.3V21"/><path d="M16 3h.8v8.5"/></svg>Recetario <%= anioActual %> · Colegio Yungay<span class="cinta-larga"> · talleres de cocina</span></p>
+
   <script>
     // En pantallas angostas el menú y el resumen del archivo arrancan plegados; en
     // escritorio quedan abiertos. Se vuelve a aplicar al girar o redimensionar.
     (function () {
       var angosto = window.matchMedia('(max-width: 1024px)');
+      var plegables = document.querySelectorAll('details[data-plegable]');
+
       function plegar() {
-        var detalles = document.querySelectorAll('details[data-plegable]');
-        Array.prototype.forEach.call(detalles, function (detalle) {
-          detalle.open = !angosto.matches;
+        Array.prototype.forEach.call(plegables, function (detalle) {
+          // El desplegable "Más" siempre arranca cerrado: no es un panel de
+          // navegación sino una lista de secundarios.
+          detalle.open = detalle.classList.contains('mas') ? false : !angosto.matches;
         });
       }
       plegar();
-      if (angosto.addEventListener) {
-        angosto.addEventListener('change', plegar);
-      }
+      if (angosto.addEventListener) angosto.addEventListener('change', plegar);
       // Chrome restaura el estado abierto/cerrado de <details> después de cargar:
       // se vuelve a aplicar al terminar para que escritorio siempre quede desplegado.
       window.addEventListener('load', plegar);
 
-      // Escape cierra el menú y devuelve el foco a su botón.
-      var menu = document.querySelector('details.menu');
-      if (menu) {
-        var boton = menu.querySelector('summary');
-        document.addEventListener('keydown', function (evento) {
-          if (evento.key === 'Escape' && menu.open && angosto.matches) {
-            menu.open = false;
-            if (boton) boton.focus();
-          }
+      function cerrarTodo(excepto) {
+        var cerrado = null;
+        Array.prototype.forEach.call(document.querySelectorAll('details[open]'), function (detalle) {
+          if (detalle === excepto) return;
+          // Un envoltorio que contiene al que se abrió no se cierra: el menú de
+          // escritorio es un <details> abierto que solo agrupa la navegación.
+          if (excepto && detalle.contains(excepto)) return;
+          var disparador = detalle.querySelector('summary');
+          if (detalle.classList.contains('menu') && disparador && getComputedStyle(disparador).display === 'none') return;
+          detalle.open = false;
+          cerrado = cerrado || detalle;
         });
+        return cerrado;
       }
+
+      // Chrome cierra el <details> por su cuenta al presionar Escape y deja el
+      // foco en <body>: el keydown llega cuando ya está cerrado. Se recuerda el
+      // último disparador pulsado para devolverle el foco a mano.
+      var ultimoDisparador = null;
+      document.addEventListener('click', function (evento) {
+        var disparador = evento.target.closest && evento.target.closest('summary');
+        if (!disparador) return;
+        var padre = disparador.parentElement;
+        if (padre && padre.matches && padre.matches('.menu, .mas')) ultimoDisparador = disparador;
+      });
+
+      function devolverFoco() {
+        if (!ultimoDisparador) return;
+        ultimoDisparador.focus();
+      }
+
+      // Escape cierra cualquier desplegable abierto (menú móvil y "Más" de
+      // escritorio) y devuelve el foco a su disparador. Se escucha en captura:
+      // Chrome cierra el <details> por su cuenta antes de que llegue al burbujeo
+      // y entonces ya no habría nada abierto que enfocar.
+      document.addEventListener('keydown', function (evento) {
+        if (evento.key !== 'Escape') return;
+        var abiertos = Array.prototype.filter.call(
+          document.querySelectorAll('details[open]'),
+          function (detalle) { return detalle.matches('.menu, .mas'); }
+        );
+        if (!abiertos.length) { devolverFoco(); return; }
+        var ultimo = abiertos[abiertos.length - 1];
+        var resumen = ultimo.querySelector('summary');
+        ultimo.open = false;
+        if (resumen) {
+          resumen.focus();
+          requestAnimationFrame(function () { resumen.focus(); });
+        }
+        setTimeout(devolverFoco, 40);
+        evento.preventDefault();
+        evento.stopPropagation();
+      }, true);
+
+      // Chrome aplica su propio cierre después del keydown: se vuelve a intentar
+      // cuando termina el turno del teclado.
+      document.addEventListener('keyup', function (evento) {
+        if (evento.key === 'Escape' && document.activeElement === document.body) devolverFoco();
+      }, true);
+
+      // Un clic fuera de un desplegable lo cierra, como cualquier menú.
+      document.addEventListener('click', function (evento) {
+        var detalle = evento.target.closest && evento.target.closest('details.menu, details.mas');
+        cerrarTodo(detalle);
+      });
     })();
   </script>
 
   <main id="contenido" class="contenedor">
-    <% if (aviso) { %><p class="mensaje mensaje-ok" role="status"><%= aviso %></p><% } %>
-    <% if (error) { %><p class="mensaje mensaje-error" role="alert"><%= error %></p><% } %>
+    <% if (aviso) { %><p class="mensaje mensaje-ok" role="status"><%- icono('ok') %><%= aviso %></p><% } %>
+    <% if (error) { %><p class="mensaje mensaje-error" role="alert"><%- icono('alerta') %><%= error %></p><% } %>

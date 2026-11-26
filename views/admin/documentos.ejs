@@ -54,6 +54,31 @@
 </section>
 
 <section class="tarjeta">
+  <form method="get" action="/admin/documentos" class="filtros" aria-label="Filtros">
+    <div class="filtro-busqueda">
+      <label for="f-q">Buscar por nombre</label>
+      <input id="f-q" name="q" type="search" value="<%= typeof busqueda === 'string' ? busqueda : '' %>" placeholder="Nombre del archivo">
+    </div>
+    <div>
+      <label for="f-tipo">Tipo</label>
+      <select id="f-tipo" name="tipo">
+        <option value="">PDF y fotos</option>
+        <option value="pdf" <%= tipo === 'pdf' ? 'selected' : '' %>>Solo PDF</option>
+        <option value="imagen" <%= tipo === 'imagen' ? 'selected' : '' %>>Solo fotos</option>
+      </select>
+    </div>
+    <div>
+      <label for="f-origen">Va en</label>
+      <select id="f-origen" name="origen">
+        <option value="">Todo</option>
+        <option value="taller" <%= origen === 'taller' ? 'selected' : '' %>>Un taller</option>
+        <option value="receta" <%= origen === 'receta' ? 'selected' : '' %>>Una receta</option>
+      </select>
+    </div>
+    <button type="submit" class="boton">Filtrar</button>
+  </form>
+  <p class="contador-resultados" role="status"><%= total %> archivo<%= total === 1 ? '' : 's' %></p>
+  <%- include('../partials/chips-filtros', { chips: chips, urlLimpiar: '/admin/documentos' }) %>
   <h2>Documentos subidos</h2>
   <% if (documentos.length === 0) { %>
     <p class="ayuda">Todavía no hay documentos PDF.</p>
@@ -73,8 +98,7 @@
           </div>
           <a class="boton" href="/admin/documentos/<%= documento.id %>/ver">Abrir archivo</a>
           <% if (usuario.rol === 'admin') { %>
-            <form method="post" action="/admin/documentos/<%= documento.id %>/eliminar" class="en-linea"
-                  onsubmit="return confirm('¿Enviar este documento a la papelera? Se puede recuperar.');">
+            <form method="post" action="/admin/documentos/<%= documento.id %>/eliminar" class="en-linea" data-confirmar="¿Enviar este documento a la papelera? Se puede recuperar.">
               <button type="submit" class="boton boton-peligro">Eliminar</button>
             </form>
           <% } %>

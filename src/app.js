@@ -12,9 +12,14 @@ const { ETIQUETA_ESTADO } = require('./validaciones');
 // Sello de los estáticos: fecha de modificación de los dos archivos que
 // importan. Cambian, cambia la URL, y el navegador no puede servir lo viejo.
 function selloDeArchivos() {
+  // Toda hoja y script propio entra en el sello: si falta uno, el navegador
+  // sigue usando la versión vieja después de cada cambio (y el CSS nuevo
+  // parece no aplicarse).
   const archivos = [
     path.join(__dirname, '..', 'public', 'css', 'estilos.css'),
+    path.join(__dirname, '..', 'public', 'css', 'cartel.css'),
     path.join(__dirname, '..', 'public', 'js', 'app.js'),
+    path.join(__dirname, '..', 'public', 'js', 'formularios.js'),
   ];
   const marcas = archivos.map((ruta) => {
     try {
@@ -27,6 +32,28 @@ function selloDeArchivos() {
 }
 
 const versionAssets = selloDeArchivos();
+
+// Iconos del proyecto: se leen una sola vez desde public/icons y se inyectan
+// como SVG inline, así heredan el color del texto que acompañan y no suman una
+// petición por icono. `<%- icono('pdf') %>` en cualquier vista.
+const cacheIconos = new Map();
+function icono(nombre, clase = '') {
+  if (!/^[a-z-]+$/.test(String(nombre))) return '';
+  if (!cacheIconos.has(nombre)) {
+    try {
+      cacheIconos.set(
+        nombre,
+        fs.readFileSync(path.join(__dirname, '..', 'public', 'icons', `${nombre}.svg`), 'utf8')
+      );
+    } catch {
+      cacheIconos.set(nombre, '');
+    }
+  }
+  const svg = cacheIconos.get(nombre);
+  if (!svg) return '';
+  const clases = clase ? `icono ${clase}` : 'icono';
+  return svg.replace('<svg ', `<svg class="${clases}" focusable="false" `);
+}
 
 const rutasPublicas = require('../routes/publico');
 const rutasAuth = require('../routes/auth');
@@ -61,6 +88,14 @@ function crearApp() {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.static(path.join(__dirname, '..', 'public')));
 
+  // Las páginas se piden siempre frescas: mientras alguien revisa el sitio,
+  // una copia guardada le muestra contenido viejo y parece que el cambio no
+  // se aplicó. Los archivos estáticos sí llevan su sello de versión.
+  app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store');
+    next();
+  });
+
   // Cabeceras de seguridad mínimas: no hay helmet entre las dependencias y la
   // demo se sirve por HTTPS a través de un túnel, así que se declaran a mano.
   // La CSP deja entrar solo los reproductores de YouTube que usan los videos.
@@ -71,7 +106,7 @@ function crearApp() {
         "img-src 'self' data:",
         "style-src 'self' 'unsafe-inline'",
         "script-src 'self' 'unsafe-inline'",
-        'frame-src https://www.youtube-nocookie.com https://www.youtube.com',
+        'frame-src https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com',
         "base-uri 'self'",
         "form-action 'self'",
         "frame-ancestors 'self'",
@@ -90,30 +125,25 @@ function crearApp() {
     process.exit(1);
   }
 
-  app.use(
-    session({
-      store: new PgStore({ pool, createTableIfMissing: true }),
-      secret: process.env.SESSION_SECRET || 'clave-solo-para-desarrollo',
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: cookieSegura(),
-        maxAge: 1000 * 60 * 60 * 8,
-      },
-    })
-  );
-
-  // Datos que todas las vistas necesitan.
+  // Datos estáticos que toda vista necesita. Van ANTES de la sesión a
+  // propósito: si el almacén de sesiones falla (base caída, cookie corrupta),
+  // error.ejs sigue teniendo versionAssets, fecha y rutaActual y puede
+  // renderizarse en vez de reventar con "versionAssets is not defined".
   app.use((req, res, next) => {
-    res.locals.usuario = req.session.usuario || null;
-    res.locals.aviso = typeof req.query.ok === 'string' ? req.query.ok : null;
-    res.locals.error = typeof req.query.error === 'string' ? req.query.error : null;
+    res.locals.usuario = null;
+    res.locals.aviso = null;
+    res.locals.error = null;
     res.locals.etiquetaEstado = ETIQUETA_ESTADO;
     res.locals.rutaActual = req.path;
-    res.locals.terminoBusqueda = typeof req.query.q === 'string' ? req.query.q : '';
+    // Dirección completa de la página: la necesitan las etiquetas que arman la
+    // vista previa del enlace al compartirlo (WhatsApp, Telegram, X).
+    res.locals.urlBase = `${req.protocol}://${req.get('host')}`;
+    res.locals.urlActual = `${res.locals.urlBase}${req.originalUrl}`;
+    res.locals.terminoBusqueda = '';
+    // Solo /buscar lo apaga: esa vista trae su propio formulario con el término.
+    res.locals.ocultarBusqueda = false;
     res.locals.anioActual = new Date().getFullYear();
+    res.locals.icono = icono;
 
     // Versión de los archivos estáticos para que el navegador estrene el CSS y
     // el JS nuevos al primer clic. Sin esto, un docente puede quedarse semanas
@@ -132,6 +162,31 @@ function crearApp() {
         timeZone: 'America/Santiago',
       }).format(momento);
     };
+    next();
+  });
+
+  app.use(
+    session({
+      store: new PgStore({ pool, createTableIfMissing: true }),
+      secret: process.env.SESSION_SECRET || 'clave-solo-para-desarrollo',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: cookieSegura(),
+        maxAge: 1000 * 60 * 60 * 8,
+      },
+    })
+  );
+
+  // Solo lo que depende de la sesión se lee después de montarla, y con acceso
+  // opcional: una cookie vieja no puede tumbar el resto del sitio.
+  app.use((req, res, next) => {
+    res.locals.usuario = (req.session && req.session.usuario) || null;
+    res.locals.aviso = typeof req.query.ok === 'string' ? req.query.ok : null;
+    res.locals.error = typeof req.query.error === 'string' ? req.query.error : null;
+    res.locals.terminoBusqueda = typeof req.query.q === 'string' ? req.query.q : '';
     next();
   });
 

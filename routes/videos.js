@@ -128,7 +128,11 @@ router.post('/admin/videos', requiereSesion, async (req, res, next) => {
       nombre: nombre.valor,
       proveedor: enlace.proveedor,
     });
-    return res.redirect(`/admin/videos?ok=${encodeURIComponent('Video registrado correctamente.')}`);
+    const mensaje = 'Video registrado correctamente.';
+    const volver = v.destinoSeguro(cuerpo.volver, '');
+    return res.redirect(
+      volver ? `${volver}?ok=${encodeURIComponent(mensaje)}` : `/admin/videos?ok=${encodeURIComponent(mensaje)}`
+    );
   } catch (error) {
     return next(error);
   }
@@ -145,7 +149,11 @@ router.post('/admin/videos/:id/eliminar', requiereRol('admin'), async (req, res,
     if (!rows[0]) return next();
 
     await registrar(req.session.usuario.id, 'eliminar', 'video', id, { nombre: rows[0].nombre });
-    res.redirect(`/admin/videos?ok=${encodeURIComponent('Video enviado a la papelera.')}`);
+    const volver = v.destinoSeguro(req.body && req.body.volver, '');
+    res.redirect(
+      volver ? `${volver}?ok=${encodeURIComponent('Video enviado a la papelera.')}`
+             : `/admin/videos?ok=${encodeURIComponent('Video enviado a la papelera.')}`
+    );
   } catch (error) {
     next(error);
   }

@@ -1,0 +1,82 @@
+<%- include('../partials/head') %>
+<%
+  // La portada usa la primera foto del archivo como cartel. Si no hay ninguna,
+  // el degradado verde del CSS hace de fondo: nunca queda un hueco gris.
+  const tallerConFoto = talleres.find(function (t) { return t.id_imagen; });
+  const destacados = talleres.slice(0, 3);
+%>
+<section class="portada-cartel">
+  <% if (tallerConFoto) { %>
+    <img class="portada-foto" src="/documentos/<%= tallerConFoto.id_imagen %>/ver" alt="" loading="eager">
+  <% } %>
+  <div class="portada-contenido">
+    <p class="etiqueta-amarilla">Archivo <%= anioActual %> · Colegio Yungay</p>
+    <h1 class="portada-titulo">Creando Sabores<span>.</span></h1>
+    <p class="portada-bajada">
+      Los talleres de cocina del colegio, con sus recetas, sus documentos y sus clases.
+      Cada ficha guarda quiénes participaron y qué se cocinó.
+    </p>
+    <div class="portada-acciones">
+      <a class="boton boton-primario" href="/talleres"><%= resumen.talleres === 1 ? 'Ver el taller' : 'Ver los ' + resumen.talleres + ' talleres' %></a>
+      <a class="boton boton-secundario" href="/recetas">Ver recetas</a>
+      <a class="enlace-suave" href="/ejecuciones">Ver clases</a>
+    </div>
+    <ul class="tira-cifras" aria-label="Cifras del archivo">
+      <li><b><%= resumen.talleres %></b><%= resumen.talleres === 1 ? 'taller' : 'talleres' %></li>
+      <li><b><%= totalRecetas %></b><%= Number(totalRecetas) === 1 ? 'receta' : 'recetas' %></li>
+      <li><b><%= totalEjecuciones %></b><%= Number(totalEjecuciones) === 1 ? 'clase' : 'clases' %></li>
+      <li><b><%= resumen.tematicas %></b><%= resumen.tematicas === 1 ? 'temática' : 'temáticas' %></li>
+    </ul>
+  </div>
+</section>
+
+<main id="contenido" class="contenedor contenido-principal">
+  <% if (talleres.length === 0) { %>
+    <div class="estado-vacio">
+      <p>Todavía no hay talleres publicados en el archivo.</p>
+      <% if (usuario) { %>
+        <a class="boton boton-primario" href="/admin/talleres/nuevo"><%- icono('ok') %>Crear el primer taller</a>
+      <% } else { %>
+        <p class="ayuda">El archivo se irá llenando a medida que la coordinación publique los talleres de cada semestre.</p>
+      <% } %>
+    </div>
+  <% } else { %>
+    <div class="carpeta-tab">
+      <h2>Últimos talleres</h2>
+      <span><%= resumen.talleres %> en total</span>
+    </div>
+    <ul class="fichas-archivo">
+      <% destacados.forEach(function (taller) { %>
+        <%- include('../partials/ficha-taller', { taller: taller }) %>
+      <% }) %>
+    </ul>
+    <p style="margin-top: var(--e4)">
+      <a class="boton boton-secundario" href="/talleres">Ver todo el archivo</a>
+    </p>
+  <% } %>
+</main>
+
+<% if (talleres.length > 0) { %>
+<section class="banda-negra">
+  <div class="contenedor">
+    <h2>Las temáticas del año</h2>
+    <%# Un solo recorrido: el total por temática se cuenta acá y no se repite abajo. %>
+    <%
+      const conteo = new Map();
+      talleres.forEach(function (t) { conteo.set(t.tematica, (conteo.get(t.tematica) || 0) + 1); });
+    %>
+    <ul class="lista-tematicas">
+      <% Array.from(conteo.entries()).forEach(function (par) { %>
+        <li>
+          <a href="/talleres?tematica=<%= encodeURIComponent(par[0]) %>">
+            <span class="numero"><%= String(par[1]).padStart(2, '0') %></span>
+            <span class="nombre-tematica"><%= par[0] %></span>
+          </a>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+</section>
+<% } %>
+
+<%- include('../partials/footer') %>

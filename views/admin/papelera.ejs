@@ -8,7 +8,10 @@
 </p>
 
 <% if (elementos.length === 0) { %>
-  <p class="mensaje">La papelera está vacía. Nada se ha eliminado.</p>
+  <div class="estado-vacio">
+    <p><%- icono('ok') %>La papelera está vacía: nada se ha eliminado.</p>
+    <a class="boton" href="/panel">Volver al panel</a>
+  </div>
 <% } else { %>
   <table class="tabla">
     <caption class="visualmente-oculto">Elementos eliminados</caption>
@@ -30,8 +33,7 @@
             <form method="post" action="/admin/papelera/<%= elemento.tabla %>/<%= elemento.id %>/restaurar" class="en-linea">
               <button type="submit" class="boton">Restaurar</button>
             </form>
-            <form method="post" action="/admin/papelera/<%= elemento.tabla %>/<%= elemento.id %>/purgar" class="en-linea"
-                  onsubmit="return confirm('¿Borrar definitivamente? No se puede deshacer.');">
+            <form method="post" action="/admin/papelera/<%= elemento.tabla %>/<%= elemento.id %>/purgar" class="en-linea" data-confirmar="¿Borrar definitivamente? No se puede deshacer.">
               <button type="submit" class="boton boton-peligro">Borrar definitivo</button>
             </form>
           </td>

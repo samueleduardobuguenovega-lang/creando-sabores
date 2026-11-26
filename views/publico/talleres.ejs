@@ -1,21 +1,41 @@
 <%- include('../partials/head') %>
 
+<%
+  // Un solo constructor de URLs para todo el filtro: cada enlace cambia su
+  // faceta y conserva las otras dos. Antes se armaban a mano y el "&" suelto
+  // borraba los filtros vecinos.
+  const urlFiltro = (cambios) => {
+    const parametros = new URLSearchParams();
+    const valores = { tematica, estado, anio, ...cambios };
+    Object.keys(valores).forEach((clave) => {
+      const valor = valores[clave];
+      if (valor !== null && valor !== undefined && valor !== '') parametros.set(clave, valor);
+    });
+    const cadena = parametros.toString();
+    return cadena ? '/talleres?' + cadena : '/talleres';
+  };
+
+  const filtrosActivos = [];
+  if (tematica) filtrosActivos.push({ texto: 'Temática: ' + tematica, quitar: urlFiltro({ tematica: '' }) });
+  if (estado) filtrosActivos.push({ texto: 'Estado: ' + etiquetaEstado[estado], quitar: urlFiltro({ estado: '' }) });
+  if (anio) filtrosActivos.push({ texto: 'Año: ' + anio, quitar: urlFiltro({ anio: '' }) });
+%>
+
 <section class="caratula caratula-corta">
   <p class="rotulo">Archivo de talleres</p>
   <h1>Talleres</h1>
   <p class="caratula-texto">
     Cada taller muestra cuándo se hizo o se hará, cuántas personas participaron y qué recetas se prepararon.
   </p>
-  <p class="ayuda">
-    <%= total %> taller<%= total === 1 ? '' : 'es' %><% if (tematica) { %> en <%= tematica %><% } %><% if (estado) { %> · <%= etiquetaEstado[estado] %><% } %><% if (anio) { %> · año <%= anio %><% } %>
-  </p>
 </section>
 
-<nav class="chips" aria-label="Filtrar talleres">
-  <a class="chip <%= tematica ? '' : 'chip-activo' %>" href="/talleres<%= estado ? '?estado=' + estado : '' %>">Todas</a>
+<nav class="chips" aria-label="Filtrar por temática">
+  <a class="chip <%= tematica ? '' : 'chip-activo' %>" href="<%= urlFiltro({ tematica: '' }) %>"
+     <%= tematica ? '' : 'aria-current="true"' %>>Todas</a>
   <% tematicas.forEach(function (fila) { %>
     <a class="chip <%= tematica === fila.tematica ? 'chip-activo' : '' %>"
-       href="/talleres?tematica=<%= encodeURIComponent(fila.tematica) %><%= estado ? '&estado=' + estado : '' %>">
+       href="<%= urlFiltro({ tematica: fila.tematica }) %>"
+       <%= tematica === fila.tematica ? 'aria-current="true"' : '' %>>
       <%= fila.tematica %> <span><%= fila.total %></span>
     </a>
   <% }) %>
@@ -23,10 +43,10 @@
 
 <% if (anios && anios.length > 1) { %>
   <nav class="chips chips-anio" aria-label="Filtrar por año">
-    <a class="chip <%= anio ? '' : 'chip-activo' %>" href="/talleres<%= tematica ? '?tematica=' + encodeURIComponent(tematica) : '' %>">Todos los años</a>
+    <a class="chip <%= anio ? '' : 'chip-activo' %>" href="<%= urlFiltro({ anio: '' }) %>">Todos los años</a>
     <% anios.forEach(function (valor) { %>
-      <a class="chip <%= anio === valor ? 'chip-activo' : '' %>"
-         href="/talleres?anio=<%= valor %><%= tematica ? '&tematica=' + encodeURIComponent(tematica) : '' %><%= estado ? '&estado=' + estado : '' %>"><%= valor %></a>
+      <a class="chip <%= anio === valor ? 'chip-activo' : '' %>" href="<%= urlFiltro({ anio: valor }) %>"
+         <%= anio === valor ? 'aria-current="true"' : '' %>><%= valor %></a>
     <% }) %>
   </nav>
 <% } %>
@@ -34,17 +54,36 @@
 <nav class="chips chips-estado" aria-label="Filtrar por estado">
   <% [['', 'Todos'], ['planificado', 'Planificados'], ['en_ejecucion', 'En curso'], ['finalizado', 'Finalizados']].forEach(function (par) { %>
     <a class="chip <%= (estado || '') === par[0] ? 'chip-activo' : '' %>"
-       href="/talleres?<%= tematica ? 'tematica=' + encodeURIComponent(tematica) + '&' : '' %><%= par[0] ? 'estado=' + par[0] : '' %>">
+       href="<%= urlFiltro({ estado: par[0] }) %>"
+       <%= (estado || '') === par[0] ? 'aria-current="true"' : '' %>>
       <%= par[1] %>
     </a>
   <% }) %>
 </nav>
 
+<p class="contador-resultados" role="status">
+  <%= total %> taller<%= total === 1 ? '' : 'es' %><% if (tematica) { %> en <%= tematica %><% } %><% if (estado) { %> · <%= etiquetaEstado[estado] %><% } %><% if (anio) { %> · año <%= anio %><% } %>
+</p>
+
+<% if (filtrosActivos.length) { %>
+  <ul class="chips-removibles" aria-label="Filtros activos">
+    <% filtrosActivos.forEach(function (filtro) { %>
+      <li>
+        <a class="chip-removible" href="<%= filtro.quitar %>" title="Quitar filtro">
+          <%= filtro.texto %> <span class="equis" aria-hidden="true">×</span>
+          <span class="visualmente-oculto">Quitar filtro</span>
+        </a>
+      </li>
+    <% }) %>
+    <li><a class="chip-removible" href="/talleres">Limpiar filtros</a></li>
+  </ul>
+<% } %>
+
 <% if (talleres.length === 0) { %>
-  <p class="ayuda">
-    No hay talleres con ese filtro.
+  <div class="estado-vacio">
+    <p>No hay talleres con esos filtros.</p>
     <a class="boton" href="/talleres">Ver todos los talleres</a>
-  </p>
+  </div>
 <% } else { %>
   <%
     // Una carpeta por temática, con todas sus fichas.

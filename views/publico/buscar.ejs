@@ -4,8 +4,8 @@
   <p class="rotulo">Buscador del archivo</p>
   <h1>Buscar</h1>
   <form class="filtros" method="get" action="/buscar" role="search">
-    <label for="q">Buscar por taller, receta, documento o video</label>
-    <input id="q" name="q" type="search" value="<%= termino %>" placeholder="Ej.: pan, masa madre, cazuela">
+    <label for="q-pagina">Buscar por taller, receta, documento o video</label>
+    <input id="q-pagina" name="q" type="search" value="<%= termino %>" placeholder="Ej.: pan, masa madre, cazuela">
     <button type="submit" class="boton boton-primario">Buscar</button>
   </form>
   <% if (termino && total > 0) { %>
@@ -67,7 +67,7 @@
               <strong><%= documento.nombre %></strong>
               <span class="ayuda">PDF de <a href="<%= documento.destino %>"><%= documento.asociado_a %></a></span>
             </div>
-            <a class="boton" href="/documentos/<%= documento.id %>/ver" target="_blank" rel="noopener">Abrir archivo</a>
+            <a class="boton" href="/documentos/<%= documento.id %>/ver">Ver archivo</a>
           </li>
         <% }) %>
       </ul>

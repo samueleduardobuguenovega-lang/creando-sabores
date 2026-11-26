@@ -6,22 +6,55 @@
   <p class="caratula-texto">
     Las pautas, las listas de materiales y las hojas de receta que se repartieron en cada taller, en PDF para imprimir.
   </p>
+
+  <form method="get" action="/documentos" class="filtros" aria-label="Filtros">
+    <div class="filtro-busqueda">
+      <label for="q-pagina">Buscar por nombre del archivo</label>
+      <input id="q-pagina" name="q" type="search" value="<%= busqueda %>" placeholder="Ej.: lista de materiales">
+    </div>
+    <div>
+      <label for="f-tipo">Tipo</label>
+      <select id="f-tipo" name="tipo">
+        <option value="">PDF y fotos</option>
+        <option value="pdf" <%= tipo === 'pdf' ? 'selected' : '' %>>Solo PDF</option>
+        <option value="imagen" <%= tipo === 'imagen' ? 'selected' : '' %>>Solo fotos</option>
+      </select>
+    </div>
+    <div>
+      <label for="f-origen">Viene de</label>
+      <select id="f-origen" name="origen">
+        <option value="">Todo el archivo</option>
+        <option value="taller" <%= origen === 'taller' ? 'selected' : '' %>>Un taller</option>
+        <option value="receta" <%= origen === 'receta' ? 'selected' : '' %>>Una receta</option>
+      </select>
+    </div>
+    <button type="submit" class="boton">Filtrar</button>
+  </form>
 </section>
 
+<p class="contador-resultados" role="status"><%= total %> archivo<%= total === 1 ? '' : 's' %></p>
+
+<%- include('../partials/chips-filtros', { chips: chips, urlLimpiar: '/documentos' }) %>
+
 <% if (documentos.length === 0) { %>
-  <p class="ayuda">Todavía no hay documentos cargados.</p>
+  <div class="estado-vacio">
+    <p>No hay documentos con esos filtros.</p>
+    <a class="boton" href="/documentos">Ver todos los documentos</a>
+  </div>
 <% } else { %>
   <ul class="lista-simple">
     <% documentos.forEach(function (documento) { %>
+      <% const esImagen = /^image\//.test(documento.tipo_mime || ''); %>
       <li class="elemento-simple">
         <div>
           <strong><a href="<%= documento.destino %>"><%= documento.nombre %></a></strong>
           <span class="ayuda">
+            <%- icono(esImagen ? 'imagen' : 'pdf') %><%= esImagen ? 'Imagen' : 'PDF' %> ·
             <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB ·
             <%= documento.taller ? documento.taller : documento.codigo + ' · ' + documento.receta %>
           </span>
         </div>
-        <a class="boton" href="/documentos/<%= documento.id %>/ver" target="_blank" rel="noopener">Abrir archivo</a>
+        <a class="boton" href="/documentos/<%= documento.id %>/ver">Ver archivo</a>
       </li>
     <% }) %>
   </ul>

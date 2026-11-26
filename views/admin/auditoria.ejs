@@ -1,23 +1,112 @@
 <%- include('../partials/head') %>
 
-<h1>Auditoría</h1>
-<p class="ayuda">Últimas 100 acciones registradas. Cada línea dice quién hizo qué y sobre qué registro.</p>
+<%
+  // Un solo constructor de URLs: cada faceta conserva las demás.
+  const urlAuditoria = (cambios) => {
+    const parametros = new URLSearchParams();
+    const valores = { accion, entidad, responsable: idUsuario || '', ...cambios };
+    Object.keys(valores).forEach((clave) => {
+      const valor = valores[clave];
+      if (valor !== null && valor !== undefined && valor !== '') parametros.set(clave, valor);
+    });
+    const cadena = parametros.toString();
+    return cadena ? '/admin/auditoria?' + cadena : '/admin/auditoria';
+  };
+
+  const activos = [];
+  if (accion) activos.push({ texto: 'Acción: ' + accion, quitar: urlAuditoria({ accion: '' }) });
+  if (entidad) activos.push({ texto: 'Entidad: ' + entidad, quitar: urlAuditoria({ entidad: '' }) });
+  if (idUsuario) {
+    const quien = responsables.find((fila) => fila.id === idUsuario);
+    activos.push({ texto: 'Responsable: ' + (quien ? quien.nombre : '#' + idUsuario), quitar: urlAuditoria({ responsable: '' }) });
+  }
+%>
+
+<section class="caratula caratula-corta">
+  <p class="rotulo">Trazabilidad</p>
+  <h1>Auditoría</h1>
+  <p class="caratula-texto">
+    Quién hizo qué y sobre qué registro. Cada fila lleva al recurso si sigue vivo, o dice con claridad si está en la papelera o si ya no existe.
+  </p>
+</section>
+
+<nav class="filtros" aria-label="Filtrar auditoría">
+  <div>
+    <label for="f-accion">Acción</label>
+    <select id="f-accion" onchange="if (this.value) location.href=this.value;">
+      <option value="<%= urlAuditoria({ accion: '' }) %>">Todas las acciones</option>
+      <% acciones.forEach(function (fila) { %>
+        <option value="<%= urlAuditoria({ accion: fila.accion }) %>" <%= accion === fila.accion ? 'selected' : '' %>>
+          <%= fila.accion %> (<%= fila.total %>)
+        </option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="f-entidad">Entidad</label>
+    <select id="f-entidad" onchange="if (this.value) location.href=this.value;">
+      <option value="<%= urlAuditoria({ entidad: '' }) %>">Todas las entidades</option>
+      <% entidades.forEach(function (fila) { %>
+        <option value="<%= urlAuditoria({ entidad: fila.entidad }) %>" <%= entidad === fila.entidad ? 'selected' : '' %>>
+          <%= fila.entidad %> (<%= fila.total %>)
+        </option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="f-responsable">Responsable</label>
+    <select id="f-responsable" onchange="if (this.value) location.href=this.value;">
+      <option value="<%= urlAuditoria({ responsable: '' }) %>">Cualquier persona</option>
+      <% responsables.forEach(function (fila) { %>
+        <option value="<%= urlAuditoria({ responsable: fila.id }) %>" <%= idUsuario === fila.id ? 'selected' : '' %>>
+          <%= fila.nombre %> (<%= fila.total %>)
+        </option>
+      <% }) %>
+    </select>
+  </div>
+</nav>
+
+<p class="contador-resultados" role="status"><%= registros.length %> acción<%= registros.length === 1 ? '' : 'es' %> en esta vista</p>
+
+<% if (activos.length) { %>
+  <ul class="chips-removibles" aria-label="Filtros activos">
+    <% activos.forEach(function (filtro) { %>
+      <li>
+        <a class="chip-removible" href="<%= filtro.quitar %>"><%= filtro.texto %> <span class="equis" aria-hidden="true">×</span><span class="visualmente-oculto">Quitar filtro</span></a>
+      </li>
+    <% }) %>
+    <li><a class="chip-removible" href="/admin/auditoria">Limpiar filtros</a></li>
+  </ul>
+<% } %>
 
 <% if (registros.length === 0) { %>
-  <p class="ayuda">Todavía no hay acciones registradas.</p>
+  <div class="estado-vacio">
+    <p>No hay acciones que coincidan con esos filtros.</p>
+    <a class="boton" href="/admin/auditoria">Ver todo</a>
+  </div>
 <% } else { %>
   <table class="tabla">
     <thead>
-      <tr><th>Fecha</th><th>Responsable</th><th>Acción</th><th>Entidad</th><th>Detalle</th></tr>
+      <tr><th>Fecha</th><th>Responsable</th><th>Acción</th><th>Registro</th><th>Detalle</th></tr>
     </thead>
     <tbody>
       <% registros.forEach(function (registro) { %>
         <tr>
           <td><%= fecha(registro.creado_en) %></td>
           <td><%= registro.responsable || 'Cuenta eliminada' %></td>
-          <td><%= registro.accion %></td>
-          <td><%= registro.entidad %> #<%= registro.entidad_id || '—' %></td>
-          <td><code><%= JSON.stringify(registro.detalle) %></code></td>
+          <td><%= registro.etiquetaAccion %></td>
+          <td>
+            <% if (registro.estadoEntidad === 'vivo' && registro.enlace) { %>
+              <a href="<%= registro.enlace %>"><%= registro.nombreEntidad %></a>
+            <% } else if (registro.estadoEntidad === 'papelera') { %>
+              <span class="insignia insignia-planificado"><%- icono('eliminar') %>[EN PAPELERA]</span>
+              <a href="/admin/papelera"><%= registro.nombreEntidad %></a>
+            <% } else { %>
+              <span class="insignia insignia-finalizado"><%- icono('alerta') %>[ELIMINADO]</span>
+              <span class="ayuda"><%= registro.nombreEntidad %></span>
+            <% } %>
+          </td>
+          <td><%= registro.resumen || '—' %></td>
         </tr>
       <% }) %>
     </tbody>

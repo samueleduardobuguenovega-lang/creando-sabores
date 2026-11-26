@@ -56,6 +56,29 @@
 </section>
 
 <section class="tarjeta">
+  <form method="get" action="/admin/ejecuciones" class="filtros" aria-label="Filtros">
+    <div>
+      <label for="f-taller-ej">Taller</label>
+      <select id="f-taller-ej" name="taller">
+        <option value="">Todos</option>
+        <% talleres.forEach(function (taller) { %>
+          <option value="<%= taller.id %>" <%= idTaller === taller.id ? 'selected' : '' %>><%= taller.nombre %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div>
+      <label for="f-anio">Año</label>
+      <select id="f-anio" name="anio">
+        <option value="">Todos</option>
+        <% anios.forEach(function (valor) { %>
+          <option value="<%= valor %>" <%= anio === valor ? 'selected' : '' %>><%= valor %></option>
+        <% }) %>
+      </select>
+    </div>
+    <button type="submit" class="boton">Filtrar</button>
+  </form>
+  <p class="contador-resultados" role="status"><%= total %> ejecución<%= total === 1 ? '' : 'es' %></p>
+  <%- include('../partials/chips-filtros', { chips: chips, urlLimpiar: '/admin/ejecuciones' }) %>
   <h2>Registradas (<%= ejecuciones.length %>)</h2>
   <% if (ejecuciones.length === 0) { %>
     <p class="ayuda">Todavía no hay ejecuciones. Registra la primera con el formulario de arriba.</p>
@@ -82,8 +105,7 @@
             <td data-columna="Observaciones"><%= ejecucion.observaciones || '—' %></td>
             <td data-columna="Acciones">
               <% if (usuario.rol === 'admin') { %>
-                <form method="post" action="/admin/ejecuciones/<%= ejecucion.id %>/eliminar" class="en-linea"
-                      onsubmit="return confirm('¿Enviar esta ejecución a la papelera?');">
+                <form method="post" action="/admin/ejecuciones/<%= ejecucion.id %>/eliminar" class="en-linea" data-confirmar="¿Enviar esta ejecución a la papelera? Se puede recuperar.">
                   <button type="submit" class="boton boton-peligro">Eliminar</button>
                 </form>
               <% } else { %>—<% } %>

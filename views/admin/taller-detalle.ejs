@@ -1,21 +1,20 @@
 <%- include('../partials/head') %>
 
-<p class="migas"><a href="/admin/talleres">Talleres</a> / <%= taller.nombre %></p>
+<p class="migas"><a href="/admin/talleres">Talleres</a> <span aria-hidden="true">/</span> <%= taller.nombre %></p>
 
 <div class="barra-titulo">
   <h1><%= taller.nombre %></h1>
   <div class="acciones">
     <% if (puedeEditar) { %>
-      <a class="boton" href="/admin/talleres/<%= taller.id %>/editar">Editar</a>
+      <a class="boton" href="/admin/talleres/<%= taller.id %>/editar">Editar ficha</a>
     <% } %>
     <% if (usuario.rol === 'admin') { %>
-      <form method="post" action="/admin/talleres/<%= taller.id %>/eliminar" class="en-linea"
-            onsubmit="return confirm('¿Eliminar el taller y todo lo asociado (recetas, documentos, videos y ejecuciones)?');">
-        <button type="submit" class="boton boton-peligro">Eliminar</button>
+      <form method="post" action="/admin/talleres/<%= taller.id %>/eliminar" class="en-linea" data-confirmar="¿Eliminar el taller y todo lo asociado (recetas, documentos, videos y ejecuciones)?">
+        <button type="submit" class="boton boton-peligro"><%- icono('eliminar') %>Eliminar</button>
       </form>
       <form method="post" action="/admin/talleres/<%= taller.id %>/publicacion" class="en-linea">
         <input type="hidden" name="publicar" value="<%= taller.publicado ? '0' : '1' %>">
-        <button type="submit" class="boton"><%= taller.publicado ? 'Ocultar del sitio' : 'Publicar en el sitio' %></button>
+        <button type="submit" class="boton"><%- icono(taller.publicado ? 'ojo' : 'ok') %><%= taller.publicado ? 'Ocultar del sitio' : 'Publicar en el sitio' %></button>
       </form>
     <% } %>
   </div>
@@ -23,10 +22,10 @@
 
 <dl class="ficha">
   <dt>Estado</dt>
-  <dd><span class="insignia insignia-<%= taller.estado %>"><%= etiquetaEstado[taller.estado] %></span></dd>
+  <dd><span class="insignia insignia-<%= taller.estado %>"><%- icono(taller.estado === 'finalizado' ? 'ok' : taller.estado === 'en_ejecucion' ? 'reloj' : 'panel') %><%= etiquetaEstado[taller.estado] %></span></dd>
   <dt>Sitio público</dt>
   <dd>
-    <span class="insignia insignia-<%= taller.publicado ? 'finalizado' : 'planificado' %>"><%= taller.publicado ? 'Publicado' : 'Oculto' %></span>
+    <span class="insignia insignia-<%= taller.publicado ? 'finalizado' : 'planificado' %>"><%- icono(taller.publicado ? 'ojo' : 'candado') %><%= taller.publicado ? 'Publicado' : 'Oculto' %></span>
     <% if (!taller.publicado) { %><span class="ayuda">Solo se ve en el archivo interno.</span><% } %>
   </dd>
   <dt>Temática</dt>
@@ -39,79 +38,191 @@
   <dd><%= taller.descripcion || '—' %></dd>
 </dl>
 
-<div class="dos-columnas">
-  <section>
-    <h2>Recetas asociadas</h2>
-    <a class="boton" href="/admin/recetas">Asignar una receta</a>
-    <% if (recetas.length === 0) { %>
-      <p class="ayuda">Todavía no hay recetas en este taller.</p>
-    <% } else { %>
-      <ul class="lista-simple">
-        <% recetas.forEach(function (receta) { %>
-          <li><a href="/admin/recetas/<%= receta.id %>/editar"><strong><%= receta.codigo %></strong> · <%= receta.nombre %></a></li>
-        <% }) %>
-      </ul>
-    <% } %>
-  </section>
+<%# ---------------------------------------------------------------- recetas %>
+<section id="recetas" class="bloque">
+  <div class="barra-titulo">
+    <h2>Recetas del taller</h2>
+    <span class="contador-resultados"><%= recetas.length %> receta<%= recetas.length === 1 ? '' : 's' %></span>
+  </div>
 
-  <section>
+  <% if (recetas.length === 0) { %>
+    <div class="estado-vacio"><p>Este taller todavía no tiene recetas asociadas.</p></div>
+  <% } else { %>
+    <ul class="lista-simple">
+      <% recetas.forEach(function (receta) { %>
+        <li class="fila-recurso">
+          <a href="/admin/recetas/<%= receta.id %>/editar"><strong><%= receta.codigo %></strong> · <%= receta.nombre %></a>
+          <% if (puedeEditar) { %>
+            <form method="post" action="/admin/talleres/<%= taller.id %>/recetas/<%= receta.id %>/quitar" class="en-linea" data-confirmar="¿Quitar «<%= receta.nombre %>» de este taller? La receta sigue existiendo en el catálogo.">
+              <button type="submit" class="boton boton-texto">Quitar</button>
+            </form>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <% if (puedeEditar && recetasDisponibles.length) { %>
+    <form method="post" action="/admin/talleres/<%= taller.id %>/recetas" class="fila-formulario">
+      <label for="id_receta">Asociar una receta del catálogo</label>
+      <select id="id_receta" name="id_receta" required>
+        <option value="">Elige una receta…</option>
+        <% recetasDisponibles.forEach(function (receta) { %>
+          <option value="<%= receta.id %>"><%= receta.codigo %> · <%= receta.nombre %></option>
+        <% }) %>
+      </select>
+      <button type="submit" class="boton">Asociar</button>
+    </form>
+  <% } else if (puedeEditar) { %>
+    <p class="ayuda">Todas las recetas del catálogo ya están asociadas. <a href="/admin/recetas/nueva">Crear una receta nueva</a>.</p>
+  <% } %>
+</section>
+
+<%# -------------------------------------------------------------- documentos %>
+<section id="documentos" class="bloque">
+  <div class="barra-titulo">
+    <h2>Documentos y fotos</h2>
+    <span class="contador-resultados"><%= documentos.length %> archivo<%= documentos.length === 1 ? '' : 's' %></span>
+  </div>
+
+  <% if (documentos.length === 0) { %>
+    <div class="estado-vacio"><p>Sin PDF ni fotos todavía. Sube el recetario o las fotos de la clase.</p></div>
+  <% } else { %>
+    <ul class="fichas-archivo">
+      <% documentos.forEach(function (documento) { %>
+        <% const esImagen = /^image\//.test(documento.tipo_mime || ''); %>
+        <li class="archivo-fila">
+          <% if (esImagen) { %>
+            <img class="miniatura" src="/admin/documentos/<%= documento.id %>/ver" alt="Vista previa de <%= documento.nombre %>" loading="lazy">
+          <% } else { %>
+            <span class="previa-icono" aria-hidden="true">PDF</span>
+          <% } %>
+          <span class="archivo-fila-datos">
+            <a href="/admin/documentos/<%= documento.id %>/ver" target="_blank" rel="noopener"><%= documento.nombre %></a>
+            <span class="ayuda"><%= esImagen ? 'Imagen' : 'PDF' %> · <%= Math.max(1, Math.round((documento.tamano || 0) / 1024)) %> KB</span>
+          </span>
+          <% if (usuario.rol === 'admin') { %>
+            <form method="post" action="/admin/documentos/<%= documento.id %>/eliminar" class="en-linea" data-confirmar="¿Enviar «<%= documento.nombre %>» a la papelera? Se puede recuperar.">
+              <input type="hidden" name="volver" value="/admin/talleres/<%= taller.id %>">
+              <button type="submit" class="boton boton-texto"><%- icono('eliminar') %>Eliminar</button>
+            </form>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <% if (puedeEditar) { %>
+    <form method="post" action="/admin/documentos" enctype="multipart/form-data" class="formulario formulario-compacto">
+      <input type="hidden" name="destino" value="taller:<%= taller.id %>">
+      <input type="hidden" name="volver" value="/admin/talleres/<%= taller.id %>">
+      <label for="archivos-taller">Subir PDF o fotos (máx. 10 MB por archivo)</label>
+      <input id="archivos-taller" type="file" name="archivos" accept="application/pdf,image/jpeg,image/png,image/webp" multiple data-previa="previas-doc" data-sin-carga>
+      <ul class="previas-archivos" id="previas-doc" aria-live="polite"></ul>
+      <p class="ayuda">Las fotos se reducen solas antes de guardarse. La primera imagen se usa como portada de la ficha.</p>
+      <button type="submit" class="boton">Subir archivos</button>
+    </form>
+  <% } %>
+</section>
+
+<%# ----------------------------------------------------------------- videos %>
+<section id="videos" class="bloque">
+  <div class="barra-titulo">
+    <h2>Videos</h2>
+    <span class="contador-resultados"><%= videos.length %> video<%= videos.length === 1 ? '' : 's' %></span>
+  </div>
+
+  <% if (videos.length === 0) { %>
+    <div class="estado-vacio"><p>Sin videos todavía. Pega el enlace de YouTube o Vimeo de la clase.</p></div>
+  <% } else { %>
+    <ul class="lista-simple">
+      <% videos.forEach(function (video) { %>
+        <li class="fila-recurso">
+          <div>
+            <strong><%= video.nombre %></strong>
+            <% if (video.enlaceValidado) { %>
+              <a class="ayuda" href="<%= video.enlaceValidado %>" target="_blank" rel="noopener noreferrer">Abrir en <%= video.proveedor === 'youtube' ? 'YouTube' : 'Vimeo' %></a>
+            <% } %>
+            <% if (video.embedUrl) { %>
+              <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"
+                      loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowfullscreen></iframe>
+            <% } %>
+          </div>
+          <% if (usuario.rol === 'admin') { %>
+            <form method="post" action="/admin/videos/<%= video.id %>/eliminar" class="en-linea" data-confirmar="¿Enviar «<%= video.nombre %>» a la papelera? Se puede recuperar.">
+              <input type="hidden" name="volver" value="/admin/talleres/<%= taller.id %>">
+              <button type="submit" class="boton boton-texto"><%- icono('eliminar') %>Eliminar</button>
+            </form>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <% if (puedeEditar) { %>
+    <form method="post" action="/admin/videos" class="formulario formulario-compacto">
+      <input type="hidden" name="destino" value="taller:<%= taller.id %>">
+      <input type="hidden" name="volver" value="/admin/talleres/<%= taller.id %>">
+      <label for="video-nombre">Nombre del video</label>
+      <input id="video-nombre" name="nombre" maxlength="160" required placeholder="Ej.: Preparación de masa madre">
+      <label for="video-enlace">Enlace de YouTube o Vimeo</label>
+      <input id="video-enlace" name="enlace" type="url" required placeholder="https://www.youtube.com/watch?v=…" data-previa-video="#previa-video-taller">
+      <div class="previa-video" id="previa-video-taller" hidden></div>
+      <button type="submit" class="boton">Registrar video</button>
+    </form>
+  <% } %>
+</section>
+
+<%# ------------------------------------------------------------ ejecuciones %>
+<section id="ejecuciones" class="bloque">
+  <div class="barra-titulo">
     <h2>Ejecuciones</h2>
-    <a class="boton" href="/admin/ejecuciones?taller=<%= taller.id %>">Registrar ejecución</a>
-    <% if (ejecuciones.length === 0) { %>
-      <p class="ayuda">Todavía no hay ejecuciones de este taller.</p>
-    <% } else { %>
-      <ul class="lista-simple">
-        <% ejecuciones.forEach(function (ejecucion) { %>
-          <li>
-            <%= fecha(ejecucion.fecha_ejecucion) %> ·
+    <span class="contador-resultados"><%= ejecuciones.length %> registro<%= ejecuciones.length === 1 ? '' : 's' %></span>
+  </div>
+
+  <% if (ejecuciones.length === 0) { %>
+    <div class="estado-vacio"><p>Sin clases registradas todavía.</p></div>
+  <% } else { %>
+    <ul class="lista-simple">
+      <% ejecuciones.forEach(function (ejecucion) { %>
+        <li class="fila-recurso">
+          <div>
+            <strong><%= fecha(ejecucion.fecha_ejecucion) %></strong> ·
             <%= ejecucion.cantidad_participantes %> participantes
             <% if (ejecucion.observaciones) { %><br><span class="ayuda"><%= ejecucion.observaciones %></span><% } %>
-          </li>
-        <% }) %>
-      </ul>
-    <% } %>
-  </section>
+          </div>
+          <% if (usuario.rol === 'admin') { %>
+            <form method="post" action="/admin/ejecuciones/<%= ejecucion.id %>/eliminar" class="en-linea" data-confirmar="¿Enviar esta ejecución del <%= fecha(ejecucion.fecha_ejecucion) %> a la papelera?">
+              <input type="hidden" name="volver" value="/admin/talleres/<%= taller.id %>">
+              <button type="submit" class="boton boton-texto"><%- icono('eliminar') %>Eliminar</button>
+            </form>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
 
-  <section>
-    <h2>Documentos</h2>
-    <a class="boton" href="/admin/documentos?destino=taller:<%= taller.id %>">Subir archivos</a>
-    <% if (documentos.length === 0) { %>
-      <p class="ayuda">Todavía no hay documentos en este taller.</p>
-    <% } else { %>
-      <ul class="lista-simple">
-        <% documentos.forEach(function (documento) { %>
-          <li><a href="/admin/documentos/<%= documento.id %>/ver" type="application/pdf"><%= documento.nombre %></a></li>
-        <% }) %>
-      </ul>
-    <% } %>
-  </section>
-
-  <section>
-    <h2>Videos</h2>
-    <a class="boton" href="/admin/videos?destino=taller:<%= taller.id %>">Registrar un video</a>
-    <% if (videos.length === 0) { %>
-      <p class="ayuda">Todavía no hay videos en este taller.</p>
-    <% } else { %>
-      <ul class="lista-simple">
-        <% videos.forEach(function (video) { %>
-          <li>
-            <div>
-              <strong><%= video.nombre %></strong>
-              <% if (video.embedUrl) { %>
-                <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"
-                        loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowfullscreen></iframe>
-              <% } %>
-              <% if (video.enlaceValidado) { %>
-                <a href="<%= video.enlaceValidado %>" target="_blank" rel="noopener noreferrer">Abrir en <%= video.proveedor === 'youtube' ? 'YouTube' : 'Vimeo' %></a>
-              <% } %>
-            </div>
-          </li>
-        <% }) %>
-      </ul>
-    <% } %>
-  </section>
-</div>
+  <% if (puedeEditar) { %>
+    <form method="post" action="/admin/ejecuciones" class="formulario formulario-compacto">
+      <input type="hidden" name="id_taller" value="<%= taller.id %>">
+      <input type="hidden" name="volver" value="/admin/talleres/<%= taller.id %>">
+      <div class="fila-campos">
+        <div>
+          <label for="ejecucion-fecha">Fecha de la clase</label>
+          <input id="ejecucion-fecha" name="fecha_ejecucion" type="date" required>
+        </div>
+        <div>
+          <label for="ejecucion-participantes">Participantes</label>
+          <input id="ejecucion-participantes" name="cantidad_participantes" type="number" min="0" max="1000" required>
+        </div>
+      </div>
+      <label for="ejecucion-observaciones">Observaciones (opcional)</label>
+      <textarea id="ejecucion-observaciones" name="observaciones" rows="2" maxlength="2000"></textarea>
+      <button type="submit" class="boton">Registrar ejecución</button>
+    </form>
+  <% } %>
+</section>
 
 <%- include('../partials/footer') %>

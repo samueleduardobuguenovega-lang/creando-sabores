@@ -122,6 +122,15 @@ function correoNoUsado() {
   return { ok: true };
 }
 
+// Destino de vuelta tras guardar o cancelar. Solo se aceptan rutas internas:
+// "volver" no puede sacar al usuario del sitio ni inyectar cabeceras.
+function destinoSeguro(valor, porDefecto = '/panel') {
+  const limpio = (valor ?? '').toString().trim();
+  if (!limpio.startsWith('/') || limpio.startsWith('//') || limpio.startsWith('/\\')) return porDefecto;
+  if (/[\r\n]/.test(limpio)) return porDefecto;
+  return limpio;
+}
+
 module.exports = {
   ESTADOS,
   ETIQUETA_ESTADO,
@@ -132,4 +141,5 @@ module.exports = {
   enlaceHttp,
   enlaceVideo,
   correoNoUsado,
+  destinoSeguro,
 };

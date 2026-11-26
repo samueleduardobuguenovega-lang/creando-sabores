@@ -1,7 +1,18 @@
 <%- include('../partials/head') %>
 
-<h1>Panel principal</h1>
-<p class="ayuda">Lo que falta documentar aparece primero: un toque y sigues donde corresponde.</p>
+<div class="barra-titulo">
+  <div>
+    <h1>Panel principal</h1>
+    <p class="ayuda">Lo que falta documentar aparece primero: un toque y sigues donde corresponde.</p>
+  </div>
+  <%# Una sola acción principal arriba: el resto son accesos secundarios. %>
+  <div class="acciones acciones-principales">
+    <a class="boton boton-primario" href="/admin/talleres/nuevo"><%- icono('ok') %>Nuevo taller</a>
+    <a class="boton" href="/admin/talleres">Consultar talleres</a>
+    <%# Registrar una clase vive en la navegación y en cada pendiente: repetirlo
+        aquí daba dos botones con el mismo nombre en la misma pantalla. %>
+  </div>
+</div>
 
 <%# Bandeja de pendientes: responde “¿qué me falta?” sin abrir ninguna otra
     pantalla. Cada fila lleva directo al formulario ya precargado. %>
@@ -11,16 +22,15 @@
     <p class="pendientes-vacio">Todo al día: cada taller tiene su ejecución, sus recetas y sus documentos.</p>
   <% } else { %>
     <ul class="pendientes-lista">
-      <% pendientes.forEach(function (fila, indice) { %>
+      <% pendientes.forEach(function (fila) { %>
         <li class="pendiente">
           <div class="pendiente-texto">
             <strong><a href="/admin/talleres/<%= fila.id %>"><%= fila.nombre %></a></strong>
             <span class="insignia insignia-<%= fila.estado %>"><%= etiquetaEstado[fila.estado] %></span>
             <span class="pendiente-falta"><%= fila.falta %></span>
           </div>
-          <%# Solo el primer pendiente lleva botón lleno: seis botones iguales no
-              indican por dónde empezar. %>
-          <a class="boton <%= indice === 0 ? 'boton-primario' : '' %> pendiente-accion" href="<%= fila.accion %>"><%= fila.etiquetaAccion %></a>
+          <%# La acción del pendiente es secundaria: el botón lleno de la pantalla es "Nuevo taller". %>
+          <a class="boton pendiente-accion" href="<%= fila.accion %>"><%= fila.etiquetaAccion %></a>
         </li>
       <% }) %>
     </ul>
@@ -52,12 +62,6 @@
     <span class="indicador-numero"><%= totalEjecuciones %></span>
     <span class="indicador-texto">Ejecuciones</span>
   </div>
-</section>
-
-<section class="acciones accesos">
-  <a class="boton boton-primario" href="/admin/talleres/nuevo">Nuevo taller</a>
-  <a class="boton" href="/admin/talleres">Consultar talleres</a>
-  <a class="boton" href="/admin/ejecuciones">Registrar ejecución</a>
 </section>
 
 <div class="dos-columnas">

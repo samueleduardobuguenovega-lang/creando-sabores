@@ -1,0 +1,2599 @@
+/* =====================================================================
+   Capa de diseño «cartel» — Creando Sabores / Colegio Yungay
+   Se carga DESPUÉS de estilos.css y toma el mando: fondo, tipografía,
+   cabecera y piezas. La estructura y las clases son las del sitio; acá
+   solo cambian valores, no el marcado (salvo la portada, que se rehizo).
+
+   Reglas de la casa:
+   - Una escala de espaciado de 8 pasos (--e1 … --e8). Nada fuera de ella.
+   - Tres sombras como máximo (--sombra-1, -2, -3, heredadas).
+   - Anton solo para titulares y cifras grandes; Work Sans para todo lo
+     que se lee. Anton nunca en párrafos: es condensada y se corta.
+   ===================================================================== */
+
+@import url("/fonts/fuentes.css");
+
+:root {
+  /* Paleta: blanco, verde y azul del colegio, con el amarillo del escudo
+     como único acento cálido y el negro para las bandas. */
+  --tinta: #14211b;
+  --tinta-suave: #55655c;
+  --titulo: #14211b;
+  --fondo: #ffffff;
+  --superficie: #ffffff;
+  --superficie-alt: #f4f6f3;
+  --papel: #f4f6f3;
+  /* El negro de las bandas es verde bosque: la página entera se lee verde y
+     el escudo manda. El texto sigue en blanco roto. */
+  --negro: #0d3b26;
+  --negro-suave: #155232;
+
+  /* Verde de trabajo: con este tono el blanco encima da 6,2:1 y el verde como
+     texto sobre blanco también (antes 4,36:1, justo debajo del mínimo AA). */
+  --primario: #14703f;
+  --primario-oscuro: #0e5a33;
+  --primario-claro: #d9ede1;
+  --amarillo: #f7c948;
+  --amarillo-tinta: #241c00;
+  --azul: #16324f;
+
+  --borde: #dfe4de;
+  --borde-fuerte: #1f8a54;
+  --borde-control: #7c8b81;
+  --linea-suave: #e8ece7;
+
+  /* Escala tipográfica: 7 pasos, sin excepciones. */
+  --t-1: 0.75rem;
+  --t-2: 0.875rem;
+  --t-3: 1rem;
+  --t-4: 1.125rem;
+  --t-5: 1.375rem;
+  --t-6: 1.75rem;
+  --cartel: clamp(2.6rem, 9vw, 5.5rem);
+
+  /* Espaciado: 8 pasos. */
+  --e1: 8px;  --e2: 12px; --e3: 16px; --e4: 24px;
+  --e5: 32px; --e6: 48px; --e7: 64px; --e8: 88px;
+
+  --radio: 10px;
+  --radio-caja: 12px;
+  --fuente-texto: "Work Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --fuente-cartel: "Anton", "Arial Narrow", Impact, sans-serif;
+
+  /* Anton no existe como itálica ni tiene más pesos: se pide siempre 400. */
+  --dur-micro: 120ms;
+  --ease-micro: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* ------------------------------------------------------------ base */
+
+body {
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fuente-texto);
+  font-size: var(--t-3);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--fuente-texto);
+  line-height: 1.15;
+  color: var(--tinta);
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-family: var(--fuente-cartel);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  line-height: 0.95;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  margin: 0 0 var(--e3);
+}
+
+h2 {
+  font-family: var(--fuente-cartel);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: var(--t-5);
+  letter-spacing: 0.01em;
+  margin: var(--e6) 0 var(--e3);
+}
+
+h3 {
+  font-size: var(--t-4);
+  font-weight: 600;
+}
+
+p { margin: 0 0 var(--e2); }
+
+a {
+  color: var(--primario-oscuro);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 2px;
+}
+
+a:hover { color: var(--tinta); }
+
+:focus-visible {
+  outline: 3px solid var(--primario);
+  outline-offset: 2px;
+}
+
+/* Rótulos y micro-etiquetas: mayúsculas, chico, con aire. */
+.rotulo,
+.etiqueta {
+  font-family: var(--fuente-texto);
+  font-size: var(--t-1);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+.ayuda {
+  font-size: var(--t-2);
+  color: var(--tinta-suave);
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------------------------------------ cabecera */
+
+.cabecera {
+  background: var(--negro);
+  color: #fff;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.cabecera .contenedor {
+  width: min(1240px, 100% - 32px);
+}
+
+.cabecera-fila {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  min-height: 64px;
+  flex-wrap: nowrap;
+}
+
+.cabecera a { color: #fff; }
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  text-decoration: none;
+  flex: 0 0 auto;
+}
+
+.marca-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+}
+
+.marca-texto {
+  font-family: var(--fuente-cartel);
+  font-weight: 400;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.marca-texto strong { font-weight: 400; color: var(--amarillo); }
+
+.cabecera .menu-boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  border-radius: var(--radio);
+  background: transparent;
+  color: #fff;
+  font-family: var(--fuente-texto);
+  font-size: var(--t-2);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cabecera .menu-boton::-webkit-details-marker { display: none; }
+
+.cabecera .menu-boton:hover,
+.cabecera details[open] > .menu-boton {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.cabecera .navegacion {
+  display: flex;
+  align-items: center;
+  gap: var(--e1);
+}
+
+.cabecera .navegacion a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radio);
+  font-size: var(--t-2);
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
+  text-decoration: none;
+}
+
+.cabecera .navegacion a:hover,
+.cabecera .navegacion a.activo {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.cabecera .navegacion a .icono,
+.cabecera .mas-lista a .icono { color: currentColor; }
+
+.cabecera .mas { position: relative; }
+
+.cabecera .mas-lista {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 220px;
+  background: var(--negro-suave);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radio-caja);
+  padding: var(--e1);
+  display: none;
+  gap: 2px;
+  z-index: 30;
+  box-shadow: var(--sombra-3);
+}
+
+.cabecera .mas-lista a {
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cabecera .mas-lista a:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+/* Buscador de la cabecera: campo oscuro, sin borde duro. */
+.cabecera .busqueda {
+  flex: 1 1 auto;
+  max-width: 380px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #232823;
+  border: 1px solid #333a34;
+  border-radius: var(--radio);
+  padding: 0 4px 0 12px;
+  min-height: 44px;
+}
+
+.cabecera .busqueda input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-family: var(--fuente-texto);
+  font-size: var(--t-2);
+  padding: 10px 0;
+}
+
+.cabecera .busqueda input::placeholder { color: #9aa39c; }
+
+.cabecera .busqueda .boton {
+  background: transparent;
+  border: 0;
+  color: #cfd6d0;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+}
+
+.cabecera .busqueda .boton:hover { color: #fff; }
+
+.cabecera .cuenta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  flex: 0 0 auto;
+}
+
+.cabecera .cuenta-nombre {
+  font-size: var(--t-2);
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cabecera .boton-texto { color: #fff; }
+.cabecera .boton-texto:hover { background: rgba(255, 255, 255, 0.12); }
+
+.cabecera .boton-secundario {
+  background: #fff;
+  border-color: #fff;
+  color: var(--negro);
+  font-weight: 700;
+}
+
+.cabecera .boton-secundario:hover { background: var(--amarillo); border-color: var(--amarillo); color: var(--amarillo-tinta); }
+
+/* ------------------------------------------------------------ botones */
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: var(--radio);
+  border: 1.5px solid transparent;
+  font-family: var(--fuente-texto);
+  font-size: var(--t-2);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--dur-micro) var(--ease-micro), color var(--dur-micro) var(--ease-micro), transform var(--dur-micro) var(--ease-micro);
+}
+
+.boton:active { transform: translateY(1px); }
+
+.boton-primario {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: #fff;
+}
+
+.boton-primario:hover { background: var(--primario-oscuro); border-color: var(--primario-oscuro); color: #fff; }
+
+.boton-secundario {
+  background: #fff;
+  border-color: var(--negro);
+  color: var(--negro);
+}
+
+.boton-secundario:hover { background: var(--negro); color: #fff; }
+
+.boton-texto {
+  background: transparent;
+  border-color: transparent;
+  color: var(--primario-oscuro);
+  padding: 0 10px;
+}
+
+.boton-texto:hover { background: var(--primario-claro); }
+
+.boton-peligro {
+  background: #9c1c1c;
+  border-color: #9c1c1c;
+  color: #fff;
+}
+
+.boton-icono {
+  min-width: 44px;
+  padding: 0;
+}
+
+.boton[disabled], .boton[aria-disabled="true"] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.enlace-suave {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
+  font-weight: 600;
+  color: var(--primario-oscuro);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+/* ------------------------------------------------------------ portada (cinta) */
+
+/* Cinta amarilla bajo la cabecera: el dato institucional que se repite en
+   todas las páginas públicas. */
+.cinta {
+  background: var(--amarillo);
+  color: var(--amarillo-tinta);
+  font-family: var(--fuente-texto);
+  font-size: var(--t-1);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 9px 16px;
+}
+
+/* Foto de apertura: la imagen manda, el título se apoya abajo con degradado. */
+.cierre-foto {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--negro);
+  min-height: clamp(340px, 46vh, 520px);
+}
+
+/* Sin foto, degradado del verde de la marca: la portada nunca queda en blanco. */
+.cierre-foto::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 90% at 78% 12%, rgba(247, 201, 72, 0.35), transparent 55%),
+    linear-gradient(150deg, #126b41 0%, #0d1a12 100%);
+  z-index: 0;
+}
+
+.cierre-imagen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.cierre-foto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 14, 10, 0.18) 0%, rgba(8, 14, 10, 0.55) 52%, rgba(8, 14, 10, 0.9) 100%);
+  z-index: 2;
+}
+
+.cierre-texto {
+  position: relative;
+  z-index: 3;
+  width: min(1240px, 100% - 32px);
+  margin-inline: auto;
+  padding: var(--e5) 0 var(--e6);
+  color: #fff;
+}
+
+.cierre-titulo {
+  font-family: var(--fuente-cartel);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: var(--cartel);
+  line-height: 0.86;
+  letter-spacing: 0.005em;
+  color: #fff;
+  margin: 0;
+}
+
+.cierre-titulo span { color: var(--amarillo); }
+
+.cierre-bajada {
+  color: #e4e8e2;
+  font-size: var(--t-3);
+  line-height: 1.45;
+  margin: 8px 0 0;
+  max-width: 32ch;
+}
+
+/* Tarjeta blanca que muerde la foto: acciones arriba y cifras abajo. */
+.tarjeta-portada {
+  position: relative;
+  z-index: 4;
+  width: min(1240px, 100% - 32px);
+  margin: -22px auto 0;
+  background: #fff;
+  border-radius: 12px;
+  padding: var(--e4);
+  box-shadow: 0 10px 26px rgba(10, 20, 14, 0.16);
+}
+
+.tarjeta-acciones {
+  display: flex;
+  gap: var(--e2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.cifras-portada {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: var(--e3) 0 0;
+  padding: var(--e3) 0 0;
+  border-top: 1px solid var(--borde);
+}
+
+.cifras-portada li { min-width: 0; }
+
+.cifras-portada li + li {
+  border-left: 1px solid var(--borde);
+  padding-left: var(--e2);
+}
+
+.cifras-portada b {
+  display: block;
+  font-family: var(--fuente-cartel);
+  font-weight: 400;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--tinta);
+}
+
+.cifras-portada span {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+  margin-top: 3px;
+}
+
+/* Fichas en fila: miniatura, estado, nombre y temática en una línea legible. */
+.fichas-fila { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--e3); }
+
+.fila-taller {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  align-items: center;
+  gap: var(--e3);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  transition: border-color var(--dur-micro) var(--ease-micro), box-shadow var(--dur-micro) var(--ease-micro);
+}
+
+.fila-taller:hover { border-color: var(--primario); box-shadow: var(--sombra-2); }
+
+.fila-foto {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  display: block;
+  background: var(--superficie-alt);
+}
+
+.fila-folio {
+  display: grid;
+  place-items: center;
+  font-family: var(--fuente-cartel);
+  font-size: 1.4rem;
+  color: var(--primario-oscuro);
+}
+
+.fila-datos { padding: var(--e2) 0; min-width: 0; }
+
+.fila-estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: #14573a;
+  margin-bottom: 4px;
+}
+
+.fila-estado::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.fila-estado.estado-planificado { color: #6b6250; }
+.fila-estado.estado-en_ejecucion { color: #14573a; }
+.fila-estado.estado-finalizado { color: #5b6b62; }
+
+.fila-datos h3 { margin: 0 0 3px; font-size: 0.98rem; line-height: 1.25; }
+.fila-datos h3 a { text-decoration: none; color: var(--tinta); }
+.fila-datos h3 a:hover { color: var(--primario-oscuro); text-decoration: underline; text-underline-offset: 3px; }
+
+.fila-meta {
+  margin: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+.fila-flecha { padding-right: var(--e3); color: var(--primario-oscuro); font-weight: 700; }
+
+@media (max-width: 640px) {
+  .cifras-portada { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--e2); }
+  .cifras-portada li:nth-child(3) { border-left: 0; padding-left: 0; }
+  .fila-taller { grid-template-columns: 84px 1fr; }
+  .fila-foto { width: 84px; height: 84px; }
+  .fila-flecha { display: none; }
+  .cierre-foto { min-height: 300px; }
+}
+
+
+
+/* ------------------------------------------------------------ tarjetas y listas */
+
+.contenido-principal {
+  padding: var(--e6) 0 var(--e8);
+}
+
+.rejilla-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--e4);
+}
+
+.panel-blanco {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-caja);
+  padding: var(--e4);
+}
+
+.tarjeta {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: var(--e4);
+  transition: box-shadow var(--dur-micro) var(--ease-micro), transform var(--dur-micro) var(--ease-micro);
+}
+
+.tarjeta:hover {
+  box-shadow: var(--sombra-2);
+  transform: translateY(-2px);
+}
+
+.tarjeta h3 { margin: 0 0 6px; }
+
+/* Insignias de estado: punto + texto, sin caja dura. */
+.insignia {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  font-size: var(--t-1);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: #eef1ef;
+  color: var(--tinta-suave);
+  border: 0;
+}
+
+.insignia::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.insignia-en_ejecucion,
+.insignia-en-ejecucion {
+  background: var(--primario-claro);
+  color: #14573a;
+}
+
+.insignia-finalizado {
+  background: #eceeec;
+  color: #4a544d;
+}
+
+.insignia-planificado {
+  background: #fdf1d6;
+  color: #7a5300;
+}
+
+/* ------------------------------------------------------------ fichas del archivo (tarjeta con foto) */
+
+.fichas-archivo {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--e4);
+}
+
+.ficha-archivo {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow var(--dur-micro) var(--ease-micro), transform var(--dur-micro) var(--ease-micro);
+}
+
+.ficha-archivo:hover {
+  box-shadow: var(--sombra-2);
+  transform: translateY(-2px);
+}
+
+.foto-hueco {
+  display: block;
+  width: 100%;
+  /* Sin esto la foto se aplasta: en una tarjeta de columna flexible el alto del
+     contenedor manda y la imagen, que puede encogerse, queda como una franja. */
+  flex: 0 0 auto;
+  /* 5:4 deja ver el 60 % de una foto vertical y casi entera una horizontal. */
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  object-position: center;
+  background: var(--primario-claro);
+}
+
+/* La ficha del archivo traía la foto como una franja de 52 px: se veía un
+   pedazo y no se entendía qué era. Ahora es una miniatura 5:4 de verdad. */
+.ficha-archivo .foto-hueco,
+.ficha-archivo img.foto-real {
+  height: auto;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  object-position: center;
+  flex: 0 0 auto;
+}
+
+/* Sin foto: folio grande, como el número de un catálogo. */
+.foto-hueco.folio {
+  display: grid;
+  place-items: center;
+  font-family: var(--fuente-cartel);
+  font-size: 3rem;
+  color: #7fae95;
+  background: linear-gradient(150deg, #eaf3ee, #d7e8de);
+  letter-spacing: 0.04em;
+}
+
+.ficha-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--e3) var(--e3) var(--e4);
+  flex: 1;
+}
+
+.ficha-texto h3 {
+  font-size: 1.02rem;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.enlace-ficha {
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.enlace-ficha::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.enlace-ficha:hover { color: var(--primario-oscuro); }
+
+.ficha-desc {
+  font-size: var(--t-2);
+  color: var(--tinta-suave);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ficha-campos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e1) var(--e3);
+  margin: var(--e1) 0 0;
+  font-size: var(--t-1);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+}
+
+.campo-archivo { display: inline-flex; align-items: baseline; gap: 5px; }
+
+.campo-archivo b {
+  font-family: var(--fuente-texto);
+  font-size: var(--t-2);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--tinta);
+}
+
+.ficha-abrir {
+  margin-top: auto;
+  padding-top: var(--e2);
+  font-size: var(--t-2);
+  font-weight: 700;
+  color: var(--primario-oscuro);
+}
+
+.ficha-archivo .sello-archivo {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--tinta);
+  border-radius: 999px;
+  padding: 6px 11px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------ bandas de temática */
+
+.banda-negra {
+  background: var(--negro);
+  color: #fff;
+  padding: var(--e7) 0;
+}
+
+.banda-negra h2 { color: #9aa39c; font-family: var(--fuente-texto); font-size: var(--t-1); letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; margin: 0 0 var(--e4); }
+
+.lista-tematicas {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--e2);
+  display: flex;
+  gap: var(--e5);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.lista-tematicas a {
+  display: block;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lista-tematicas .numero {
+  font-family: var(--fuente-cartel);
+  font-size: 2.4rem;
+  line-height: 1;
+  color: var(--amarillo);
+  display: block;
+}
+
+.lista-tematicas .nombre-tematica {
+  font-family: var(--fuente-cartel);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-top: 4px;
+  display: block;
+}
+
+.lista-tematicas a:hover .nombre-tematica { color: var(--amarillo); }
+
+/* Carpetas del archivo (bloques por temática en /talleres y /). */
+.carpetas { display: grid; gap: var(--e7); }
+
+.carpeta-tab {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e2);
+  border-bottom: 2px solid var(--negro);
+  padding-bottom: 10px;
+  margin-bottom: var(--e4);
+}
+
+.carpeta-tab h2 {
+  margin: 0;
+  font-size: var(--t-5);
+}
+
+.carpeta-tab span {
+  font-family: var(--fuente-texto);
+  font-size: var(--t-2);
+  font-weight: 700;
+  color: var(--tinta-suave);
+}
+
+/* ------------------------------------------------------------ ficha del taller */
+
+.portada-entidad {
+  margin: 0 0 var(--e5);
+  border-radius: var(--radio-caja);
+  overflow: hidden;
+  background: var(--primario-claro);
+}
+
+.portada-entidad img {
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  object-fit: cover;
+}
+
+.portada-entidad.portada-caratula img { aspect-ratio: 16 / 7; }
+
+.bloque-ficha {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-caja);
+  padding: var(--e4);
+}
+
+/* ------------------------------------------------------------ formularios */
+
+.formulario {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-caja);
+  padding: var(--e4);
+}
+
+.formulario label,
+.formulario .campo > label {
+  font-size: var(--t-2);
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.formulario input[type="text"],
+.formulario input[type="email"],
+.formulario input[type="password"],
+.formulario input[type="number"],
+.formulario input[type="date"],
+.formulario input[type="search"],
+.formulario select,
+.formulario textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--borde-control);
+  border-radius: var(--radio);
+  background: #fff;
+  color: var(--tinta);
+  font-family: var(--fuente-texto);
+  font-size: var(--t-3);
+}
+
+.formulario textarea { min-height: 120px; resize: vertical; }
+
+.formulario input:focus-visible,
+.formulario select:focus-visible,
+.formulario textarea:focus-visible {
+  outline: 3px solid var(--primario);
+  outline-offset: 1px;
+  border-color: var(--primario);
+}
+
+/* ------------------------------------------------------------ tablas (panel) */
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-caja);
+  overflow: hidden;
+}
+
+.tabla th {
+  text-align: left;
+  font-size: var(--t-1);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tinta-suave);
+  background: var(--superficie-alt);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.tabla td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--linea-suave);
+  font-size: var(--t-2);
+}
+
+.tabla tr:last-child td { border-bottom: 0; }
+
+/* ------------------------------------------------------------ mensajes y estados */
+
+.mensaje {
+  padding: 14px 16px;
+  border-radius: var(--radio);
+  border: 1px solid var(--borde);
+  background: #fff;
+  font-size: var(--t-2);
+}
+
+.mensaje-error {
+  border-color: #e6b8b8;
+  background: #fdeaea;
+  color: #7d1414;
+}
+
+.estado-vacio {
+  background: #fff;
+  border: 1px dashed var(--borde);
+  border-radius: var(--radio-caja);
+  padding: var(--e6) var(--e4);
+  text-align: center;
+}
+
+.estado-vacio p { color: var(--tinta-suave); max-width: 46ch; margin-inline: auto; }
+
+/* ------------------------------------------------------------ pie */
+
+.pie {
+  background: var(--negro);
+  color: rgba(255, 255, 255, 0.72);
+  padding: var(--e6) 0;
+  font-size: var(--t-2);
+}
+
+.pie a { color: #fff; }
+
+.pie h2, .pie h3 { color: #fff; }
+
+/* ------------------------------------------------------------ migas y chips */
+
+.migas {
+  font-size: var(--t-2);
+  color: var(--tinta-suave);
+  padding: var(--e3) 0 0;
+}
+
+.migas a { color: var(--tinta-suave); }
+
+.chip,
+.chip-activo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--borde);
+  background: #fff;
+  color: var(--tinta);
+  font-size: var(--t-2);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.chip-activo {
+  background: var(--negro);
+  border-color: var(--negro);
+  color: #fff;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e1);
+  align-items: center;
+}
+
+/* ------------------------------------------------------------ páginas internas */
+
+/* Carátula de sección: la misma banda negra de la portada, más baja. */
+.caratula {
+  background: var(--negro);
+  color: #fff;
+  padding: var(--e6) 0 var(--e5);
+  margin: 0;
+  border: 0;
+}
+
+.caratula > * {
+  width: min(1240px, 100% - 32px);
+  margin-inline: auto;
+}
+
+.caratula .rotulo { color: var(--amarillo); }
+
+.caratula h1 {
+  color: #fff;
+  font-size: clamp(2.1rem, 7vw, 3.6rem);
+  margin: 6px 0 var(--e2);
+}
+
+.caratula-texto {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: var(--t-4);
+  max-width: 58ch;
+  margin: 0;
+}
+
+.caratula-corta { padding: var(--e5) 0; }
+
+/* Contenedor de contenido de las secciones: mismo ancho que la cabecera. */
+.contenedor {
+  width: min(1240px, 100% - 32px);
+  margin-inline: auto;
+}
+
+/* Chips de filtro (el marcado llama .chips a la fila). */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e1);
+  align-items: center;
+  padding: var(--e3) 0 var(--e1);
+}
+
+.chips-anio, .chips-estado { padding-top: 0; }
+
+.chips .chip span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--tinta-suave);
+  background: var(--superficie-alt);
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+.chips .chip-activo span { background: rgba(255, 255, 255, 0.18); color: #fff; }
+
+.chip-removible {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--primario-claro);
+  color: #14573a;
+  font-size: var(--t-2);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.chip-removible .equis { font-size: 1rem; line-height: 1; }
+
+.chips-removibles {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e1);
+  padding: 0;
+  margin: var(--e2) 0 0;
+}
+
+.contador-resultados {
+  font-size: var(--t-2);
+  color: var(--tinta-suave);
+  margin: var(--e3) 0 var(--e4);
+}
+
+/* Tarjetas de listado (recetas, documentos, videos). */
+.lista-tarjetas {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--e4);
+  padding: 0;
+  margin: 0;
+}
+
+.lista-tarjetas > li { display: flex; }
+
+.tarjeta-enlace {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: var(--e4);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  color: var(--tinta);
+  transition: box-shadow var(--dur-micro) var(--ease-micro), transform var(--dur-micro) var(--ease-micro);
+}
+
+.tarjeta-enlace:hover { box-shadow: var(--sombra-2); transform: translateY(-2px); color: var(--tinta); }
+
+.tarjeta-enlace h3 { margin: 0 0 6px; font-size: 1.02rem; }
+
+.tarjeta-angosta { max-width: 520px; }
+
+/* Listas simples (documentos, clases, pasos). */
+.lista-simple {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid var(--borde);
+}
+
+.elemento-simple {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  padding: var(--e2) 0;
+  border-bottom: 1px solid var(--linea-suave);
+  font-size: var(--t-2);
+}
+
+.elemento-simple a { font-weight: 600; }
+
+/* Archivos adjuntos. */
+.archivo-item {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  padding: var(--e2);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: #fff;
+  min-height: 56px;
+}
+
+.archivo-icono {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--superficie-alt);
+  color: var(--primario-oscuro);
+}
+
+.archivo-datos { min-width: 0; }
+.archivo-datos strong { display: block; font-size: var(--t-2); }
+.archivo-datos .ayuda { display: block; }
+
+/* Ficha del taller: rejilla de dos columnas con la foto como carátula. */
+.maestra {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.9fr);
+  gap: var(--e5);
+  align-items: start;
+}
+
+.campo-maestra {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e2);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--linea-suave);
+  font-size: var(--t-2);
+}
+
+.campo-maestra:last-child { border-bottom: 0; }
+
+.campo-maestra dt, .campo-maestra .ayuda {
+  color: var(--tinta-suave);
+  font-size: var(--t-1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin: 0;
+}
+
+.campo-maestra dd, .campo-maestra b {
+  margin: 0;
+  font-size: var(--t-3);
+  font-weight: 600;
+  text-align: right;
+}
+
+.linea { height: 1px; background: var(--linea-suave); border: 0; margin: var(--e3) 0; }
+
+/* Reproductor de video: caja negra con aire, nunca pegada al borde. */
+.video-reproductor {
+  position: relative;
+  background: var(--negro);
+  border-radius: var(--radio-caja);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  margin: 0 0 var(--e3);
+}
+
+.video-reproductor iframe,
+.video-reproductor video {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.bloque-ficha h2 { font-size: var(--t-4); margin-top: 0; }
+
+.bloque-ficha h2:not(:first-child) { margin-top: var(--e5); }
+
+@media (max-width: 900px) {
+  .maestra { grid-template-columns: 1fr; gap: var(--e4); }
+  .lista-tarjetas { grid-template-columns: 1fr; }
+  .caratula { padding: var(--e5) 0 var(--e4); }
+}
+
+/* ------------------------------------------------------------ celular */
+
+@media (max-width: 1024px) {
+  .rejilla-tarjetas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .fichas-archivo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .contenido-principal { padding: var(--e5) 0 var(--e7); }
+  .cabecera-fila { min-height: 60px; gap: 10px; flex-wrap: wrap; padding-bottom: 10px; }
+  .marca-texto { font-size: 0.95rem; }
+  .cabecera .busqueda { order: 3; flex-basis: 100%; max-width: none; }
+  .rejilla-tarjetas, .fichas-archivo { grid-template-columns: 1fr; }
+  .portada-entidad img, .portada-entidad.portada-caratula img { aspect-ratio: 4 / 3; }
+  .lista-tematicas { gap: var(--e4); }
+  .lista-tematicas .numero { font-size: 1.9rem; }
+  .banda-negra { padding: var(--e6) 0; }
+  h1 { font-size: clamp(1.75rem, 7vw, 2.4rem); }
+  .carpeta-tab h2 { font-size: var(--t-4); }
+}
+
+/* ------------------------------------------------------------ arreglos móviles */
+
+/* El menú de la cabecera se despliega desde su botón y no flota sobre el
+   buscador ni sobre la cinta: cerrado no ocupa lugar, abierto es un panel. */
+.cabecera details.mas[open] > .mas-lista { display: grid; }
+
+@media (max-width: 900px) {
+  /* Cerrado no se pinta: la regla vieja de estilos.css (details.menu .navegacion)
+     tiene más peso, por eso el selector repite la cadena completa. */
+  .cabecera details.menu > .navegacion { display: none; }
+
+  .cabecera details.menu { position: relative; }
+
+  .cabecera details.menu[open] > .navegacion {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: auto;
+    display: grid;
+    gap: 2px;
+    min-width: min(260px, calc(100vw - 32px));
+    padding: var(--e1);
+    background: var(--negro-suave);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radio-caja);
+    box-shadow: var(--sombra-2);
+    z-index: 40;
+  }
+
+  .cabecera details.menu[open] > .navegacion a {
+    justify-content: flex-start;
+    width: 100%;
+    padding: 10px 12px;
+  }
+
+  .cabecera .mas-lista { position: static; min-width: 0; margin-top: 4px; }
+}
+
+@media (max-width: 720px) {
+  /* La cinta entra en una línea: si no, ocupa 60 px de alto y empuja la foto. */
+  .cinta {
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    padding: 8px 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .cinta .cinta-larga { display: none; }
+
+  .marca-texto { display: inline; font-size: 0.9rem; }
+  .marca { gap: 8px; }
+}
+
+/* Sello de estado de las fichas: en pantallas angostas comparte la esquina y
+   el texto baja, si no se pisa con el nombre del taller. */
+@media (max-width: 1024px) {
+  .ficha-archivo .sello-archivo { top: 8px; right: 8px; left: auto; }
+  .ficha-archivo .ficha-texto { padding-top: 34px; }
+}
+
+/* En las listas de documentos el dato auxiliar va en su propia línea: antes
+   compartía la caja de línea con el nombre y se leía encimado. */
+.lista-simple .elemento-simple .ayuda { display: block; margin-top: 2px; }
+
+/* ------------------------------------------------------------ peso del verde */
+
+/* El verde manda sobre el amarillo: el amarillo queda para la cinta, la marca
+   y el punto del título. Cifras, temáticas y estados vuelven al verde. */
+.cifras-portada b { color: var(--primario-oscuro); }
+
+.lista-tematicas .numero { color: #63cf9e; }
+
+.banda-negra .lista-tematicas a:hover .numero { color: var(--amarillo); }
+
+.fila-estado.estado-finalizado { color: #14573a; }
+
+/* Enlace del título del taller: alto mínimo de toque y subrayado verde. */
+.fila-datos h3 a {
+  display: inline-block;
+  min-height: 24px;
+  padding: 2px 0;
+  text-decoration-color: rgba(31, 138, 84, 0.45);
+}
+
+.ficha-archivo .enlace-ficha { display: inline-block; min-height: 24px; padding: 2px 0; }
+
+/* Filete verde bajo la cinta: separa del contenido y vuelve a poner el verde
+   en el borde superior de cada página. */
+.cinta { border-bottom: 3px solid var(--primario); }
+
+/* ------------------------------------------------------------ cocina, no oficina */
+
+/* Detalles de cocina: cinta con cubiertos, etiqueta del plato sobre la foto,
+   tarjeta con cinta adhesiva, fichas tipo comanda y temáticas como menú de
+   pizarra. El verde sigue mandando; el amarillo es el acento de cocina. */
+
+.cinta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cinta svg { width: 15px; height: 15px; flex: 0 0 auto; }
+
+.etiqueta-plato {
+  /* En el flujo del texto y no en una esquina: en un teléfono angosto la
+     esquina caía justo sobre la bajada del título. */
+  position: relative;
+  z-index: 4;
+  display: inline-flex;
+  margin: 0 0 10px;
+  align-items: center;
+  gap: 7px;
+  max-width: calc(100% - 24px);
+  background: #fff;
+  color: var(--tinta);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  box-shadow: var(--sombra-1);
+}
+
+.etiqueta-plato::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--primario);
+  flex: 0 0 auto;
+}
+
+.etiqueta-plato .nombre-plato { color: var(--primario-oscuro); }
+
+/* La tarjeta se separa con una línea de perforación, como una ficha de receta. */
+.tarjeta-portada { border-top: 2px dashed #d9ded9; }
+
+.cifras-portada { border-top: 2px dashed var(--borde); }
+
+/* Fichas como comanda: borde punteado y muescas a los lados. */
+.fila-taller { position: relative; border-style: dashed; border-color: #ccd6cf; }
+
+.fila-taller::before,
+.fila-taller::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px dashed #ccd6cf;
+  top: 50%;
+  margin-top: -6px;
+}
+
+.fila-taller::before { left: -6px; }
+.fila-taller::after { right: -6px; }
+
+/* Pizarra del menú: fondo con tiza y puntos guía hasta el número. */
+.banda-negra.pizarra {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+.pizarra .lista-tematicas {
+  display: grid;
+  grid-auto-flow: row;
+  gap: 0;
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.pizarra .lista-tematicas li { width: 100%; min-width: 0; }
+.pizarra .lista-tematicas a { flex-wrap: wrap; }
+
+.pizarra .lista-tematicas a {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 4px 10px;
+  width: 100%;
+  padding-bottom: 8px;
+  border-bottom: 1px dotted rgba(255, 255, 255, 0.22);
+}
+
+.pizarra .lista-tematicas .nombre-tematica {
+  order: 1;
+  min-width: 0;
+  /* Las temáticas largas («Confección caja de desayuno») deben envolver: con
+     nowrap estiraban la página a 562 px en un teléfono de 390. */
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+/**/
+
+.pizarra .lista-tematicas .numero { grid-column: 2; font-size: 1.2rem; white-space: nowrap; }
+
+.pizarra h2 { color: #e9ece7; letter-spacing: 0.12em; }
+
+@media (max-width: 720px) {
+  .etiqueta-plato { right: 10px; bottom: 10px; font-size: 0.6rem; padding: 5px 10px; }
+}
+
+/* El verde como color de trabajo: la pestaña de sección va en verde lleno y los
+   títulos de sección llevan filete verde. El amarillo queda de acento. */
+.carpeta-tab {
+  background: var(--primario);
+  color: #fff;
+  border-radius: 10px 10px 0 0;
+  padding: 10px var(--e3);
+  margin-bottom: var(--e3);
+}
+
+.carpeta-tab h2 { color: #fff; margin: 0; }
+
+.carpeta-tab span { color: rgba(255, 255, 255, 0.82); }
+
+.v4-seccion h2,
+.seccion-titulo {
+  border-bottom: 3px solid var(--primario);
+  padding-bottom: 6px;
+  display: inline-block;
+}
+
+/* Un chip nunca mide más que la pantalla: si el nombre de la temática es largo
+   («Confección caja de desayuno para vender el día de la madre») envuelve. */
+.chips .chip {
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.3;
+  text-align: left;
+}
+
+/* Carátula de la ficha: las columnas eran `fr` sin mínimo cero, así que el
+   título más largo fijaba un ancho de 373 px dentro de un contenedor de 296 y
+   la página se iba a 405 px en un teléfono de 360. */
+.caratula-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); }
+
+.caratula-grid > * { min-width: 0; }
+
+.caratula h1, .caratula-texto, .caratula p { overflow-wrap: break-word; }
+
+@media (max-width: 900px) {
+  .caratula-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* El contador del menú se centra en la línea: con nombres que envuelven, el
+   «×1» quedaba flotando 30 px más arriba que el texto. */
+.pizarra .lista-tematicas a { align-items: center; }
+
+/* Ficha del taller en móvil: la rejilla de datos usaba `1fr` sin mínimo cero y
+   la columna «Participantes · por definir» empujaba la página 25 px de más. */
+.maestra, .maestra dl, .campo-maestra, .campo-maestra dd { min-width: 0; }
+
+.campo-maestra { flex-wrap: wrap; }
+
+.campo-maestra .linea { min-width: 12px; }
+
+.campo-maestra dd { overflow-wrap: anywhere; }
+
+@media (max-width: 700px) {
+  .caratula .maestra dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ------------------------------------------------------------------- verde */
+
+/* Título de la carátula: Anton tiene más alto de glifo que su línea y se
+   recortaba arriba y abajo (caja de 45 px para 50 px de contenido). */
+.caratula h1,
+.caratula-corta h1 {
+  line-height: 1.18;
+  padding-bottom: 6px;
+  letter-spacing: 0;
+}
+
+.caratula-corta { padding: var(--e5) 0 var(--e6); }
+
+/* Chip activo en verde, no en negro. */
+.chips .chip-activo {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: #fff;
+}
+
+
+/* Texto secundario sobre las bandas verdes: la gris de las tarjetas claras no
+   tiene contraste ahí (2,04:1). */
+.caratula .ayuda,
+.caratula-texto,
+.caratula .fecha,
+.caratula p.ayuda { color: rgba(255, 255, 255, 0.82); }
+
+/* Dos invisibles que aparecieron al medir contraste:
+   la pestaña verde de sección tenía enlaces en verde (1,5:1), y la tarjeta
+   blanca de la ficha heredaba el blanco de la carátula (1:1). */
+.carpeta-tab a { color: #fff; text-decoration-color: rgba(255, 255, 255, 0.6); }
+.carpeta-tab a:hover { color: var(--amarillo); }
+
+.caratula .maestra { color: var(--tinta); }
+.caratula .maestra .campo-maestra dt { color: var(--tinta-suave); }
+.caratula .maestra .campo-maestra dd { color: var(--tinta); }
+
+/* ---------------------------------------------------- visor dentro de la receta */
+
+/* El PDF o la foto se ven en la misma página, con el botón de descarga al lado:
+   antes se abrían en otra pestaña y cortaban la lectura. */
+.archivo-con-visor {
+  display: block;
+  background: var(--superficie-alt);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-caja);
+  padding: 10px;
+  margin-bottom: 16px;
+}
+
+.visor {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.visor-imagen { display: block; width: 100%; height: auto; }
+
+.visor-pdf {
+  display: block;
+  width: 100%;
+  height: min(70vh, 560px);
+  border: 0;
+}
+
+.archivo-con-visor .archivo-datos { margin-top: 12px; }
+
+.archivo-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.archivo-acciones .boton { flex: 1 1 140px; text-align: center; }
+
+/* Páginas del PDF convertidas a imagen: se leen dentro de la receta y no en
+   otra pestaña. */
+.visor-paginas { display: grid; gap: 8px; background: #fff; padding: 8px; }
+
+.visor-pagina {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+}
+
+.visor-nota {
+  margin: 0;
+  padding: 18px 14px;
+  font-size: 0.92rem;
+  color: var(--tinta-suave);
+  text-align: center;
+}
+
+/* --------------------------------------------------- arreglos de hover
+
+   La pestaña de carpeta se pinta verde con letras blancas, pero al pasar el
+   mouse la hoja base la pasaba a celeste y el texto seguía blanco: el título
+   del taller desaparecía. El hover se queda en verde, que es la marca. */
+.carpeta:hover .carpeta-tab,
+.carpeta:focus-within .carpeta-tab {
+  background: var(--primario-oscuro);
+  color: #fff;
+}
+
+.carpeta:hover .carpeta-tab h2,
+.carpeta:hover .carpeta-tab a,
+.carpeta:focus-within .carpeta-tab h2,
+.carpeta:focus-within .carpeta-tab a {
+  color: #fff;
+}
+
+/* El botón «Más» de la cabecera heredaba el gris pensado para fondo claro:
+   sobre el verde oscuro quedaba en 2:1. Queda como texto blanco, sin píldora,
+   para que la píldora siga significando «estás acá» y no se confunda con la
+   página activa; el realce aparece solo al pasar el mouse. */
+.cabecera details.mas > summary.menu-boton { color: #fff; }
+
+.cabecera details.mas[open] > summary.menu-boton,
+.cabecera details.mas > summary.menu-boton:hover,
+.cabecera details.mas > summary.menu-boton:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+/* Archivo con dos acciones (ver y descargar): en pantalla angosta los botones
+   bajan a su propia línea en vez de empujar la fila fuera de la pantalla. */
+.archivo-item { flex-wrap: wrap; }
+
+.archivo-item .archivo-datos { flex: 1 1 150px; min-width: 0; }
+
+.archivo-item .archivo-datos strong,
+.archivo-item .archivo-datos .ayuda { overflow-wrap: anywhere; }
+
+.archivo-item .boton { flex: 0 1 auto; max-width: 100%; }
+
+/* El botón «Menú» del celular: cerrado era una píldora blanca con tinta
+   oscura, y al abrirlo perdía el fondo y quedaba oscuro sobre verde (1,3:1).
+   Un solo par para los dos estados: píldora tenue sobre el verde y texto
+   blanco. */
+.cabecera details.menu > summary.menu-boton,
+.cabecera details.menu[open] > summary.menu-boton {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.cabecera details.menu > summary.menu-boton:hover,
+.cabecera details.menu > summary.menu-boton:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* Filtros de /talleres en el celular: una sola línea de temas que se desliza
+   de lado; el estado y el año viven en la tarjeta y en la ficha, así que sus
+   filas de chips se retiran. Con trece botones la lista de talleres quedaba
+   fuera de la pantalla. */
+@media (max-width: 700px) {
+  .chips {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .chips::-webkit-scrollbar { display: none; }
+
+  .chips .chip {
+    flex: 0 0 auto;
+    max-width: 13rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Después de la regla de arriba, para que el ocultamiento gane. */
+  .chips.chips-estado,
+  .chips.chips-anio { display: none; }
+
+  .contador-resultados { margin-top: 4px; }
+
+  /* Cabecera de la página: el visitante tiene que ver el primer taller sin
+     desplazarse. El texto de entrada se recorta a dos líneas. */
+  .caratula { padding: 20px 0 20px; }
+
+  .caratula-texto {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 16px;
+    line-height: 1.45;
+  }
+}
+
+/* Bloque de recetas dentro de la ficha del taller: cada receta se reconoce
+   por su foto (o por un ícono si todavía no tiene), no por leer el texto. */
+.bloque-recetas { gap: 14px; }
+
+.titulo-bloque {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--linea-suave);
+}
+
+.titulo-bloque-icono {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  border-radius: 12px;
+  background: var(--primario-claro);
+  color: var(--primario-oscuro);
+}
+
+.titulo-bloque h2 { margin: 0; }
+
+.titulo-bloque-nota {
+  margin: 2px 0 0;
+  font-size: 0.95rem;
+  color: var(--tinta-suave);
+}
+
+.cuenta-bloque {
+  margin-left: auto;
+  min-width: 34px;
+  padding: 4px 10px;
+  border-radius: var(--radio-chip);
+  background: var(--primario);
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.grilla-recetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.receta-mini {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-caja);
+  background: var(--superficie);
+  overflow: hidden;
+}
+
+.receta-mini-enlace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.receta-mini-medio {
+  display: block;
+  aspect-ratio: 4 / 3;
+  background: var(--superficie-alt);
+}
+
+.receta-mini-medio img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.receta-mini-sin-foto {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  color: var(--primario);
+  background:
+    repeating-linear-gradient(45deg, transparent 0 8px, rgba(21, 115, 71, 0.05) 8px 16px),
+    var(--primario-tinte);
+}
+
+.receta-mini-sin-foto span {
+  font-size: 0.82rem;
+  color: var(--tinta-suave);
+}
+
+.receta-mini-cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px 14px;
+}
+
+.receta-mini-codigo {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--tinta-suave);
+}
+
+.receta-mini-cuerpo strong { font-size: 1.02rem; line-height: 1.3; }
+
+.receta-mini-abrir {
+  margin-top: 6px;
+  font-weight: 700;
+  color: var(--primario-oscuro);
+}
+
+.receta-mini-enlace:hover .receta-mini-abrir,
+.receta-mini-enlace:focus-visible .receta-mini-abrir { text-decoration: underline; }
+
+.receta-mini-enlace:hover { outline: 3px solid var(--borde-fuerte); outline-offset: -3px; }
+
+@media (max-width: 700px) {
+  .grilla-recetas { grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .receta-mini-cuerpo { padding: 10px 10px 12px; }
+
+  .receta-mini-cuerpo strong { font-size: 0.95rem; }
+
+  .titulo-bloque-icono { width: 40px; height: 40px; }
+}
+
+/* En el celular la ficha escondía la foto y quedaba solo texto. Un cuadro de
+   96 px a la izquierda alcanza para reconocer el taller de un vistazo. */
+@media (max-width: 640px) {
+  .ficha-archivo {
+    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-areas:
+      "foto titulo"
+      "foto desc"
+      "foto meta"
+      "foto pie";
+    column-gap: 12px;
+  }
+
+  .ficha-archivo .foto-hueco,
+  .ficha-archivo img.foto-real {
+    display: block;
+    grid-area: foto;
+    align-self: start;
+    width: 96px;
+    height: 96px;
+    aspect-ratio: auto;
+    border-radius: 8px;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .ficha-archivo .foto-hueco.folio { font-size: 1.6rem; }
+}
+
+/* Hueco de foto en el listado de recetas: se ve como un espacio reservado,
+   no como una imagen que no cargó. */
+.miniatura-tarjeta.miniatura-vacia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--primario);
+  background:
+    repeating-linear-gradient(45deg, transparent 0 8px, rgba(21, 115, 71, 0.05) 8px 16px),
+    var(--primario-tinte);
+  border-bottom: 1px solid var(--linea-suave);
+}
+
+.miniatura-tarjeta.miniatura-vacia span {
+  font-size: 0.78rem;
+  color: var(--tinta-suave);
+}
+
+/* ==========================================================================
+   Ajustes de lectura pedidos por Nek (25-11): jerarquía de títulos, aire en
+   los bordes, filtros centrados y el enlace de la receta con forma de botón.
+   ========================================================================== */
+
+/* La foto de portada queda de fondo y el filtro oscuro se nota: el título
+   blanco se lee sobre cualquier imagen. */
+.cierre-foto::after {
+  background: linear-gradient(180deg, rgba(6, 12, 8, 0.42) 0%, rgba(6, 12, 8, 0.66) 48%, rgba(6, 12, 8, 0.9) 100%);
+}
+
+.cierre-foto::before {
+  background:
+    radial-gradient(120% 90% at 78% 12%, rgba(247, 201, 72, 0.16), transparent 55%),
+    linear-gradient(150deg, #0f5c38 0%, #0a1610 100%);
+}
+
+/* Sin el punto delante de «En el fuego»: la píldora ya se lee sola. */
+.etiqueta-plato::before { display: none; }
+.etiqueta-plato { padding: 7px 15px; }
+
+/* Un solo tipo de letra para los títulos: el de cartel, también en h3. */
+h3 {
+  font-family: var(--fuente-cartel);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  line-height: 1.12;
+  font-size: var(--t-4);
+}
+
+/* Con la tipografía de cartel hace falta aire entre letras para que se lea. */
+h2 { letter-spacing: 0.025em; }
+.nombre-tematica { letter-spacing: 0.05em; }
+.fila-datos h3,
+.tarjeta-enlace h3 {
+  font-size: 1.14rem;
+  letter-spacing: 0.025em;
+  margin-bottom: 5px;
+}
+
+/* «El menú del año»: el número de la derecha va en la misma línea que el
+   nombre de la temática. Antes caía en una fila propia, un poco más arriba,
+   y parecía desalineado. */
+.pizarra .lista-tematicas a { align-items: center; }
+
+.pizarra .lista-tematicas .nombre-tematica {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.pizarra .lista-tematicas .numero {
+  grid-column: 2;
+  grid-row: 1;
+}
+.numero {
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* En el teléfono los títulos y las descripciones tocaban la orilla. */
+@media (max-width: 700px) {
+  .contenedor,
+  .caratula > *,
+  .banda-negra .contenedor {
+    width: min(1240px, 100% - 44px);
+  }
+}
+
+/* Filtros centrados, con los controles a la misma altura y la misma línea. */
+.filtros {
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.filtros > div,
+.filtros .filtro-busqueda {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filtros > div > label,
+.filtros .filtro-busqueda > label {
+  font-size: var(--t-2);
+  font-weight: 600;
+  color: var(--tinta);
+}
+
+.filtros input,
+.filtros select,
+.filtros .boton {
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--borde-control);
+  border-radius: var(--radio);
+  background: #fff;
+  color: var(--tinta);
+  font-family: var(--fuente-texto);
+  font-size: var(--t-3);
+}
+
+.filtros .boton {
+  background: var(--primario);
+  border-color: var(--primario);
+  color: #fff;
+  font-weight: 700;
+}
+
+.filtros .boton:hover {
+  background: var(--primario-oscuro);
+  border-color: var(--primario-oscuro);
+}
+
+/* «Ver receta» como botón: se entiende que se puede entrar. */
+.ficha-abrir,
+.receta-mini-abrir {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 15px;
+  border: 1.5px solid var(--primario);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--primario-oscuro);
+  font-size: var(--t-2);
+  font-weight: 700;
+  transition: background var(--dur-micro) var(--ease-micro), color var(--dur-micro) var(--ease-micro);
+}
+
+.ficha-abrir { margin-top: auto; }
+.receta-mini-abrir { margin-top: var(--e2); }
+
+.tarjeta-enlace:hover .ficha-abrir,
+.receta-mini:hover .receta-mini-abrir {
+  background: var(--primario);
+  color: #fff;
+}
+
+/* Los chips de filtro, centrados como grupo. «safe» evita que en un teléfono
+   el primero quede cortado por la izquierda cuando la fila no cabe. */
+.chips { justify-content: safe center; }
+
+/* Etiqueta «En el fuego» de la portada: una barra fina que gira entre recetas.
+   Antes era una píldora alta con un punto, mucho círculo para dos palabras. */
+.plato-turno {
+  position: relative;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 100%;
+  margin: 0 0 12px;
+  padding: 4px 12px 4px 10px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(6, 12, 8, 0.22);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.plato-prefijo {
+  flex: 0 0 auto;
+  color: var(--tinta-suave);
+  white-space: nowrap;
+}
+
+.plato-prefijo::after {
+  content: "";
+  display: inline-block;
+  width: 1px;
+  height: 11px;
+  margin-left: 9px;
+  vertical-align: -1px;
+  background: var(--borde-control);
+}
+
+/* Las recetas se apilan en la misma celda: el ancho lo fija la más larga y no
+   hay saltos cuando cambia la que se ve. */
+.plato-nombres {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.plato-nombres > li { grid-area: 1 / 1; }
+
+.plato-nombre {
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  /* Ancho suficiente para el nombre completo; solo los títulos largos se
+     recortan, y siempre con puntos suspensivos a la vista. */
+  max-width: min(64vw, 280px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--primario-oscuro);
+  text-decoration: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s var(--ease-micro);
+}
+
+.plato-nombre.activo {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.plato-nombre:focus-visible {
+  outline: 2px solid var(--primario);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .plato-nombre { transition: none; }
+}
+
+/* --- Ajustes medidos del cartel · 2026-11-26 ------------------------------ */
+/* Los nombres de plato se recortaban contra el borde del panel: con
+   max-width:min(64vw,280px) llegaban a x=400 en un contenedor que termina en
+   x=368, y el overflow:hidden del cierre los escondía a mitad de palabra. */
+@media (max-width: 1024px) {
+  .plato-nombre {
+    max-width: 100%;
+  }
+}
+
+/* --- Cabecera y cajón del menú en móvil · 2026-11-26 --------------------- */
+/* Este archivo se carga después de estilos.css y redefine la cabecera como
+   flex, así que la corrección del apilado en tres filas vive aquí: marca,
+   menú y cuenta en una fila, y la búsqueda debajo a lo ancho. */
+@media (max-width: 1024px) {
+  .cabecera .cabecera-fila {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "marca menu cuenta"
+      "busqueda busqueda busqueda";
+    align-items: center;
+    gap: 6px 10px;
+    min-height: 0;
+    padding: 6px 0 8px;
+  }
+
+  .cabecera .marca { grid-area: marca; min-width: 0; }
+
+  .cabecera details.menu {
+    grid-area: menu;
+    justify-self: end;
+    position: static;
+    margin: 0;
+  }
+
+  .cabecera .cuenta { grid-area: cuenta; }
+
+  .cabecera .busqueda {
+    grid-area: busqueda;
+    order: 0;
+    flex-basis: auto;
+    width: 100%;
+    max-width: none;
+  }
+}
+
+/* En la mano los filtros se envuelven: el carrusel de chips escondía opciones
+   a 800 px de scroll sin ninguna señal de que hubiera más. */
+@media (max-width: 720px) {
+  .chips {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+}
+
+/* El nombre del plato no puede exceder la caja que lo contiene: la celda de la
+   grilla se dimensionaba por el texto (287 px) y se salía 47 px del panel. */
+.plato-nombres > li {
+  min-width: 0;
+  width: 100%;
+}
+
+.plato-nombre {
+  max-width: 100%;
+}
+
+/* --- Tablas con scroll propio ------------------------------------------- */
+/* cartel.css fija `overflow: hidden` en .tabla: a 1024 la tabla de talleres
+   medía 1027 px en un contenedor de 977 y el botón «Eliminar» quedaba 20 px
+   fuera de la pantalla, sin scroll que lo alcanzara. */
+@media (max-width: 1100px) {
+  .tabla {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+}
+
+/* --- Chips que se cortaban a mitad de palabra --------------------------- */
+/* La capa de 700 px dejaba `flex: 0 0 auto; max-width: 13rem; overflow: hidden`
+   en cada chip: el nombre largo se truncaba sin puntos suspensivos (el texto es
+   un nodo suelto, no un elemento con ellipsis) y el contador quedaba 400 px a la
+   derecha, fuera del recorte. Ahora el chip envuelve el nombre completo y el
+   contador nunca se encoge ni se sale. */
+@media (max-width: 1024px) {
+  .chips .chip {
+    flex: 0 1 auto;
+    max-width: 100%;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.25;
+  }
+
+  .chips .chip > span {
+    flex: 0 0 auto;
+    margin-left: 2px;
+  }
+}
+
+/* --- Marca, menú e Ingresar ya no se pisan ------------------------------ */
+/* Con tres columnas `auto` la marca no cedía: medía 200 px, el botón Menú
+   arrancaba en x=183 y el nombre de la marca se montaba 33 px encima del
+   botón. Ahora la marca es la columna elástica, su texto se recorta con
+   puntos suspensivos y en teléfono se oculta: los dos sellos alcanzan. */
+@media (max-width: 1024px) {
+  .cabecera .cabecera-fila {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .cabecera .marca {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .cabecera .marca-texto {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 520px) {
+  .cabecera .marca-texto { display: none; }
+}
+
+/* ============================================================================
+   Responsividad general · 2026-11-26 (segunda pasada)
+   Medido sobre 22 rutas en 8 anchuras (320 a 1920). Esta capa elimina los
+   tres tipos de defecto que quedaban: elementos fuera del viewport, contenido
+   recortado dentro de cajas con ocultamiento y solapes en la cabecera.
+   ========================================================================== */
+
+/* --- Cabecera: el modo de dos filas termina antes de 1024 ----------------- */
+/* A exactamente 1024 la cabecera quedaba en un estado híbrido: la fila en dos
+   líneas (modo móvil) pero el menú todavía absoluto, y el desplegable caía
+   encima del campo de búsqueda. Desde 1024 manda el diseño de escritorio: una
+   sola fila con el menú en línea. */
+@media (min-width: 1024px) {
+  .cabecera .cabecera-fila {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--e3);
+    min-height: 64px;
+    padding: 0;
+  }
+
+  .cabecera details.menu {
+    position: static;
+    justify-self: auto;
+    margin: 0;
+  }
+
+  .cabecera .marca { flex: 0 1 auto; }
+
+  .cabecera .busqueda {
+    width: 100%;
+    max-width: none;
+  }
+
+  details.menu .navegacion {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    gap: var(--e2);
+  }
+}
+
+/* --- Botones que cortaban su propia etiqueta ----------------------------- */
+/* «Agregar», «Filtrar» y similares tenían 89 px de caja para 96 px de texto:
+   se cortaba la última letra. Ahora el botón crece o parte la etiqueta. */
+.boton,
+.boton-texto,
+.chip-removible {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+/* --- Grillas de formulario con columnas fijas ---------------------------- */
+/* `div.dos-columnas` mantenía dos columnas a 320 px y se salía 15 px de la
+   pantalla. Con auto-fit cede a una sola columna cuando no hay espacio. */
+.dos-columnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+
+/* --- Filas de listado que recortaban su contenido ------------------------ */
+/* `li.fila-taller` medía 1208 px con 1212 de contenido y ocultaba el desborde;
+   `ficha-archivo`, `receta-mini` y `plato-nombre` repetían el patrón. Todas
+   pasan a columnas que ceden y texto que puede partirse. */
+.fila-taller {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.fila-datos,
+.ficha-archivo,
+.receta-mini,
+.elemento-simple,
+.archivo-datos {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.plato-nombre {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* --- Cabecera: la franja 1024-1199 vuelve al modo de dos filas ----------- */
+/* A 1024 la fila única de escritorio no cabe: la marca, cuatro enlaces, el
+   buscador y la cuenta suman más que el ancho. Esa franja vuelve al menú
+   desplegable y a la búsqueda en segunda línea, sin tocar el diseño de 1200
+   en adelante. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .cabecera .cabecera-fila {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "marca menu cuenta"
+      "busqueda busqueda busqueda";
+    gap: var(--e1) var(--e3);
+    align-items: center;
+    min-height: 0;
+  }
+
+  .cabecera .marca { grid-area: marca; min-width: 0; overflow: hidden; }
+  .cabecera details.menu { grid-area: menu; position: relative; }
+  .cabecera .cuenta { grid-area: cuenta; }
+  .cabecera .busqueda { grid-area: busqueda; width: 100%; }
+
+  .cabecera details.menu .navegacion {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-height: 70vh;
+    overflow-y: auto;
+    width: min(320px, calc(100vw - 24px));
+    flex-wrap: nowrap;
+  }
+}
+
+/* --- Menú de escritorio: una sola línea, sin partirse en tres ----------- */
+@media (min-width: 1200px) {
+  .cabecera details.menu { flex: 0 0 auto; }
+
+  .cabecera details.menu .navegacion {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  .cabecera .busqueda {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+}
+
+/* --- Botones dentro de barras de acciones ------------------------------- */
+/* `.acciones .boton` vuelve a fijar el no-partir con más peso que el `.boton`
+   general: a 320 px la etiqueta «Recetas (2)» medía 111 px en 105. */
+.acciones .boton,
+.acciones a.boton,
+.acciones button.boton {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* --- El desplegable del menú solo existe cuando está abierto ------------- */
+/* Varias capas fuerzan `display` en `.navegacion` para el modo de escritorio,
+   y eso anula la regla del navegador que oculta el contenido de un <details>
+   cerrado: el menú quedaba desplegado y encima de la búsqueda a 1024 px.
+   Aquí se restituye la lógica: cerrado, oculto; abierto, visible. */
+details.menu:not([open]) > .navegacion {
+  display: none !important;
+}
+
+/* En escritorio el menú no se despliega: está siempre en línea y el botón
+   «Menú» estorba. */
+@media (min-width: 1200px) {
+  details.menu > summary { display: none; }
+  details.menu > .navegacion { display: flex !important; }
+}
+
+/* --- Corrección de las dos reglas anteriores ---------------------------- */
+/* 1) En la franja 1024-1199 el desplegable estaba en una fila del grid y al
+      abrirse estiraba la cabecera hasta 364 px. Vuelve a flotar por encima.
+   2) La regla que oculta el desplegable cerrado tenía más peso que la que lo
+      muestra en escritorio, y el menú desaparecía de 1200 en adelante. */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .cabecera details.menu .navegacion {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    left: auto;
+    width: min(320px, calc(100vw - 32px));
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 40;
+  }
+}
+
+@media (min-width: 1200px) {
+  .cabecera details.menu > .navegacion,
+  .cabecera details.menu:not([open]) > .navegacion,
+  .cabecera details.menu[open] > .navegacion {
+    display: flex !important;
+  }
+}
+
+/* --- Últimos dos recortes medidos --------------------------------------- */
+/* El botón «Recetas (2)» de la portada no partía su etiqueta porque
+   estilos.css fija el no-partir con una regla más específica dentro de
+   .caratula; a 320 px el texto medía 111 en una caja de 105. */
+.caratula .acciones .boton {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+/* La flecha de cada fila de taller mide 0 px en pantalla angosta, pero su
+   icono seguía pintando 6 px por fuera del contenedor y engordaba el ancho
+   de la fila. */
+.fila-taller .fila-flecha {
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* --- La marca decorativa de cada fila estaba partida --------------------- */
+/* `li.fila-taller::after` es un punto de 12 px colocado a `right: -6px`, es
+   decir, deliberadamente fuera de la caja. El `overflow: hidden` de la fila lo
+   recortaba por la mitad y además inflaba el ancho del contenedor 6 px. Ningún
+   hijo real llega al borde, así que quitarlo no destapa nada. */
+.fila-taller {
+  overflow: visible;
+}
+
+/* --- La entrada de cada página se lee completa -------------------------- */
+/* Estaba limitada a dos líneas en móvil y tres en tablet: la frase cortaba a
+   media palabra («…cuántas persona…») y parecía un fallo. La entrada ocupa lo
+   que necesite; las descripciones cortas de las tarjetas siguen con su límite. */
+.caratula .caratula-texto {
+  display: block;
+  -webkit-line-clamp: none;
+  overflow: visible;
+}

@@ -6,10 +6,42 @@
   <p class="caratula-texto">
     Lo que quedó grabado en cada taller: técnicas, preparaciones y cierres de sesión.
   </p>
+
+  <form method="get" action="/videos" class="filtros" aria-label="Filtros">
+    <div class="filtro-busqueda">
+      <label for="q-pagina">Buscar por nombre</label>
+      <input id="q-pagina" name="q" type="search" value="<%= busqueda %>" placeholder="Ej.: masa madre">
+    </div>
+    <div>
+      <label for="f-taller">Taller</label>
+      <select id="f-taller" name="taller">
+        <option value="">Todos los talleres</option>
+        <% talleres.forEach(function (taller) { %>
+          <option value="<%= taller.id %>" <%= idTaller === taller.id ? 'selected' : '' %>><%= taller.nombre %></option>
+        <% }) %>
+      </select>
+    </div>
+    <div>
+      <label for="f-proveedor">Plataforma</label>
+      <select id="f-proveedor" name="proveedor">
+        <option value="">Todas</option>
+        <option value="youtube" <%= proveedor === 'youtube' ? 'selected' : '' %>>YouTube</option>
+        <option value="vimeo" <%= proveedor === 'vimeo' ? 'selected' : '' %>>Vimeo</option>
+      </select>
+    </div>
+    <button type="submit" class="boton">Filtrar</button>
+  </form>
 </section>
 
+<p class="contador-resultados" role="status"><%= total %> video<%= total === 1 ? '' : 's' %></p>
+
+<%- include('../partials/chips-filtros', { chips: chips, urlLimpiar: '/videos' }) %>
+
 <% if (videos.length === 0) { %>
-  <p class="ayuda">Todavía no hay videos registrados.</p>
+  <div class="estado-vacio">
+    <p>No hay videos con esos filtros.</p>
+    <a class="boton" href="/videos">Ver todos los videos</a>
+  </div>
 <% } else { %>
   <div class="carpetas">
     <% videos.forEach(function (video) { %>
@@ -19,8 +51,9 @@
           <span><%= video.tematica || 'Video' %></span>
         </div>
         <div class="carpeta-cuerpo">
-          <p class="ayuda" style="margin:.6rem 0">
+          <p class="ayuda">
             En <a href="<%= video.destino %>"><%= video.asociado %></a>
+            <% if (video.proveedor) { %> · <%- icono('video') %><%= video.proveedor === 'youtube' ? 'YouTube' : 'Vimeo' %><% } %>
           </p>
           <% if (video.embedUrl) { %>
             <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"

@@ -6,36 +6,53 @@
   <p class="caratula-texto">
     Cada receta guarda su ficha PDF, los talleres donde se hizo y quién la subió.
   </p>
-  <form method="get" action="/recetas" class="filtros">
-    <label for="q">Buscar por código, nombre o ingrediente</label>
-    <input id="q" name="q" type="search" value="<%= busqueda %>" placeholder="Ej.: REC-001, mermelada o ciruela">
+
+  <form method="get" action="/recetas" class="filtros" role="search">
+    <div class="filtro-busqueda">
+      <label for="q-pagina">Buscar una receta</label>
+      <input id="q-pagina" name="q" type="search" value="<%= busqueda %>"
+             placeholder="mermelada, pan amasado, cazuela…">
+    </div>
     <button type="submit" class="boton">Buscar</button>
   </form>
-  <% if (busqueda) { %>
-    <p class="ayuda">
-      <%= recetas.length %> resultado<%= recetas.length === 1 ? '' : 's' %> para «<%= busqueda %>».
-      <a href="/recetas">Ver todas</a>
-    </p>
-  <% } %>
 </section>
 
+<p class="contador-resultados" role="status">
+  <%= recetas.length %> receta<%= recetas.length === 1 ? '' : 's' %><% if (busqueda) { %> para «<%= busqueda %>»<% } %>
+</p>
+
+<%- include('../partials/chips-filtros', { chips: chips, urlLimpiar: '/recetas' }) %>
+
 <% if (recetas.length === 0) { %>
-  <p class="ayuda">
-    No hay recetas para esa búsqueda.
+  <div class="estado-vacio">
+    <p>No hay recetas para esos filtros.</p>
     <a class="boton" href="/recetas">Ver todas las recetas</a>
-  </p>
+  </div>
 <% } else { %>
+  <h2 class="visualmente-oculto">Todas las recetas del archivo</h2>
   <ul class="lista-tarjetas">
     <% recetas.forEach(function (receta) { %>
       <li class="tarjeta tarjeta-enlace">
-        <% if (receta.id_imagen) { %>
-          <img class="miniatura-tarjeta" src="/documentos/<%= receta.id_imagen %>/ver" alt="" loading="lazy">
+        <%# Solo una foto subida se muestra como miniatura; la ficha en PDF vive
+            en la página de la receta, donde se puede leer. %>
+        <% if (receta.imagen_es_imagen) { %>
+          <img class="miniatura-tarjeta" src="/documentos/<%= receta.id_imagen %>/ver"
+               alt="Foto de <%= receta.nombre %>" loading="lazy">
+        <% } else { %>
+          <span class="miniatura-tarjeta miniatura-vacia" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 10h16v3a6 6 0 0 1-6 6h-4a6 6 0 0 1-6-6z"/>
+              <path d="M2.5 10h19"/>
+              <path d="M9 6.5c0-1 1-1.4 1-2.5M14 6.5c0-1 1-1.4 1-2.5"/>
+            </svg>
+            <span>Sin foto todavía</span>
+          </span>
         <% } %>
-        <p class="etiqueta"><%= receta.codigo %></p>
         <h3><a class="enlace-ficha" href="/recetas/<%= receta.id %>"><%= receta.nombre %></a></h3>
         <p><%= receta.descripcion || 'Sin descripción.' %></p>
         <p class="ayuda">
           <%= receta.talleres_nombres ? 'Se preparó en: ' + receta.talleres_nombres : 'Todavía no está asociada a un taller' %>
+          <% if (receta.archivos) { %> · <%- icono('pdf') %><%= receta.archivos %> archivo<%= receta.archivos === 1 ? '' : 's' %><% } %>
         </p>
         <span class="ficha-abrir" aria-hidden="true">Ver receta →</span>
       </li>

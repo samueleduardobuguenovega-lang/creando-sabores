@@ -8,6 +8,8 @@ const { registrar } = require('../src/auditoria');
 const v = require('../src/validaciones');
 const { puedeTocar } = require('../src/permisos');
 const archivos = require('../src/archivos');
+const { creadorDeUrls, chip } = require('../src/facetas');
+const { vistaDePagina } = require('../src/pdf');
 
 const router = express.Router();
 const TAMANO_MAXIMO = 10 * 1024 * 1024;
@@ -28,7 +30,10 @@ const carga = multer({
   },
 });
 
-async function cargarDatos() {
+async function cargarDatos(filtros = {}) {
+  const busqueda = (filtros.q ?? '').toString().trim();
+  const tipo = ['pdf', 'imagen'].includes(filtros.tipo) ? filtros.tipo : '';
+  const origen = ['taller', 'receta'].includes(filtros.origen) ? filtros.origen : '';
   const [documentos, talleres, recetas] = await Promise.all([
     query(
       `SELECT d.id, d.nombre, d.archivo, d.tamano, d.tipo_mime, d.creado_en,
@@ -38,17 +43,40 @@ async function cargarDatos() {
          LEFT JOIN taller t ON t.id = d.id_taller
          LEFT JOIN receta r ON r.id = d.id_receta
         WHERE d.eliminado_en IS NULL
-        ORDER BY d.creado_en DESC, d.id DESC`
+          AND ($1 = '' OR d.nombre ILIKE '%' || $1 || '%')
+          AND ($2 = '' OR ($2 = 'pdf' AND d.tipo_mime = 'application/pdf')
+                        OR ($2 = 'imagen' AND d.tipo_mime LIKE 'image/%'))
+          AND ($3 = '' OR ($3 = 'taller' AND d.id_taller IS NOT NULL)
+                        OR ($3 = 'receta' AND d.id_receta IS NOT NULL))
+        ORDER BY d.creado_en DESC, d.id DESC`,
+      [busqueda.length >= 2 ? busqueda.replace(/[\\%_]/g, '\\$&') : '', tipo, origen]
     ),
     query('SELECT id, nombre FROM taller WHERE eliminado_en IS NULL ORDER BY nombre'),
     query('SELECT id, codigo, nombre FROM receta WHERE eliminado_en IS NULL ORDER BY nombre'),
   ]);
-  return { documentos: documentos.rows, talleres: talleres.rows, recetas: recetas.rows };
+
+  const urlFiltro = creadorDeUrls('/admin/documentos', { q: busqueda, tipo, origen });
+  const chips = [];
+  if (busqueda) chips.push(chip(`Búsqueda: ${busqueda}`, urlFiltro({ q: '' })));
+  if (tipo) chips.push(chip(tipo === 'pdf' ? 'Tipo: PDF' : 'Tipo: Imagen', urlFiltro({ tipo: '' })));
+  if (origen) chips.push(chip(origen === 'taller' ? 'Origen: Taller' : 'Origen: Receta', urlFiltro({ origen: '' })));
+
+  return {
+    documentos: documentos.rows,
+    talleres: talleres.rows,
+    recetas: recetas.rows,
+    busqueda,
+    tipo,
+    origen,
+    urlFiltro,
+    chips,
+    total: documentos.rows.length,
+  };
 }
 
 async function renderListado(req, res, next, { estado = 200, errores = [], valores = {} } = {}) {
   try {
-    const datos = await cargarDatos();
+    const datos = await cargarDatos(req.query || {});
     return res.status(estado).render('admin/documentos', {
       titulo: 'Documentos PDF',
       ...datos,
@@ -222,23 +250,46 @@ router.post('/admin/documentos', requiereSesion, (req, res, next) => {
         ? `${cuantos}: ${archivos.describirTamano(totalOriginal)} → ` +
           `${archivos.describirTamano(totalGuardado)} (${ahorro} % menos).`
         : `${cuantos} correctamente.`;
-      return res.redirect(`/admin/documentos?ok=${encodeURIComponent(mensaje)}`);
+      // Si la subida salió desde la ficha del taller o de la receta, se vuelve
+      // ahí mismo: el usuario no pierde el contexto. Sin `volver`, el destino
+      // histórico es el listado (lo que esperan las pruebas de integración).
+      const volver = v.destinoSeguro(req.body.volver, '');
+      return res.redirect(
+        volver ? `${volver}?ok=${encodeURIComponent(mensaje)}` : `/admin/documentos?ok=${encodeURIComponent(mensaje)}`
+      );
     } catch (error) {
       return next(error);
     }
   });
 });
 
-async function enviarPdf(req, res, next) {
+async function enviarPdf(req, res, next, { publico = false, descarga = false } = {}) {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id < 1) return next();
 
+    // Un documento en papelera no se entrega nunca. Sin sesión, además, su
+    // taller o receta tiene que estar publicado: el archivo de un borrador no
+    // se descarga aunque alguien adivine el id.
     const { rows } = await query(
-      'SELECT nombre, archivo, tipo_mime, contenido FROM documento WHERE id = $1',
+      `SELECT d.nombre, d.archivo, d.tipo_mime, d.contenido,
+              CASE WHEN d.id_taller IS NOT NULL THEN
+                     EXISTS (SELECT 1 FROM taller t
+                              WHERE t.id = d.id_taller AND t.publicado AND t.eliminado_en IS NULL)
+                   ELSE
+                     EXISTS (SELECT 1 FROM receta r
+                              WHERE r.id = d.id_receta AND r.eliminado_en IS NULL)
+                     AND (NOT EXISTS (SELECT 1 FROM receta_taller rt WHERE rt.id_receta = d.id_receta)
+                          OR EXISTS (SELECT 1 FROM receta_taller rt
+                                       JOIN taller t2 ON t2.id = rt.id_taller
+                                      WHERE rt.id_receta = d.id_receta
+                                        AND t2.publicado AND t2.eliminado_en IS NULL))
+              END AS visible
+         FROM documento d
+        WHERE d.id = $1 AND d.eliminado_en IS NULL`,
       [id]
     );
-    if (!rows[0] || !rows[0].contenido) {
+    if (!rows[0] || !rows[0].contenido || (publico && !rows[0].visible)) {
       return res.status(404).render('error', {
         titulo: 'Documento no encontrado',
         mensaje: 'Ese documento no existe o fue eliminado.',
@@ -258,8 +309,10 @@ async function enviarPdf(req, res, next) {
 
     res.set({
       'Content-Type': tipoMime,
+      // `inline` para verlo en la misma pestaña; `attachment` para el botón de
+      // descarga. Es el mismo archivo: cambia solo la cabecera.
       'Content-Disposition':
-        `inline; filename="${nombreArchivo.replace(/[^\x20-\x7E]/g, '')}${extension}"; ` +
+        `${descarga ? 'attachment' : 'inline'}; filename="${nombreArchivo.replace(/[^\x20-\x7E]/g, '')}${extension}"; ` +
         `filename*=UTF-8''${encodeURIComponent(nombreArchivo + extension)}`,
       'X-Content-Type-Options': 'nosniff',
       'Cache-Control': 'private, no-store',
@@ -275,7 +328,52 @@ router.get('/admin/documentos/:id/ver', requiereSesion, enviarPdf);
 // Visor público: la ficha del taller ofrece sus PDF a cualquier visitante, así
 // que el mismo envío se expone sin sesión. El documento se busca por id; no se
 // listan documentos sueltos ni se exponen los de recetas sin taller.
-router.get('/documentos/:id/ver', enviarPdf);
+router.get('/documentos/:id/ver', (req, res, next) => enviarPdf(req, res, next, { publico: true }));
+
+// Descarga del mismo archivo, en la misma pestaña y sin abrir nada nuevo.
+router.get('/documentos/:id/descargar', (req, res, next) =>
+  enviarPdf(req, res, next, { publico: true, descarga: true })
+);
+
+// Una página del PDF convertida en imagen: es lo que permite leer el archivo
+// dentro de la receta, porque Chrome en Android no muestra PDF incrustado.
+router.get('/documentos/:id/vista.png', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    const pagina = Math.max(1, Number(req.query.p) || 1);
+    if (!Number.isInteger(id) || id < 1) return next();
+
+    const { rows } = await query(
+      `SELECT d.tipo_mime, d.contenido,
+              EXISTS (SELECT 1 FROM taller t
+                       WHERE t.id = d.id_taller AND t.publicado AND t.eliminado_en IS NULL)
+              OR (d.id_receta IS NOT NULL
+                  AND EXISTS (SELECT 1 FROM receta r
+                               WHERE r.id = d.id_receta AND r.eliminado_en IS NULL)
+                  AND (NOT EXISTS (SELECT 1 FROM receta_taller rt WHERE rt.id_receta = d.id_receta)
+                       OR EXISTS (SELECT 1 FROM receta_taller rt
+                                    JOIN taller t2 ON t2.id = rt.id_taller
+                                   WHERE rt.id_receta = d.id_receta
+                                     AND t2.publicado AND t2.eliminado_en IS NULL))) AS visible
+         FROM documento d
+        WHERE d.id = $1 AND d.eliminado_en IS NULL`,
+      [id]
+    );
+
+    if (!rows[0] || !rows[0].contenido || !rows[0].visible) return next();
+    if (rows[0].tipo_mime !== 'application/pdf') return next();
+
+    const imagen = await vistaDePagina(id, rows[0].contenido, pagina);
+    res.set({
+      'Content-Type': 'image/png',
+      'Cache-Control': 'private, max-age=3600',
+      'X-Content-Type-Options': 'nosniff',
+    });
+    return res.send(imagen);
+  } catch (error) {
+    return next(error);
+  }
+});
 
 // Borrar un documento suelto (RF-09): no hay que borrar el taller para quitarlo.
 router.post('/admin/documentos/:id/eliminar', requiereRol('admin'), async (req, res, next) => {
@@ -288,6 +386,8 @@ router.post('/admin/documentos/:id/eliminar', requiereRol('admin'), async (req, 
     if (!rows[0]) return next();
 
     await registrar(req.session.usuario.id, 'eliminar', 'documento', id, { nombre: rows[0].nombre });
+    const volver = v.destinoSeguro(req.body && req.body.volver, '');
+    if (volver) return res.redirect(`${volver}?ok=${encodeURIComponent('Documento enviado a la papelera.')}`);
     res.redirect(`/admin/documentos?ok=${encodeURIComponent('Documento enviado a la papelera.')}`);
   } catch (error) {
     next(error);

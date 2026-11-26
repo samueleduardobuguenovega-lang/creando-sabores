@@ -5,6 +5,7 @@ const { requiereSesion, requiereRol } = require('../src/auth');
 const { registrar } = require('../src/auditoria');
 const v = require('../src/validaciones');
 const { puedeTocar, recetaDe, sinPermiso } = require('../src/permisos');
+const { creadorDeUrls, chip } = require('../src/facetas');
 
 const router = express.Router();
 
@@ -66,12 +67,26 @@ async function cargarTalleres(seleccionados = []) {
 
 async function renderFormulario(res, { titulo, modo, receta, errores, status = 200 }) {
   const datosTalleres = await cargarTalleres(receta.seleccionados);
+  // En edición se listan los archivos ya adjuntos: la receta y sus PDF/fotos son
+  // la misma cosa, así que se ven y se suben desde el mismo formulario.
+  const documentos = receta.valores && receta.valores.id
+    ? (
+        await query(
+          `SELECT id, nombre, tamano, tipo_mime
+             FROM documento
+            WHERE id_receta = $1 AND eliminado_en IS NULL
+            ORDER BY creado_en DESC, id DESC`,
+          [receta.valores.id]
+        )
+      ).rows
+    : [];
   return res.status(status).render('admin/receta-form', {
     titulo,
     modo,
     receta: receta.valores,
     talleres: datosTalleres.talleres,
     talleresSeleccionados: datosTalleres.seleccionados,
+    documentos,
     errores,
   });
 }
@@ -85,20 +100,60 @@ async function validarTalleresSeleccionados(seleccionados) {
 router.get('/admin/recetas', requiereSesion, async (req, res, next) => {
   try {
     const busqueda = (req.query.q ?? '').toString().trim();
+    const idTaller = /^\d+$/.test(req.query.taller || '') ? Number(req.query.taller) : null;
+    const archivo = ['con', 'sin'].includes(req.query.archivo) ? req.query.archivo : '';
+
     const { rows: recetas } = await query(
       `SELECT r.id, r.codigo, r.nombre, r.enlace_pdf,
-              COUNT(DISTINCT rt.id_taller)::int AS talleres,
-              (SELECT COUNT(*) FROM documento d WHERE d.id_receta = r.id)::int AS documentos,
-              (SELECT d.id FROM documento d WHERE d.id_receta = r.id ORDER BY d.id LIMIT 1) AS id_documento
+              COUNT(DISTINCT t.id)::int AS talleres,
+              (SELECT COUNT(*) FROM documento d
+                WHERE d.id_receta = r.id AND d.eliminado_en IS NULL)::int AS documentos,
+              (SELECT d.id FROM documento d
+                WHERE d.id_receta = r.id AND d.eliminado_en IS NULL
+                ORDER BY d.id LIMIT 1) AS id_documento
          FROM receta r
          LEFT JOIN receta_taller rt ON rt.id_receta = r.id
+         LEFT JOIN taller t ON t.id = rt.id_taller AND t.eliminado_en IS NULL
         WHERE r.eliminado_en IS NULL
           AND ($1 = '' OR r.codigo ILIKE '%' || $1 || '%' OR r.nombre ILIKE '%' || $1 || '%')
+          AND ($2::int IS NULL OR EXISTS (
+                SELECT 1 FROM receta_taller rt2 WHERE rt2.id_receta = r.id AND rt2.id_taller = $2))
+          AND ($3 = '' OR ($3 = 'con' AND EXISTS (
+                SELECT 1 FROM documento d2 WHERE d2.id_receta = r.id AND d2.eliminado_en IS NULL))
+              OR ($3 = 'sin' AND NOT EXISTS (
+                SELECT 1 FROM documento d3 WHERE d3.id_receta = r.id AND d3.eliminado_en IS NULL)))
         GROUP BY r.id
         ORDER BY r.nombre, r.codigo`,
-      [busqueda]
+      [busqueda, idTaller, archivo]
     );
-    res.render('admin/recetas-lista', { titulo: 'Recetas', recetas, busqueda });
+
+    const { rows: talleres } = await query(
+      `SELECT id, nombre FROM taller WHERE eliminado_en IS NULL ORDER BY nombre`
+    );
+
+    const urlFiltro = creadorDeUrls('/admin/recetas', { q: busqueda, taller: idTaller, archivo });
+    const chips = [];
+    if (busqueda) chips.push(chip(`Búsqueda: ${busqueda}`, urlFiltro({ q: '' })));
+    if (idTaller) {
+      const elegido = talleres.find((fila) => fila.id === idTaller);
+      chips.push(chip(`Taller: ${elegido ? elegido.nombre : '#' + idTaller}`, urlFiltro({ taller: '' })));
+    }
+    if (archivo) chips.push(chip(archivo === 'con' ? 'Con archivos' : 'Sin archivos', urlFiltro({ archivo: '' })));
+
+    res.render('admin/recetas-lista', {
+      // Esta vista trae su propio buscador: la cabecera no repite un segundo
+      // campo con la misma etiqueta (y el mismo id).
+      ocultarBusqueda: true,
+      titulo: 'Recetas',
+      recetas,
+      busqueda,
+      idTaller,
+      archivo,
+      talleres,
+      urlFiltro,
+      chips,
+      total: recetas.length,
+    });
   } catch (error) {
     next(error);
   }

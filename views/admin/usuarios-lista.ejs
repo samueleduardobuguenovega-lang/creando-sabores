@@ -17,7 +17,13 @@
         <td><%= cuenta.nombre %></td>
         <td><code><%= cuenta.usuario %></code></td>
         <td><%= cuenta.rol === 'admin' ? 'Administrador' : 'Docente' %></td>
-        <td><%= cuenta.activo ? 'Activo' : 'Desactivado' %></td>
+        <td>
+          <% if (cuenta.activo) { %>
+            <span class="insignia insignia-finalizado"><%- icono('ok') %>Activo</span>
+          <% } else { %>
+            <span class="insignia insignia-oculto"><%- icono('candado') %>Desactivado</span>
+          <% } %>
+        </td>
         <td><%= fecha(cuenta.creado_en) %></td>
         <td><a href="/admin/usuarios/<%= cuenta.id %>/editar">Editar</a></td>
       </tr>

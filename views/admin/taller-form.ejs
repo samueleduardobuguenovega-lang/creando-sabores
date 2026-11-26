@@ -1,6 +1,9 @@
 <%- include('../partials/head') %>
 
-<h1><%= titulo %></h1>
+<div class="barra-titulo">
+  <h1><%= titulo %></h1>
+  <a class="boton boton-texto" href="/admin/talleres">Volver al listado</a>
+</div>
 
 <% if (errores.length > 0) { %>
   <div class="mensaje mensaje-error" role="alert">
@@ -11,32 +14,60 @@
   </div>
 <% } %>
 
-<form method="post"
+<%# Dónde queda lo que se guarda: sin esto el docente no sabe si el taller ya
+    está en el sitio público o sigue interno. %>
+<p class="mensaje mensaje-info">
+  <% if (usuario.rol === 'admin') { %>
+    <%- icono('ojo') %>Al guardar, este taller queda <strong>publicado en el sitio público</strong>. Puedes ocultarlo después desde su ficha.
+  <% } else { %>
+    <%- icono('candado') %>Este taller se guarda como <strong>borrador interno</strong>. Solo se verá en el sitio público cuando la administración lo publique.
+  <% } %>
+</p>
+
+<form novalidate method="post"
       action="<%= modo === 'crear' ? '/admin/talleres' : '/admin/talleres/' + taller.id %>"
-      class="formulario">
+      class="formulario formulario-taller"
+      data-previa-ficha="ficha-previa">
 
-  <label for="nombre">Nombre del taller</label>
-  <input id="nombre" name="nombre" type="text" required maxlength="140" value="<%= taller.nombre %>">
-
-  <label for="tematica">Temática</label>
-  <input id="tematica" name="tematica" type="text" required maxlength="120" value="<%= taller.tematica %>">
-
-  <label for="descripcion">Descripción</label>
-  <textarea id="descripcion" name="descripcion" rows="5" maxlength="2000"><%= taller.descripcion %></textarea>
-
-  <div class="fila-campos">
+  <div class="dos-columnas">
     <div>
-      <label for="fecha_planificada">Fecha planificada</label>
-      <input id="fecha_planificada" name="fecha_planificada" type="date" value="<%= taller.fecha_planificada %>">
+      <label for="nombre">Nombre del taller</label>
+      <input id="nombre" name="nombre" type="text" required maxlength="140" value="<%= taller.nombre %>" data-campo="nombre">
+
+      <label for="tematica">Temática</label>
+      <input id="tematica" name="tematica" type="text" required maxlength="120" value="<%= taller.tematica %>" data-campo="tematica">
+
+      <label for="descripcion">Descripción</label>
+      <textarea id="descripcion" name="descripcion" rows="5" maxlength="2000" data-campo="descripcion"><%= taller.descripcion %></textarea>
+
+      <div class="fila-campos">
+        <div>
+          <label for="fecha_planificada">Fecha planificada</label>
+          <input id="fecha_planificada" name="fecha_planificada" type="date" value="<%= taller.fecha_planificada %>" data-campo="fecha">
+        </div>
+        <div>
+          <label for="estado">Estado</label>
+          <select id="estado" name="estado" data-campo="estado">
+            <% ['planificado', 'en_ejecucion', 'finalizado'].forEach(function (clave) { %>
+              <option value="<%= clave %>" <%= taller.estado === clave ? 'selected' : '' %>><%= etiquetaEstado[clave] %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
     </div>
-    <div>
-      <label for="estado">Estado</label>
-      <select id="estado" name="estado">
-        <% ['planificado', 'en_ejecucion', 'finalizado'].forEach(function (clave) { %>
-          <option value="<%= clave %>" <%= taller.estado === clave ? 'selected' : '' %>><%= etiquetaEstado[clave] %></option>
-        <% }) %>
-      </select>
-    </div>
+
+    <aside class="vista-previa" aria-live="polite">
+      <p class="rotulo">Así se verá la ficha pública</p>
+      <article class="tarjeta" id="ficha-previa">
+        <p class="etiqueta" data-campo="tematica"><%= taller.tematica || 'Temática' %></p>
+        <h3 data-campo="nombre"><%= taller.nombre || 'Nombre del taller' %></h3>
+        <p data-campo="descripcion"><%= taller.descripcion || 'La descripción aparecerá aquí tal como en el sitio público.' %></p>
+        <p class="ayuda">
+          <span data-campo="fecha"><%= taller.fecha_planificada || 'Sin fecha' %></span> ·
+          <span class="insignia insignia-<%= taller.estado %>" data-campo="estado"><%= etiquetaEstado[taller.estado] %></span>
+        </p>
+      </article>
+    </aside>
   </div>
 
   <div class="acciones">

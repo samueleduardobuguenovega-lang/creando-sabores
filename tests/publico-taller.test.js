@@ -118,3 +118,29 @@ test('la ficha pública de una receta muestra quién la subió y su PDF', async 
   assert.match(respuesta.texto, /Ficha de la receta/);
   assert.match(respuesta.texto, new RegExp(`/documentos/${documentoRecetaId}/ver`));
 });
+
+test('la tarjeta de la receta muestra la foto subida y, sin foto, el hueco reservado', async () => {
+  const { rows: usuarios } = await pool.query("SELECT id FROM usuario WHERE usuario = 'docente'");
+  const idUsuario = usuarios[0].id;
+
+  // Con solo la ficha en PDF no se inventa una miniatura: se avisa que falta la foto.
+  const soloFicha = await anonimo.get(`/talleres/${tallerId}`);
+  assert.match(soloFicha.texto, /Sin foto todavía/);
+  assert.doesNotMatch(soloFicha.texto, /vista\.png/);
+
+  // Con foto cargada, la tarjeta la muestra.
+  const imagen = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==',
+    'base64'
+  );
+  const { rows } = await pool.query(
+    `INSERT INTO documento (nombre, archivo, tipo_mime, tamano, contenido, id_receta, id_usuario)
+     VALUES ('Foto de la receta', 'foto.png', 'image/png', $1, $2, $3, $4)
+     RETURNING id`,
+    [imagen.length, imagen, recetaId, idUsuario]
+  );
+
+  const conFoto = await anonimo.get(`/talleres/${tallerId}`);
+  assert.match(conFoto.texto, new RegExp(`receta-mini-medio[^]*?/documentos/${rows[0].id}/ver`));
+  await pool.query('DELETE FROM documento WHERE id = $1', [rows[0].id]);
+});

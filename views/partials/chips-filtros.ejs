@@ -1,0 +1,15 @@
+<%# Chips de filtros activos. Se incluye solo cuando hay al menos uno.
+    Espera `chips` (array de { etiqueta, quitar }) y `urlLimpiar`. %>
+<% if (chips && chips.length) { %>
+  <ul class="chips-removibles" aria-label="Filtros activos">
+    <% chips.forEach(function (filtro) { %>
+      <li>
+        <a class="chip-removible" href="<%= filtro.quitar %>" title="Quitar filtro">
+          <%= filtro.etiqueta %> <span class="equis" aria-hidden="true">×</span>
+          <span class="visualmente-oculto">Quitar filtro</span>
+        </a>
+      </li>
+    <% }) %>
+    <li><a class="chip-removible" href="<%= urlLimpiar %>">Limpiar filtros</a></li>
+  </ul>
+<% } %>

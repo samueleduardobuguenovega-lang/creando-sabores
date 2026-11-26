@@ -2,17 +2,43 @@
 
 <div class="barra-titulo">
   <h1>Recetas</h1>
-  <a class="boton boton-primario" href="/admin/recetas/nueva">Nueva receta</a>
+  <a class="boton boton-primario" href="/admin/recetas/nueva"><%- icono('ok') %>Nueva receta</a>
 </div>
 
-<form method="get" action="/admin/recetas" class="filtros">
-  <label for="q">Buscar por código o nombre</label>
-  <input id="q" name="q" type="search" value="<%= busqueda %>" placeholder="Código o nombre">
+<form method="get" action="/admin/recetas" class="filtros" aria-label="Filtros">
+  <div class="filtro-busqueda">
+    <label for="q">Buscar por código o nombre</label>
+    <input id="q" name="q" type="search" value="<%= busqueda %>" placeholder="Código o nombre">
+  </div>
+  <div>
+    <label for="f-taller">Taller</label>
+    <select id="f-taller" name="taller">
+      <option value="">Todos</option>
+      <% talleres.forEach(function (taller) { %>
+        <option value="<%= taller.id %>" <%= idTaller === taller.id ? 'selected' : '' %>><%= taller.nombre %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div>
+    <label for="f-archivo">Archivos</label>
+    <select id="f-archivo" name="archivo">
+      <option value="">Todas</option>
+      <option value="con" <%= archivo === 'con' ? 'selected' : '' %>>Con archivos</option>
+      <option value="sin" <%= archivo === 'sin' ? 'selected' : '' %>>Sin archivos</option>
+    </select>
+  </div>
   <button type="submit" class="boton">Filtrar</button>
 </form>
 
+<p class="contador-resultados" role="status"><%= total %> receta<%= total === 1 ? '' : 's' %></p>
+
+<%- include('../partials/chips-filtros', { chips: chips, urlLimpiar: '/admin/recetas' }) %>
+
 <% if (recetas.length === 0) { %>
-  <p class="ayuda">No hay recetas que coincidan con la búsqueda.</p>
+  <div class="estado-vacio">
+    <p>No hay recetas con esos filtros.</p>
+    <a class="boton" href="/admin/recetas">Ver todas</a>
+  </div>
 <% } else { %>
   <table class="tabla">
     <thead>
@@ -21,6 +47,7 @@
         <th>Nombre</th>
         <th class="numero">Talleres</th>
         <th>Documentos</th>
+        <th>Acciones</th>
       </tr>
     </thead>
     <tbody>
@@ -31,12 +58,16 @@
           <td class="numero"><%= receta.talleres %></td>
           <td>
             <% if (receta.documentos > 0) { %>
-              <a href="/admin/documentos/<%= receta.id_documento %>/ver" target="_blank" rel="noopener"><%= receta.documentos %> PDF</a>
+              <a href="/admin/documentos/<%= receta.id_documento %>/ver" target="_blank" rel="noopener"><%- icono('pdf') %><%= receta.documentos %> archivo<%= receta.documentos === 1 ? '' : 's' %></a>
             <% } else if (receta.enlace_pdf) { %>
               <a href="<%= receta.enlace_pdf %>" target="_blank" rel="noopener">Enlace externo</a>
             <% } else { %>
-              Sin PDF
+              <span class="ayuda">Sin archivos</span>
             <% } %>
+          </td>
+          <td class="acciones">
+            <a href="/admin/recetas/<%= receta.id %>/editar">Editar</a>
+            <a href="/admin/recetas/<%= receta.id %>/editar#archivos-receta">Adjuntar archivos</a>
           </td>
         </tr>
       <% }) %>

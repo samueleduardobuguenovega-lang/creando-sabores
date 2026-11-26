@@ -6,6 +6,7 @@ const { requiereSesion, requiereRol } = require('../src/auth');
 const { registrar } = require('../src/auditoria');
 const { puedeTocar, tallerDe, sinPermiso } = require('../src/permisos');
 const v = require('../src/validaciones');
+const { creadorDeUrls, chip } = require('../src/facetas');
 
 const router = express.Router();
 
@@ -43,9 +44,11 @@ router.get('/panel', requiereSesion, async (req, res, next) => {
     // mostramos solo la más urgente para que la lista siga siendo una acción
     // por fila. Prioridad: ejecución > recetas > documentos > video.
     const { rows: revision } = await query(
-      `SELECT t.id, t.nombre, t.estado,
+      `SELECT t.id, t.nombre, t.estado, t.id_usuario,
               (SELECT COUNT(*) FROM ejecucion e WHERE e.id_taller = t.id AND e.eliminado_en IS NULL)::int AS ejecuciones,
-              (SELECT COUNT(*) FROM receta_taller r WHERE r.id_taller = t.id)::int  AS recetas,
+              (SELECT COUNT(*) FROM receta_taller rt
+                 JOIN receta r ON r.id = rt.id_receta
+                WHERE rt.id_taller = t.id AND r.eliminado_en IS NULL)::int  AS recetas,
               (SELECT COUNT(*) FROM documento d WHERE d.id_taller = t.id AND d.eliminado_en IS NULL)::int AS documentos,
               (SELECT COUNT(*) FROM video v WHERE v.id_taller = t.id AND v.eliminado_en IS NULL)::int      AS videos
          FROM taller t
@@ -56,7 +59,10 @@ router.get('/panel', requiereSesion, async (req, res, next) => {
                  t.id`
     );
 
+    // Solo se ofrecen pendientes sobre talleres que esta persona puede editar:
+    // una bandeja que lleva a un 403 es peor que una bandeja vacía.
     const pendientes = revision
+      .filter((fila) => puedeTocar(req.session.usuario, fila))
       .map((fila) => {
         if (fila.ejecuciones === 0) {
           return { ...fila, falta: 'Falta registrar la ejecución', accion: `/admin/ejecuciones?taller=${fila.id}`, etiquetaAccion: 'Registrar ejecución' };
@@ -119,23 +125,59 @@ router.get('/admin/talleres', requiereSesion, async (req, res, next) => {
   try {
     const busqueda = (req.query.q ?? '').toString().trim();
     const estado = v.ESTADOS.includes(req.query.estado) ? req.query.estado : null;
+    const tematica = (req.query.tematica ?? '').toString().trim();
+    const publicado = ['1', '0'].includes(req.query.publicado) ? req.query.publicado : '';
 
     const { rows: talleres } = await query(
-      `SELECT t.id, t.nombre, t.tematica, t.estado, t.fecha_planificada, t.publicado,
+      `SELECT t.id, t.nombre, t.tematica, t.estado, t.fecha_planificada, t.publicado, t.id_usuario,
               COUNT(DISTINCT e.id)::int AS ejecuciones,
-              COUNT(DISTINCT r.id_receta)::int AS recetas
+              COUNT(DISTINCT rc.id)::int AS recetas
          FROM taller t
-         LEFT JOIN ejecucion e ON e.id_taller = t.id
+         LEFT JOIN ejecucion e ON e.id_taller = t.id AND e.eliminado_en IS NULL
          LEFT JOIN receta_taller r ON r.id_taller = t.id
+         LEFT JOIN receta rc ON rc.id = r.id_receta AND rc.eliminado_en IS NULL
         WHERE t.eliminado_en IS NULL
           AND ($1 = '' OR t.nombre ILIKE '%' || $1 || '%' OR t.tematica ILIKE '%' || $1 || '%')
           AND ($2::text IS NULL OR t.estado = $2)
+          AND ($3 = '' OR t.tematica = $3)
+          AND ($4 = '' OR t.publicado = ($4 = '1'))
         GROUP BY t.id
         ORDER BY t.creado_en DESC`,
-      [busqueda, estado]
+      [busqueda, estado, tematica, publicado]
     );
 
-    res.render('admin/talleres-lista', { titulo: 'Talleres', talleres, busqueda, estado });
+    const { rows: tematicas } = await query(
+      `SELECT tematica, COUNT(*)::int AS total FROM taller
+        WHERE eliminado_en IS NULL GROUP BY tematica ORDER BY tematica`
+    );
+
+    const urlFiltro = creadorDeUrls('/admin/talleres', {
+      q: busqueda,
+      estado: estado || '',
+      tematica,
+      publicado,
+    });
+    const chips = [];
+    if (busqueda) chips.push(chip(`Búsqueda: ${busqueda}`, urlFiltro({ q: '' })));
+    if (estado) chips.push(chip(`Estado: ${etiquetaEstado[estado]}`, urlFiltro({ estado: '' })));
+    if (tematica) chips.push(chip(`Temática: ${tematica}`, urlFiltro({ tematica: '' })));
+    if (publicado) chips.push(chip(publicado === '1' ? 'Publicados' : 'Sin publicar', urlFiltro({ publicado: '' })));
+
+    res.render('admin/talleres-lista', {
+      // Esta vista trae su propio buscador: la cabecera no repite un segundo
+      // campo con la misma etiqueta (y el mismo id).
+      ocultarBusqueda: true,
+      titulo: 'Talleres',
+      talleres,
+      busqueda,
+      estado,
+      tematica,
+      publicado,
+      tematicas,
+      urlFiltro,
+      chips,
+      total: talleres.length,
+    });
   } catch (error) {
     next(error);
   }
@@ -206,6 +248,15 @@ router.get('/admin/talleres/:id', requiereSesion, async (req, res, next) => {
         ORDER BY r.nombre`,
       [id]
     );
+    // Catálogo para vincular sin salir de la ficha: las que todavía no están.
+    const { rows: recetasDisponibles } = await query(
+      `SELECT r.id, r.codigo, r.nombre
+         FROM receta r
+        WHERE r.eliminado_en IS NULL
+          AND NOT EXISTS (SELECT 1 FROM receta_taller rt WHERE rt.id_receta = r.id AND rt.id_taller = $1)
+        ORDER BY r.nombre`,
+      [id]
+    );
     const { rows: ejecuciones } = await query(
       `SELECT id, fecha_ejecucion, cantidad_participantes, observaciones
          FROM ejecucion WHERE id_taller = $1 AND eliminado_en IS NULL
@@ -213,7 +264,9 @@ router.get('/admin/talleres/:id', requiereSesion, async (req, res, next) => {
       [id]
     );
     const { rows: documentos } = await query(
-      'SELECT id, nombre, tipo_mime, creado_en FROM documento WHERE id_taller = $1 AND eliminado_en IS NULL ORDER BY creado_en DESC',
+      `SELECT id, nombre, tamano, tipo_mime, creado_en
+         FROM documento WHERE id_taller = $1 AND eliminado_en IS NULL
+        ORDER BY creado_en DESC`,
       [id]
     );
     const { rows: videos } = await query(
@@ -235,6 +288,7 @@ router.get('/admin/talleres/:id', requiereSesion, async (req, res, next) => {
       taller,
       responsable: responsables[0] ? responsables[0].nombre : 'Cuenta eliminada',
       recetas,
+      recetasDisponibles,
       ejecuciones,
       documentos,
       videos: videosConReproductor,
@@ -363,6 +417,62 @@ router.post('/admin/talleres/:id/publicacion', requiereRol('admin'), async (req,
   }
 });
 
+// Recetas del taller: se vinculan y se desvinculan desde la ficha misma, que es
+// donde el docente está mirando el taller. Las recetas son del catálogo y no se
+// borran al desvincular: solo se corta la relación.
+router.post('/admin/talleres/:id/recetas', requiereSesion, async (req, res, next) => {
+  const id = Number(req.params.id) || 0;
+  const idReceta = Number(req.body.id_receta) || 0;
+  try {
+    const taller = await tallerDe(id);
+    if (!taller) return next();
+    if (!puedeTocar(req.session.usuario, taller)) {
+      return sinPermiso(
+        res,
+        'Este taller lo documenta otra persona.',
+        'Puedes consultarlo, pero solo quien lo creó o la administración pueden asociarle recetas.'
+      );
+    }
+
+    const { rows } = await query(
+      `INSERT INTO receta_taller (id_receta, id_taller)
+       SELECT r.id, $2 FROM receta r
+        WHERE r.id = $1 AND r.eliminado_en IS NULL
+          AND NOT EXISTS (SELECT 1 FROM receta_taller rt WHERE rt.id_receta = r.id AND rt.id_taller = $2)
+       RETURNING id_receta`,
+      [idReceta, id]
+    );
+    if (rows[0]) await registrar(req.session.usuario.id, 'vincular', 'taller', id, { id_receta: idReceta });
+
+    const aviso = rows[0] ? 'Receta asociada al taller.' : 'Esa receta ya estaba asociada.';
+    res.redirect(`/admin/talleres/${id}?ok=${encodeURIComponent(aviso)}#recetas`);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/admin/talleres/:id/recetas/:idReceta/quitar', requiereSesion, async (req, res, next) => {
+  const id = Number(req.params.id) || 0;
+  const idReceta = Number(req.params.idReceta) || 0;
+  try {
+    const taller = await tallerDe(id);
+    if (!taller) return next();
+    if (!puedeTocar(req.session.usuario, taller)) {
+      return sinPermiso(
+        res,
+        'Este taller lo documenta otra persona.',
+        'Puedes consultarlo, pero solo quien lo creó o la administración pueden quitarle recetas.'
+      );
+    }
+
+    await query('DELETE FROM receta_taller WHERE id_taller = $1 AND id_receta = $2', [id, idReceta]);
+    await registrar(req.session.usuario.id, 'desvincular', 'taller', id, { id_receta: idReceta });
+    res.redirect(`/admin/talleres/${id}?ok=${encodeURIComponent('Receta quitada del taller.')}#recetas`);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Papelera (RF-09). Solo la administración la ve: son las cosas que se mandaron
 // a eliminar y todavía se pueden recuperar. Purga = borrado definitivo.
 const ENTIDADES_PAPELERA = {
@@ -447,7 +557,12 @@ router.post('/admin/ejecuciones/:id/eliminar', requiereRol('admin'), async (req,
 
     await query('UPDATE ejecucion SET eliminado_en = now() WHERE id = $1', [id]);
     await registrar(req.session.usuario.id, 'eliminar', 'ejecucion', id, {});
-    res.redirect(`/admin/ejecuciones?ok=${encodeURIComponent('Ejecución enviada a la papelera.')}`);
+    const volver = v.destinoSeguro(req.body && req.body.volver, '');
+    res.redirect(
+      volver
+        ? `${volver}?ok=${encodeURIComponent('Ejecución enviada a la papelera.')}`
+        : `/admin/ejecuciones?ok=${encodeURIComponent('Ejecución enviada a la papelera.')}`
+    );
   } catch (error) {
     next(error);
   }
@@ -624,17 +739,158 @@ router.post('/admin/usuarios/:id', requiereRol('admin'), async (req, res, next) 
 
 // ------------------------------------------------------------ auditoría (RNF)
 
+// Cada entidad auditada se busca en su tabla real para poder decir si sigue
+// viva, si está en la papelera o si ya no existe. Sin esto la auditoría es una
+// lista de ids y JSON que nadie puede accionar.
+const ENTIDADES_AUDITORIA = {
+  taller: {
+    tabla: 'taller',
+    nombre: (fila) => fila.nombre,
+    enlace: (fila) => `/admin/talleres/${fila.id}`,
+  },
+  receta: {
+    tabla: 'receta',
+    nombre: (fila) => `${fila.codigo} · ${fila.nombre}`,
+    enlace: (fila) => `/admin/recetas/${fila.id}/editar`,
+  },
+  documento: {
+    tabla: 'documento',
+    nombre: (fila) => fila.nombre,
+    enlace: (fila) => `/admin/documentos/${fila.id}/ver`,
+  },
+  video: {
+    tabla: 'video',
+    nombre: (fila) => fila.nombre,
+    enlace: () => '/admin/videos',
+  },
+  ejecucion: {
+    tabla: 'ejecucion',
+    nombre: (fila) => `${fila.fecha || ''}${fila.taller ? ' · ' + fila.taller : ''}`.trim() || 'Ejecución',
+    enlace: () => '/admin/ejecuciones',
+  },
+  usuario: {
+    tabla: 'usuario',
+    nombre: (fila) => fila.nombre,
+    enlace: (fila) => `/admin/usuarios/${fila.id}/editar`,
+  },
+};
+
+const ETIQUETA_ACCION = {
+  crear: 'Creó',
+  actualizar: 'Actualizó',
+  publicar: 'Publicó',
+  ocultar: 'Ocultó',
+  eliminar: 'Envió a papelera',
+  restaurar: 'Restauró',
+  purgar: 'Borró definitivo',
+  clave: 'Cambió clave',
+  vincular: 'Asoció receta',
+  desvincular: 'Quitó receta',
+};
+
+// El detalle se guarda como JSON; al usuario se le muestra en castellano.
+const ETIQUETA_DETALLE = {
+  nombre: 'Nombre',
+  participantes: 'Participantes',
+  fecha: 'Fecha',
+  proveedor: 'Proveedor',
+  id_taller: 'Taller',
+  id_receta: 'Receta',
+  id_video: 'Video',
+};
+
+function resumenDetalle(detalle) {
+  if (!detalle || typeof detalle !== 'object') return '';
+  return Object.keys(detalle)
+    .filter((clave) => !/^id_/.test(clave) && detalle[clave] !== null && detalle[clave] !== '')
+    .map((clave) => `${ETIQUETA_DETALLE[clave] || clave}: ${detalle[clave]}`)
+    .join(' · ');
+}
+
 router.get('/admin/auditoria', requiereRol('admin'), async (req, res, next) => {
   try {
+    const accion = (req.query.accion ?? '').toString().trim();
+    const entidad = (req.query.entidad ?? '').toString().trim();
+    const idUsuario = Number(req.query.responsable) || 0;
+
     const { rows: registros } = await query(
-      `SELECT a.id, a.accion, a.entidad, a.entidad_id, a.detalle, a.creado_en,
+      `SELECT a.id, a.accion, a.entidad, a.entidad_id, a.detalle, a.creado_en, a.id_usuario,
               u.nombre AS responsable
          FROM auditoria a
          LEFT JOIN usuario u ON u.id = a.id_usuario
+        WHERE ($1 = '' OR a.accion = $1)
+          AND ($2 = '' OR a.entidad = $2)
+          AND ($3 = 0 OR a.id_usuario = $3)
         ORDER BY a.creado_en DESC, a.id DESC
-        LIMIT 100`
+        LIMIT 200`,
+      [accion, entidad, idUsuario]
     );
-    res.render('admin/auditoria', { titulo: 'Auditoría', registros });
+
+    // Una consulta por entidad presente en la página, no una por fila.
+    const idsPorEntidad = {};
+    registros.forEach((registro) => {
+      if (!ENTIDADES_AUDITORIA[registro.entidad] || !registro.entidad_id) return;
+      (idsPorEntidad[registro.entidad] = idsPorEntidad[registro.entidad] || new Set()).add(registro.entidad_id);
+    });
+
+    const vivos = {};
+    await Promise.all(
+      Object.keys(idsPorEntidad).map(async (nombreEntidad) => {
+        const definicion = ENTIDADES_AUDITORIA[nombreEntidad];
+        const ids = Array.from(idsPorEntidad[nombreEntidad]);
+        const columnas = definicion.tabla === 'taller' || definicion.tabla === 'usuario'
+          ? 'id, nombre'
+          : definicion.tabla === 'receta'
+            ? 'id, codigo, nombre'
+            : definicion.tabla === 'ejecucion'
+              ? `id, to_char(fecha_ejecucion, 'DD-MM-YYYY') AS fecha`
+              : 'id, nombre';
+
+        const { rows } = await query(
+          `SELECT ${columnas}${definicion.tabla === 'usuario' ? '' : ', eliminado_en'}
+             FROM ${definicion.tabla}
+            WHERE id = ANY($1::int[])`,
+          [ids]
+        );
+        vivos[nombreEntidad] = new Map(rows.map((fila) => [fila.id, fila]));
+      })
+    );
+
+    const filas = registros.map((registro) => {
+      const definicion = ENTIDADES_AUDITORIA[registro.entidad];
+      const fila = definicion && registro.entidad_id ? vivos[registro.entidad].get(registro.entidad_id) : null;
+      let estadoEntidad = 'eliminado';
+      if (fila) estadoEntidad = fila.eliminado_en ? 'papelera' : 'vivo';
+      return {
+        ...registro,
+        etiquetaAccion: ETIQUETA_ACCION[registro.accion] || registro.accion,
+        nombreEntidad: definicion ? definicion.nombre(fila || { id: registro.entidad_id }) : registro.entidad,
+        estadoEntidad,
+        enlace: fila && estadoEntidad === 'vivo' ? definicion.enlace(fila) : null,
+        resumen: resumenDetalle(registro.detalle),
+      };
+    });
+
+    const [acciones, entidades, responsables] = await Promise.all([
+      query('SELECT accion, COUNT(*)::int AS total FROM auditoria GROUP BY accion ORDER BY accion'),
+      query('SELECT entidad, COUNT(*)::int AS total FROM auditoria GROUP BY entidad ORDER BY entidad'),
+      query(
+        `SELECT u.id, u.nombre, COUNT(*)::int AS total
+           FROM auditoria a JOIN usuario u ON u.id = a.id_usuario
+          GROUP BY u.id, u.nombre ORDER BY u.nombre`
+      ),
+    ]);
+
+    res.render('admin/auditoria', {
+      titulo: 'Auditoría',
+      registros: filas,
+      accion,
+      entidad,
+      idUsuario,
+      acciones: acciones.rows,
+      entidades: entidades.rows,
+      responsables: responsables.rows,
+    });
   } catch (error) {
     next(error);
   }
@@ -642,8 +898,11 @@ router.get('/admin/auditoria', requiereRol('admin'), async (req, res, next) => {
 
 // ------------------------------------- ejecuciones (RF-06 / CU-06)
 
-async function datosEjecuciones() {
-  const [ejecuciones, talleres, videos] = await Promise.all([
+async function datosEjecuciones(filtros = {}) {
+  const idTaller = /^\d+$/.test(filtros.taller || '') ? Number(filtros.taller) : null;
+  const anio = /^\d{4}$/.test(filtros.anio || '') ? Number(filtros.anio) : null;
+
+  const [ejecuciones, talleres, videos, anios] = await Promise.all([
     query(
       `SELECT e.id, e.fecha_ejecucion, e.cantidad_participantes, e.observaciones,
               e.id_taller, e.id_video, t.nombre AS taller, t.tematica,
@@ -652,20 +911,48 @@ async function datosEjecuciones() {
          JOIN taller t ON t.id = e.id_taller
          LEFT JOIN video v ON v.id = e.id_video
         WHERE e.eliminado_en IS NULL AND t.eliminado_en IS NULL
+          AND ($1::int IS NULL OR e.id_taller = $1)
+          AND ($2::int IS NULL OR EXTRACT(YEAR FROM e.fecha_ejecucion)::int = $2)
         ORDER BY e.fecha_ejecucion DESC, e.id DESC
-        LIMIT 100`
+        LIMIT 100`,
+      [idTaller, anio]
     ),
     query('SELECT id, nombre FROM taller WHERE eliminado_en IS NULL ORDER BY nombre'),
     query('SELECT id, nombre FROM video WHERE eliminado_en IS NULL ORDER BY nombre'),
+    query(
+      `SELECT DISTINCT EXTRACT(YEAR FROM e.fecha_ejecucion)::int AS anio
+         FROM ejecucion e JOIN taller t ON t.id = e.id_taller
+        WHERE e.eliminado_en IS NULL AND t.eliminado_en IS NULL
+        ORDER BY anio DESC`
+    ),
   ]);
-  return { ejecuciones: ejecuciones.rows, talleres: talleres.rows, videos: videos.rows };
+
+  const urlFiltro = creadorDeUrls('/admin/ejecuciones', { taller: idTaller, anio });
+  const chips = [];
+  if (idTaller) {
+    const elegido = talleres.rows.find((fila) => fila.id === idTaller);
+    chips.push(chip(`Taller: ${elegido ? elegido.nombre : '#' + idTaller}`, urlFiltro({ taller: '' })));
+  }
+  if (anio) chips.push(chip(`Año: ${anio}`, urlFiltro({ anio: '' })));
+
+  return {
+    ejecuciones: ejecuciones.rows,
+    talleres: talleres.rows,
+    videos: videos.rows,
+    anios: anios.rows.map((fila) => fila.anio),
+    idTaller,
+    anio,
+    urlFiltro,
+    chips,
+    total: ejecuciones.rows.length,
+  };
 }
 
 async function renderEjecuciones(req, res, next, { estado = 200, errores = [], valores = {} } = {}) {
   try {
     return res.status(estado).render('admin/ejecuciones', {
       titulo: 'Ejecuciones',
-      ...(await datosEjecuciones()),
+      ...(await datosEjecuciones(req.query || {})),
       errores,
       valores,
     });
@@ -751,8 +1038,12 @@ router.post('/admin/ejecuciones', requiereSesion, async (req, res, next) => {
       participantes,
       id_video: idVideo,
     });
+    const mensaje = 'Ejecución registrada correctamente.';
+    const volver = v.destinoSeguro(cuerpo.volver, '');
     return res.redirect(
-      `/admin/ejecuciones?ok=${encodeURIComponent('Ejecución registrada correctamente.')}`
+      volver
+        ? `${volver}?ok=${encodeURIComponent(mensaje)}`
+        : `/admin/ejecuciones?ok=${encodeURIComponent(mensaje)}`
     );
   } catch (error) {
     return next(error);

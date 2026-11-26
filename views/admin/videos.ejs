@@ -81,8 +81,7 @@
             <a class="boton" href="<%= video.enlaceValidado %>" target="_blank" rel="noopener noreferrer">Abrir video</a>
           <% } %>
           <% if (usuario.rol === 'admin') { %>
-            <form method="post" action="/admin/videos/<%= video.id %>/eliminar" class="en-linea"
-                  onsubmit="return confirm('¿Enviar este video a la papelera? Se puede recuperar.');">
+            <form method="post" action="/admin/videos/<%= video.id %>/eliminar" class="en-linea" data-confirmar="¿Enviar este video a la papelera? Se puede recuperar.">
               <button type="submit" class="boton boton-peligro">Eliminar</button>
             </form>
           <% } %>

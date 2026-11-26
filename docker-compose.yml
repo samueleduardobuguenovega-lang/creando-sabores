@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: creando
+      POSTGRES_PASSWORD: creando
+      POSTGRES_DB: creando_sabores
+    volumes:
+      - datos:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U creando -d creando_sabores"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://creando:creando@db:5432/creando_sabores
+      SESSION_SECRET: ${SESSION_SECRET:-cambia-esta-clave-antes-de-publicar}
+      NODE_ENV: production
+      # La demo corre por HTTP; detrás de HTTPS pon 1.
+      COOKIE_SEGURA: "0"
+      SEMBRAR: ${SEMBRAR:-0}
+    volumes:
+      - archivos:/app/uploads
+
+volumes:
+  datos:
+  archivos:

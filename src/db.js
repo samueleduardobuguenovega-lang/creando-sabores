@@ -1,5 +1,9 @@
 // Conexión única a PostgreSQL para toda la aplicación.
 // La cadena de conexión viene de DATABASE_URL (ver .env.example).
+// Carga .env cuando existe, para que `cp .env.example .env` alcance en local.
+// En Docker el archivo no va en la imagen: las variables llegan por el entorno.
+require('dotenv').config({ quiet: true });
+
 const { Pool, types } = require('pg');
 
 // Las columnas DATE se devuelven como texto 'aaaa-mm-dd': así no aparecen

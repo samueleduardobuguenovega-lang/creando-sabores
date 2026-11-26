@@ -19,7 +19,8 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      # Si el 3000 está ocupado en tu equipo: APP_PORT=3199 docker compose up
+      - "${APP_PORT:-3000}:3000"
     environment:
       DATABASE_URL: postgres://creando:creando@db:5432/creando_sabores
       SESSION_SECRET: ${SESSION_SECRET:-cambia-esta-clave-antes-de-publicar}

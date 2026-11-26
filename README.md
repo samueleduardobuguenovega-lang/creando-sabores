@@ -38,7 +38,11 @@ docker compose exec app npm run instalar   # crea o actualiza las tablas
 docker compose exec app npm run seed       # datos de ejemplo y usuarios
 ```
 
-Queda en http://localhost:3000.
+Queda en http://localhost:3000. Si ese puerto ya está ocupado en tu equipo:
+
+```bash
+APP_PORT=3199 docker compose up -d   # http://localhost:3199
+```
 
 ## Arranque manual
 
@@ -70,6 +74,7 @@ npm start                    # http://localhost:3000
 | `CLAVE_DOCENTE` | no | `Docente-2026` | clave del usuario `docente` que crea el seed |
 | `SEMBRAR` | no | `0` | `1` siembra datos al arrancar el contenedor |
 | `GS_BIN` / `MAGICK_BIN` | no | `gs` / `magick` | ruta a los binarios si están en otro sitio |
+| `APP_PORT` | no | `3000` | puerto del host cuando se levanta con Docker |
 
 ## Usuarios de ejemplo
 

@@ -44,12 +44,19 @@
     <a class="boton boton-secundario" href="/recetas">Recetas</a>
     <a class="enlace-suave" href="/ejecuciones">Ver clases</a>
   </div>
+  <% const cifras = [
+       { n: resumen.talleres, uno: 'taller', varios: 'talleres' },
+       { n: totalRecetas, uno: 'receta', varios: 'recetas' },
+       { n: totalEjecuciones, uno: 'clase registrada', varios: 'clases registradas' },
+       { n: resumen.tematicas, uno: 'temática', varios: 'temáticas' }
+     ].filter(function (c) { return Number(c.n) > 0; }); %>
+  <% if (cifras.length) { %>
   <ul class="cifras-portada" aria-label="Cifras del archivo">
-    <li><b><%= resumen.talleres %></b><span><%= resumen.talleres === 1 ? 'taller' : 'talleres' %></span></li>
-    <li><b><%= totalRecetas %></b><span><%= Number(totalRecetas) === 1 ? 'receta' : 'recetas' %></span></li>
-    <li><b><%= totalEjecuciones %></b><span><%= Number(totalEjecuciones) === 1 ? 'clase registrada' : 'clases registradas' %></span></li>
-    <li><b><%= resumen.tematicas %></b><span><%= resumen.tematicas === 1 ? 'temática' : 'temáticas' %></span></li>
+    <% cifras.forEach(function (c) { %>
+    <li><b><%= c.n %></b><span><%= Number(c.n) === 1 ? c.uno : c.varios %></span></li>
+    <% }); %>
   </ul>
+  <% } %>
 </div>
 
 <main id="contenido" class="contenedor contenido-principal">

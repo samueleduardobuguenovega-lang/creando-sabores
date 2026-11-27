@@ -137,3 +137,57 @@
     });
   });
 })();
+
+/* Un envío por formulario. Sin esto, dos toques rápidos en el teléfono crean
+   dos registros o dos correos; el segundo clic no puede saber que ya envió.
+   El estado se marca después de que los validadores hayan decidido, y se
+   limpia si el navegador restaura la página desde el historial. */
+(function () {
+  'use strict';
+
+  function botonDe(form) {
+    return form.querySelector('button[type="submit"], input[type="submit"]');
+  }
+
+  function bloquear(form) {
+    var boton = botonDe(form);
+    if (boton) {
+      boton.setAttribute('aria-busy', 'true');
+      boton.disabled = true;
+    }
+  }
+
+  function liberar(form) {
+    var boton = botonDe(form);
+    delete form.dataset.enviando;
+    if (boton) {
+      boton.removeAttribute('aria-busy');
+      boton.disabled = false;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('form'), function (form) {
+      if ((form.getAttribute('method') || 'get').toLowerCase() !== 'post') return;
+
+      form.addEventListener('submit', function (ev) {
+        if (form.dataset.enviando === 'si') {
+          ev.preventDefault();
+          return;
+        }
+        // Los validadores corren antes (están registrados primero); si
+        // cancelaron el envío, no se bloquea nada.
+        window.setTimeout(function () {
+          if (ev.defaultPrevented) return;
+          form.dataset.enviando = 'si';
+          bloquear(form);
+        }, 0);
+      });
+    });
+  });
+
+  window.addEventListener('pageshow', function (ev) {
+    if (!ev.persisted) return;
+    Array.prototype.forEach.call(document.querySelectorAll('form'), liberar);
+  });
+})();

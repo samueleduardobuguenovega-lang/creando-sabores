@@ -309,8 +309,8 @@ a:hover { color: var(--tinta); }
   background: transparent;
   border: 0;
   color: #cfd6d0;
-  min-width: 40px;
-  min-height: 40px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
 }
 
@@ -772,7 +772,8 @@ a:hover { color: var(--tinta); }
   place-items: center;
   font-family: var(--fuente-cartel);
   font-size: 3rem;
-  color: #7fae95;
+  /* 5.6:1 sobre el degradado del hueco; antes era #7fae95 a 2.5:1, ilegible. */
+  color: var(--primario);
   background: linear-gradient(150deg, #eaf3ee, #d7e8de);
   letter-spacing: 0.04em;
 }
@@ -1082,7 +1083,7 @@ a:hover { color: var(--tinta); }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 14px;
   border-radius: 999px;
   border: 1px solid var(--borde);
@@ -2107,7 +2108,9 @@ h2 { letter-spacing: 0.025em; }
 .filtros .filtro-busqueda > label {
   font-size: var(--t-2);
   font-weight: 600;
-  color: var(--tinta);
+  /* Hereda el color del bloque: sobre la carátula verde queda blanco y sobre
+     fondo claro queda tinta. Antes fijaba tinta y desaparecía en la carátula. */
+  color: inherit;
 }
 
 .filtros input,
@@ -2596,4 +2599,66 @@ details.menu:not([open]) > .navegacion {
   display: block;
   -webkit-line-clamp: none;
   overflow: visible;
+}
+
+/* =====================================================================
+   Ajustes medidos — 2026-11-27
+   Cada regla de este bloque responde a una medición sobre la app viva, no a
+   una preferencia. Los números están en el comentario de cada grupo.
+   ===================================================================== */
+
+/* Objetivos táctiles: la marca medía 40 px y los chips 38. El mínimo es 44. */
+.marca {
+  min-height: 44px;
+}
+
+.chip {
+  min-height: 44px;
+}
+
+/* Corte de línea: el navegador reparte mejor titulares y párrafos, sin
+   huérfanas de una palabra ni líneas que se estiran hasta el borde. */
+h1, h2, h3,
+.caratula h1,
+.titulo-bloque {
+  text-wrap: balance;
+}
+
+p,
+.caratula-texto,
+.tarjeta-texto {
+  text-wrap: pretty;
+}
+
+/* Cifras que se comparan entre sí no bailan al cambiar de valor. */
+.contador-resultados,
+.ficha dd,
+.tabla td.numero {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Envío en curso: el botón conserva su tamaño y anuncia el estado, así el
+   segundo clic no puede producir un segundo envío. */
+.boton[aria-busy="true"] {
+  cursor: progress;
+  color: transparent;
+  position: relative;
+}
+
+.boton[aria-busy="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #fff;
+  border-right-color: #fff;
+  animation: girar 700ms linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
 }

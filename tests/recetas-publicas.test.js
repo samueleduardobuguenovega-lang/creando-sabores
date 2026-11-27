@@ -160,9 +160,9 @@ test('el sello de versión cambia con cada hoja de estilos propia', async () => 
   assert.equal(version.split('-').length, 4, 'estilos, cartel, app y formularios');
 });
 
-// La etiqueta de la portada no se queda pegada a una sola receta: gira entre
-// las que tienen foto propia y cada vuelta es el enlace a esa receta.
-test('la portada gira entre las recetas con foto y cada una lleva a su receta', async () => {
+// La cinta de la portada no elige una receta: muestra todas las que tienen
+// foto y cada una es su propio enlace. Una sola receta no necesita cinta.
+test('la cinta de la portada enlaza cada receta con foto', async () => {
   const cliente = crearCliente(app.base);
 
   const { rows: talleres } = await pool.query(
@@ -175,26 +175,48 @@ test('la portada gira entre las recetas con foto y cada una lleva a su receta', 
      SELECT 'REC-QA-TURNO', 'Chutney de ciruela', 'Para la portada.', id
        FROM usuario WHERE usuario = 'docente' RETURNING id`
   );
+  await pool.query(
+    `INSERT INTO receta (codigo, nombre, descripcion, id_usuario)
+     SELECT 'REC-QA-TURNO-2', 'Mermelada de ciruela', 'Para la portada.', id
+       FROM usuario WHERE usuario = 'docente'`
+  );
+  const { rows: segunda } = await pool.query(
+    `SELECT id FROM receta WHERE codigo = 'REC-QA-TURNO-2'`
+  );
   await pool.query('INSERT INTO receta_taller (id_receta, id_taller) VALUES ($1, $2)', [
     recetas[0].id,
+    talleres[0].id,
+  ]);
+  await pool.query('INSERT INTO receta_taller (id_receta, id_taller) VALUES ($1, $2)', [
+    segunda[0].id,
     talleres[0].id,
   ]);
   const png = Buffer.from(
     'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==',
     'base64'
   );
-  await pool.query(
-    `INSERT INTO documento (nombre, archivo, tipo_mime, tamano, contenido, id_receta, id_usuario)
-     SELECT 'Foto del chutney', 'chutney.png', 'image/png', $2, $3, $1, id
-       FROM usuario WHERE usuario = 'docente'`,
-    [recetas[0].id, png.length, png]
-  );
+  for (const [receta, nombre] of [
+    [recetas[0].id, 'chutney.png'],
+    [segunda[0].id, 'mermelada.png'],
+  ]) {
+    await pool.query(
+      `INSERT INTO documento (nombre, archivo, tipo_mime, tamano, contenido, id_receta, id_usuario)
+       SELECT $4, $5, 'image/png', $2, $3, $1, id
+         FROM usuario WHERE usuario = 'docente'`,
+      [receta, png.length, png, nombre, nombre]
+    );
+  }
 
   const { estado, texto: html } = await cliente.get('/');
   assert.equal(estado, 200);
-  assert.match(html, /class="plato-prefijo">En el fuego/);
+  // Sin foto propia del taller la portada no lleva etiqueta; lo que sí tiene
+  // que estar es la cinta con cada receta con foto enlazada.
   assert.match(
     html,
-    new RegExp(`<a class="plato-nombre[^"]*" href="/recetas/${recetas[0].id}"[^>]*>Chutney de ciruela</a>`)
+    new RegExp(`<a class="cinta-item" href="/recetas/${recetas[0].id}"[^>]*>`)
+  );
+  assert.match(
+    html,
+    new RegExp(`<a class="cinta-item" href="/recetas/${segunda[0].id}"[^>]*>`)
   );
 });

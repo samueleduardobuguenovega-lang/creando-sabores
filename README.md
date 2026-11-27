@@ -1,18 +1,65 @@
 # Creando Sabores
 
-Sitio del taller de gastronomía del Colegio Yungay, con Santo Tomás. Registra talleres,
-recetas, ejecuciones, documentos y videos, y publica una vitrina abierta para visitas.
-Los contenidos se cargan desde un panel con sesión.
+Sitio del taller de gastronomía del **Colegio Yungay** (con Santo Tomás). Reúne talleres,
+recetas, clases, videos y documentos del año, y los publica en una vitrina abierta para
+estudiantes y apoderados. Los contenidos se cargan desde un panel con sesión.
+
+Sitio público sin registro, panel con dos roles (`admin` y `docente`) y renderizado en el
+servidor: no hay bundler ni framework de cliente, sólo Node, EJS y CSS propio.
+
+## Capturas
+
+**Escritorio**
+
+![Portada](docs/capturas/inicio-escritorio.webp)
+![Talleres](docs/capturas/talleres-escritorio.webp)
+![Recetario](docs/capturas/recetas-escritorio.webp)
+![Ficha de taller](docs/capturas/taller-detalle-escritorio.webp)
+
+**Teléfono** (390 × 844, navegación inferior fija de cinco destinos)
+
+![Portada en teléfono](docs/capturas/inicio-movil.webp)
+![Talleres en teléfono](docs/capturas/talleres-movil.webp)
+![Ficha de taller en teléfono](docs/capturas/taller-detalle-movil.webp)
+![Archivos en teléfono](docs/capturas/archivos-movil.webp)
+
+## Qué incluye
+
+- **Vitrina pública**: portada con el taller en curso, talleres con sus recetas, recetario
+  completo, clases, videos y una galería de archivos donde la foto se ve antes que el nombre.
+- **Ficha de taller**: fecha, participantes, recetas asociadas y videos embebidos.
+- **Recetario**: ingredientes y pasos, con previa de la primera página si la receta viene en
+  PDF y con las fotos propias de cada preparación.
+- **Panel**: alta y edición de talleres, recetas, ejecuciones, documentos y videos, con
+  permisos por rol y auditoría de cambios.
+- **Archivos**: los PDF se comprimen y las fotos se orientan y reducen al subirlos.
+- **Videos**: sólo enlaces de **YouTube**; cualquier otro proveedor se rechaza con un mensaje
+  claro en el formulario.
+- **Navegación en teléfono**: barra inferior fija con cinco destinos, sin menú hamburguesa.
+- **Errores con salida**: estados de error con botón «Reintentar» y enlaces a inicio y
+  talleres, en lugar de una pantalla en blanco.
 
 ## Stack
 
-- Node.js 20 o superior, Express y EJS (server-side rendering, sin bundler).
-- PostgreSQL 16 para los datos y las sesiones.
-- CSS propio con dos hojas: `public/css/estilos.css` (base) y `public/css/cartel.css`
-  (capa que gana en cascada: allí viven los ajustes de cabecera, tablas y responsividad).
-- Ghostscript, ImageMagick y Poppler para procesar los archivos que se suben.
+- Node.js 20 o superior, Express y EJS (renderizado en el servidor, sin bundler).
+- PostgreSQL 16, también para las sesiones (`connect-pg-simple`).
+- CSS propio en dos hojas: `public/css/estilos.css` (base) y `public/css/cartel.css`
+  (capa final: cabecera, tablas, navegación móvil y responsividad).
 
-## Requisitos
+### Dependencias de Node
+
+| Paquete | Para qué |
+| --- | --- |
+| `express` | servidor HTTP y ruteo |
+| `ejs` | plantillas del servidor |
+| `pg` | cliente de PostgreSQL, pool de conexiones y consultas |
+| `express-session` + `connect-pg-simple` | sesión del panel guardada en la base |
+| `bcryptjs` | hash de las claves de usuario |
+| `multer` | subida de archivos (PDF y fotos) |
+| `dotenv` | carga `.env` en desarrollo; si no está, usa las variables del entorno |
+| `playwright` (dev) | pruebas de navegador de la variante E2E |
+
+### Herramientas del sistema
 
 | Pieza | Para qué | Cómo se instala |
 | --- | --- | --- |
@@ -23,7 +70,7 @@ Los contenidos se cargan desde un panel con sesión.
 | ImageMagick (`magick`) | orientar y reducir las fotos que se suben | `apt install imagemagick` |
 
 Sin Poppler, las recetas con PDF responden con error 500 al abrir la vista previa: es la
-causa más común de que "funcione todo menos una página".
+causa más común de que «funcione todo menos una página».
 
 ## Arranque con Docker (recomendado)
 
@@ -88,7 +135,8 @@ clave propia después de entrar.
 
 ## Pruebas
 
-Las pruebas crean y borran datos, así que necesitan una base aparte de la de trabajo:
+La suite es de integración real: levanta el servidor contra PostgreSQL y **borra el esquema
+en cada corrida**, así que necesita una base aparte de la de trabajo.
 
 ```bash
 createdb creando_pruebas
@@ -96,15 +144,15 @@ DATABASE_URL=postgres://usuario:clave@localhost:5432/creando_pruebas \
   SESSION_SECRET=pruebas NODE_ENV=test npm test
 ```
 
-Requieren `pdftoppm` instalado; sin él fallan las pruebas de PDF con `spawn pdftoppm ENOENT`.
-La suite tarda varios minutos porque cada prueba levanta el servidor.
+Son 89 pruebas, tardan alrededor de medio minuto y requieren `pdftoppm`; sin él fallan las de
+PDF con `spawn pdftoppm ENOENT`. `npm run test:e2e` corre además la variante de navegador.
 
 ## Estructura
 
 ```
 server.js              arranque del proceso
-src/app.js             configuración de Express, sesiones y middlewares
-src/db.js              pool de PostgreSQL
+src/app.js             configuración de Express, sesiones, CSP y middlewares
+src/db.js              pool de PostgreSQL (dotenv opcional)
 src/schema.sql         esquema completo de la base
 src/instalar.js        crea o actualiza las tablas
 src/seed.js            datos y usuarios de ejemplo
@@ -115,7 +163,7 @@ views/                 plantillas EJS (publico/, admin/, partials/)
 public/css/            estilos: estilos.css (base) y cartel.css (capa final)
 public/js/             comportamiento del cliente
 tests/                 pruebas de integración con node:test
-docs/                  requerimientos, modelo de datos, manual y operación
+docs/                  requerimientos, modelo de datos, manual, operación y capturas
 ```
 
 ## Problemas frecuentes
@@ -126,12 +174,23 @@ docs/                  requerimientos, modelo de datos, manual y operación
 - **Entra al panel y la sesión no persiste sobre HTTP**: pon `COOKIE_SEGURA=0` fuera de
   producción.
 - **El puerto 3000 está ocupado**: cambia `PORT`, o `docker compose up` con otro mapeo.
-- **Los estilos no cambian después de editar**: las dos hojas se cachean con sello de
-  versión; reinicia el servidor o fuerza recarga en el navegador.
+- **Los estilos no cambian después de editar**: las hojas se cachean con sello de versión y
+  el HTML va con `Cache-Control: no-cache`; fuerza una recarga del navegador.
 
 ## Responsividad
 
-La interfaz se verifica midiendo 21 pantallas en 9 anchuras (320, 360, 390, 480, 768,
-1024, 1200, 1440 y 1920 px) y buscando tres defectos: elementos fuera del ancho visible,
-contenido recortado por `overflow` y controles solapados. Al tocar la cabecera, las tablas
-o los listados conviene repetir esa medición antes de dar el cambio por terminado.
+La interfaz se verifica midiendo 21 pantallas en 9 anchuras (320, 360, 390, 480, 768, 1024,
+1200, 1440 y 1920 px) y buscando tres defectos: elementos fuera del ancho visible, contenido
+recortado por `overflow` y controles solapados. Al tocar la cabecera, las tablas o los
+listados conviene repetir esa medición antes de dar el cambio por terminado.
+
+## Documentación
+
+- [`docs/requerimientos.md`](docs/requerimientos.md) — alcance, actores y requisitos.
+- [`docs/modelo-datos.md`](docs/modelo-datos.md) — tablas, relaciones y reglas.
+- [`docs/manual-usuario.md`](docs/manual-usuario.md) — uso del panel paso a paso.
+- [`docs/operacion.md`](docs/operacion.md) — respaldo, restauración y despliegue.
+- [`docs/despliegue.md`](docs/despliegue.md) — puesta en marcha con Docker.
+
+Las capturas de `docs/capturas/` corresponden a la versión actual del sitio con los datos de
+ejemplo del seed.

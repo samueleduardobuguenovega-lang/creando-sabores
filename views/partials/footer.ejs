@@ -1,9 +1,18 @@
+
   </main>
 
   <footer class="pie">
     <div class="contenedor pie-fila">
       <p>Creando Sabores · Registro de talleres gastronómicos</p>
-      <p class="pie-nota">Proyecto académico · <%= anioActual %></p>
+      <p class="pie-nota">
+        Proyecto académico · <%= anioActual %>
+        <%# El acceso es para docentes, no para visitantes: un botón grande en la
+            cabecera hacía pensar que cualquiera podía crear una cuenta. Va al
+            pie, chico y en negrita, solo como aviso de que existe. %>
+        <% if (typeof usuario === 'undefined' || !usuario) { %>
+          · <a class="pie-ingreso" href="/login">Ingresar</a>
+        <% } %>
+      </p>
     </div>
   </footer>
 </body>

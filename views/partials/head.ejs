@@ -66,9 +66,13 @@
         <span class="marca-texto">Creando <strong>Sabores</strong></span>
       </a>
 
-      <%# La navegación va siempre visible: cinco destinos caben en una fila y
-          esconderlos detrás de un menú obliga a un toque de más en cada visita. %>
-      <nav class="navegacion" aria-label="Menú principal">
+      <%# Hasta 1024 px la navegación vive dentro de un desplegable que arranca
+          cerrado: antes se mostraba como columna fija y se comía 252 px de alto
+          en una pantalla de 900 px. En escritorio el desplegable se disuelve
+          (display: contents) y los destinos quedan en la misma fila. %>
+      <details class="menu" data-plegable>
+        <summary class="menu-boton">Menú <span aria-hidden="true">☰</span></summary>
+        <nav class="navegacion" aria-label="Menú principal">
           <% if (usuario) { %>
             <a href="/panel" class="<%= rutaActual === '/panel' ? 'activo' : '' %>" <%= rutaActual === '/panel' ? 'aria-current="page"' : '' %>><%- icono('panel') %>Panel</a>
             <a href="/admin/talleres" class="<%= rutaActual.startsWith('/admin/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/talleres') ? 'aria-current="page"' : '' %>><%- icono('talleres') %>Talleres</a>
@@ -100,7 +104,8 @@
             <a href="/documentos" class="<%= rutaActual.startsWith('/documentos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/documentos') ? 'aria-current="page"' : '' %>><%- icono('documentos') %>Archivos</a>
             <a href="/ejecuciones" class="<%= rutaActual.startsWith('/ejecuciones') ? 'activo' : '' %>" <%= rutaActual.startsWith('/ejecuciones') ? 'aria-current="page"' : '' %>><%- icono('ejecuciones') %>Clases</a>
           <% } %>
-      </nav>
+        </nav>
+      </details>
 
       <%# Un solo buscador en todo el DOM: en escritorio va en la barra y en
           móvil ocupa la segunda fila de la cabecera. En /buscar la propia vista
@@ -119,8 +124,6 @@
           <form method="post" action="/salir" class="en-linea">
             <button type="submit" class="boton boton-texto">Salir</button>
           </form>
-        <% } else { %>
-          <a class="boton boton-secundario" href="/login">Ingresar</a>
         <% } %>
       </div>
     </div>

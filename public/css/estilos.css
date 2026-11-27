@@ -3623,3 +3623,23 @@ textarea,
 #contenido select {
   min-width: 0;
 }
+
+/* --- Acceso de docentes al pie -------------------------------------------- */
+/* El botón «Ingresar» de la cabecera pesaba como una llamada a la acción y
+   sugería que un visitante podía crearse cuenta. Va al pie, chico y en
+   negrita: informa que existe sin competir con el contenido. */
+.pie-ingreso {
+  font-weight: 700;
+  color: var(--tinta-suave);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 1px;
+}
+
+.pie-ingreso:hover,
+.pie-ingreso:focus-visible {
+  color: var(--primario);
+}
+
+/* La celda de cuenta queda vacía para quien no ha entrado: no debe reservar ancho. */
+.cuenta:empty { display: none; }

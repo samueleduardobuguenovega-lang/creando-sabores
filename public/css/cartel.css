@@ -2384,12 +2384,12 @@ h2 { letter-spacing: 0.025em; }
    recortado dentro de cajas con ocultamiento y solapes en la cabecera.
    ========================================================================== */
 
-/* --- Cabecera: el modo de dos filas termina antes de 1024 ----------------- */
+/* --- Cabecera: el modo de dos filas termina en 1024 ----------------------- */
 /* A exactamente 1024 la cabecera quedaba en un estado híbrido: la fila en dos
    líneas (modo móvil) pero el menú todavía absoluto, y el desplegable caía
-   encima del campo de búsqueda. Desde 1024 manda el diseño de escritorio: una
-   sola fila con el menú en línea. */
-@media (min-width: 1024px) {
+   encima del campo de búsqueda. Desde 1025 manda el diseño de escritorio: una
+   sola fila con el menú en línea; hasta 1024 inclusive, el botón «Menú». */
+@media (min-width: 1025px) {
   .cabecera .cabecera-fila {
     display: flex;
     flex-wrap: nowrap;
@@ -2470,7 +2470,7 @@ h2 { letter-spacing: 0.025em; }
    buscador y la cuenta suman más que el ancho. Esa franja vuelve al menú
    desplegable y a la búsqueda en segunda línea, sin tocar el diseño de 1200
    en adelante. */
-@media (min-width: 1024px) and (max-width: 1199px) {
+@media (min-width: 1025px) and (max-width: 1199px) {
   .cabecera .cabecera-fila {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto auto;
@@ -2526,42 +2526,11 @@ h2 { letter-spacing: 0.025em; }
 /* Varias capas fuerzan `display` en `.navegacion` para el modo de escritorio,
    y eso anula la regla del navegador que oculta el contenido de un <details>
    cerrado: el menú quedaba desplegado y encima de la búsqueda a 1024 px.
-   Aquí se restituye la lógica: cerrado, oculto; abierto, visible. */
+   Aquí se restituye la lógica: cerrado, oculto; abierto, visible.
+   El comportamiento por franja vive al final del archivo, en el bloque
+   «Navegación por franja»; esta regla solo cubre el estado del <details>. */
 details.menu:not([open]) > .navegacion {
   display: none !important;
-}
-
-/* En escritorio el menú no se despliega: está siempre en línea y el botón
-   «Menú» estorba. */
-@media (min-width: 1200px) {
-  details.menu > summary { display: none; }
-  details.menu > .navegacion { display: flex !important; }
-}
-
-/* --- Corrección de las dos reglas anteriores ---------------------------- */
-/* 1) En la franja 1024-1199 el desplegable estaba en una fila del grid y al
-      abrirse estiraba la cabecera hasta 364 px. Vuelve a flotar por encima.
-   2) La regla que oculta el desplegable cerrado tenía más peso que la que lo
-      muestra en escritorio, y el menú desaparecía de 1200 en adelante. */
-@media (min-width: 1024px) and (max-width: 1199px) {
-  .cabecera details.menu .navegacion {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    left: auto;
-    width: min(320px, calc(100vw - 32px));
-    max-height: 70vh;
-    overflow-y: auto;
-    z-index: 40;
-  }
-}
-
-@media (min-width: 1200px) {
-  .cabecera details.menu > .navegacion,
-  .cabecera details.menu:not([open]) > .navegacion,
-  .cabecera details.menu[open] > .navegacion {
-    display: flex !important;
-  }
 }
 
 /* --- Últimos dos recortes medidos --------------------------------------- */
@@ -3059,18 +3028,109 @@ p,
   }
 }
 
-/* Compatibilidad con marcado viejo — 2026-11-27
-   Si un navegador conserva en caché la cabecera anterior (details.menu con el
-   disparador ☰), la navegación igual se muestra siempre y el disparador no se
-   pinta: nunca queda un botón que abra lo que ya está abierto. */
-.cabecera details.menu > summary.menu-boton {
-  display: none;
+/* --- Navegación por franja ---------------------------------------------- */
+/* Tres comportamientos, uno por tamaño, y ninguno se pisa:
+   ≥1025 px  fila en línea dentro de la cabecera, sin botón «Menú».
+   721-1024  se pliega en el botón «Menú» y arranca cerrado (un toque abre).
+   ≤720 px   barra inferior fija con los cinco destinos. */
+/* --- Comportamiento por banda -------------------------------------------- */
+/* Chrome (2024+) envuelve el contenido de un <details> en `::details-content`
+   con `content-visibility: hidden` mientras está cerrado. Por eso un <nav>
+   dentro de un details cerrado se mide en 0 px aunque su `display` diga flex:
+   no se oculta con CSS normal. Se deja el contenido siempre renderizable y el
+   plegado se decide banda por banda, no por el estado nativo del details. */
+.cabecera details.menu::details-content {
+  content-visibility: visible;
+  display: contents;
 }
 
-/* `!important` porque la capa vieja oculta el contenido de un <details>
-   cerrado con esa prioridad: con marcado en caché la navegación desaparecía. */
-.cabecera details.menu > .navegacion {
-  display: flex !important;
+@media (min-width: 1025px) {
+  .cabecera details.menu > summary.menu-boton {
+    display: none;
+  }
+
+  .cabecera details.menu > .navegacion,
+  .cabecera details.menu:not([open]) > .navegacion,
+  .cabecera details.menu[open] > .navegacion {
+    display: flex !important;
+    /* `details.menu` es `display: contents` en escritorio: quien compite por el
+       ancho es el propio <nav>, así que el tamaño va acá y no en el contenedor.
+       Con `1 1 auto` el nav se encogía a 313 px y los últimos destinos quedaban
+       fuera de vista dentro de una barra con scroll. */
+    flex: 0 0 auto;
+    min-width: 0;
+    flex-wrap: nowrap;
+    position: static;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* El buscador cede el ancho: crece hasta 380 px y se pega a la derecha, así
+     los destinos conservan su tamaño natural en cualquier escritorio. */
+  .cabecera .busqueda {
+    flex: 1 1 260px;
+    max-width: 380px;
+    margin-left: auto;
+  }
+}
+
+/* Entre 1025 y 1199 px no caben marca, cinco destinos y buscador en una fila
+   sin encoger el buscador a 258 px. En vez de apretarlo, baja solo a una
+   segunda fila y toma el ancho completo: la cabecera queda en dos niveles
+   legibles (destinos arriba, búsqueda abajo) y no en una fila asfixiada. */
+@media (min-width: 1025px) and (max-width: 1199px) {
+  .cabecera .busqueda {
+    flex: 1 1 100%;
+    max-width: none;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .cabecera details.menu > summary.menu-boton {
+    display: none;
+  }
+
+  .cabecera details.menu > .navegacion,
+  .cabecera details.menu:not([open]) > .navegacion {
+    display: grid !important;
+  }
+}
+
+/* El cajón heredaba el fondo blanco del estilo claro, pero los enlaces son
+   blancos porque viven dentro de la cabecera negra: el menú se abría vacío.
+   En la franja del desplegable el panel vuelve a ser oscuro y el texto claro,
+   que es el par que ya usa la cabecera. */
+@media (min-width: 721px) and (max-width: 1024px) {
+  /* Aquí sí manda el estado del details: cerrado, el cajón no se pinta. */
+  .cabecera details.menu:not([open]) > .navegacion {
+    display: none !important;
+  }
+
+  .cabecera details.menu > summary.menu-boton {
+    display: inline-flex;
+  }
+
+  .cabecera details.menu .navegacion {
+    /* Ancho explícito: el panel es `position: absolute` y sin ancho propio se
+       encogía al mínimo de su contenido (75 px con texto partido en vertical). */
+    width: min(360px, calc(100vw - 32px));
+    grid-template-columns: 1fr 1fr;
+    background: var(--negro-suave);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  }
+
+  .cabecera details.menu .navegacion a {
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .cabecera details.menu .navegacion a:hover,
+  .cabecera details.menu .navegacion a.activo {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+  }
 }
 
 /* Navegación sin menú desplegable — 2026-11-27
@@ -3137,6 +3197,54 @@ p,
     background: var(--negro);
     border-top: 1px solid rgba(255, 255, 255, 0.16);
     padding: 4px 2px 6px;
+  }
+
+  /* «Más» dentro de la barra: la regla de la franja del desplegable (estilos.css,
+     max-width 1024) le pone `grid-column: 1 / -1` y lo sacaba de su celda —
+     quedaba primero, encimado y con la lista abriéndose hacia arriba dentro de
+     la barra. Acá vuelve a ser una celda más. El selector lleva la fila entera
+     porque el de estilos declara tres elementos y gana por especificidad. */
+  .cabecera .cabecera-fila .navegacion > details.mas {
+    grid-column: auto;
+    align-self: stretch;
+    position: static;
+    min-width: 0;
+  }
+
+  .cabecera .cabecera-fila .navegacion > details.mas > summary.menu-boton,
+  .cabecera .cabecera-fila .navegacion > details.mas[open] > summary.menu-boton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    width: 100%;
+    min-height: 56px;
+    max-height: 60px;
+    padding: 4px 2px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    font-size: 0.7rem;
+    line-height: 1.1;
+    text-align: center;
+  }
+
+  /* La lista se abre hacia arriba desde la barra, ancho de pantalla, y se
+     puede desplazar: nueve entradas no caben en una columna de 77 px. */
+  .cabecera .navegacion > details.mas > .mas-lista {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: 76px;
+    top: auto;
+    width: auto;
+    min-width: 0;
+    max-height: 55vh;
+    overflow-y: auto;
+    grid-template-columns: 1fr 1fr;
+    padding: var(--e1);
+    z-index: 70;
   }
 }
 

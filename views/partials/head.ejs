@@ -66,9 +66,9 @@
         <span class="marca-texto">Creando <strong>Sabores</strong></span>
       </a>
 
-      <details class="menu" data-plegable>
-        <summary class="menu-boton">Menú <span aria-hidden="true">☰</span></summary>
-        <nav class="navegacion" aria-label="Menú principal">
+      <%# La navegación va siempre visible: cinco destinos caben en una fila y
+          esconderlos detrás de un menú obliga a un toque de más en cada visita. %>
+      <nav class="navegacion" aria-label="Menú principal">
           <% if (usuario) { %>
             <a href="/panel" class="<%= rutaActual === '/panel' ? 'activo' : '' %>" <%= rutaActual === '/panel' ? 'aria-current="page"' : '' %>><%- icono('panel') %>Panel</a>
             <a href="/admin/talleres" class="<%= rutaActual.startsWith('/admin/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/admin/talleres') ? 'aria-current="page"' : '' %>><%- icono('talleres') %>Talleres</a>
@@ -96,17 +96,11 @@
                 contextuales desde la portada y las fichas. %>
             <a href="/talleres" class="<%= rutaActual.startsWith('/talleres') ? 'activo' : '' %>" <%= rutaActual.startsWith('/talleres') ? 'aria-current="page"' : '' %>><%- icono('talleres') %>Talleres</a>
             <a href="/recetas" class="<%= rutaActual.startsWith('/recetas') ? 'activo' : '' %>" <%= rutaActual.startsWith('/recetas') ? 'aria-current="page"' : '' %>><%- icono('recetas') %>Recetas</a>
-            <details class="mas" data-plegable>
-              <summary class="menu-boton">Más <span aria-hidden="true">▾</span></summary>
-              <div class="mas-lista">
-                <a href="/videos" class="<%= rutaActual.startsWith('/videos') ? 'activo' : '' %>"><%- icono('videos') %>Videos</a>
-                <a href="/documentos" class="<%= rutaActual.startsWith('/documentos') ? 'activo' : '' %>"><%- icono('documentos') %>Documentos</a>
-                <a href="/ejecuciones" class="<%= rutaActual.startsWith('/ejecuciones') ? 'activo' : '' %>"><%- icono('ejecuciones') %>Clases</a>
-              </div>
-            </details>
+            <a href="/videos" class="<%= rutaActual.startsWith('/videos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/videos') ? 'aria-current="page"' : '' %>><%- icono('videos') %>Videos</a>
+            <a href="/documentos" class="<%= rutaActual.startsWith('/documentos') ? 'activo' : '' %>" <%= rutaActual.startsWith('/documentos') ? 'aria-current="page"' : '' %>><%- icono('documentos') %>Archivos</a>
+            <a href="/ejecuciones" class="<%= rutaActual.startsWith('/ejecuciones') ? 'activo' : '' %>" <%= rutaActual.startsWith('/ejecuciones') ? 'aria-current="page"' : '' %>><%- icono('ejecuciones') %>Clases</a>
           <% } %>
-        </nav>
-      </details>
+      </nav>
 
       <%# Un solo buscador en todo el DOM: en escritorio va en la barra y en
           móvil ocupa la segunda fila de la cabecera. En /buscar la propia vista
@@ -139,31 +133,28 @@
     // En pantallas angostas el menú y el resumen del archivo arrancan plegados; en
     // escritorio quedan abiertos. Se vuelve a aplicar al girar o redimensionar.
     (function () {
-      var angosto = window.matchMedia('(max-width: 1024px)');
       var plegables = document.querySelectorAll('details[data-plegable]');
 
       function plegar() {
         Array.prototype.forEach.call(plegables, function (detalle) {
-          // El desplegable "Más" siempre arranca cerrado: no es un panel de
-          // navegación sino una lista de secundarios.
-          detalle.open = detalle.classList.contains('mas') ? false : !angosto.matches;
+          // Ningún desplegable arranca abierto: la navegación ya se ve siempre
+          // y "Más" es una lista de secundarios, no un panel.
+          detalle.open = false;
         });
       }
       plegar();
-      if (angosto.addEventListener) angosto.addEventListener('change', plegar);
       // Chrome restaura el estado abierto/cerrado de <details> después de cargar:
-      // se vuelve a aplicar al terminar para que escritorio siempre quede desplegado.
+      // se vuelve a aplicar al terminar, y también al girar el teléfono.
       window.addEventListener('load', plegar);
+      window.addEventListener('orientationchange', plegar);
 
       function cerrarTodo(excepto) {
         var cerrado = null;
         Array.prototype.forEach.call(document.querySelectorAll('details[open]'), function (detalle) {
           if (detalle === excepto) return;
-          // Un envoltorio que contiene al que se abrió no se cierra: el menú de
-          // escritorio es un <details> abierto que solo agrupa la navegación.
+          // Un clic dentro de un desplegable cerrado no lo toca; cualquier otro
+          // lo cierra, incluso con el marcado viejo donde el menú iba abierto.
           if (excepto && detalle.contains(excepto)) return;
-          var disparador = detalle.querySelector('summary');
-          if (detalle.classList.contains('menu') && disparador && getComputedStyle(disparador).display === 'none') return;
           detalle.open = false;
           cerrado = cerrado || detalle;
         });

@@ -2,7 +2,14 @@
 // La cadena de conexión viene de DATABASE_URL (ver .env.example).
 // Carga .env cuando existe, para que `cp .env.example .env` alcance en local.
 // En Docker el archivo no va en la imagen: las variables llegan por el entorno.
-require('dotenv').config({ quiet: true });
+// En desarrollo las credenciales viven en .env; en el contenedor llegan como
+// variables de entorno, así que dotenv es opcional y su ausencia no rompe el
+// arranque.
+try {
+  require('dotenv').config({ quiet: true });
+} catch (error) {
+  // Sin dotenv instalado se usan las variables del entorno tal cual.
+}
 
 const { Pool, types } = require('pg');
 

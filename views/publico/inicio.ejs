@@ -12,20 +12,7 @@
     <img class="cierre-imagen" src="/documentos/<%= tallerConFoto.id_imagen %>/ver" alt="" loading="eager">
   <% } %>
   <div class="cierre-texto">
-    <% if (enElFuego && enElFuego.length) { %>
-      <%# La etiqueta gira entre las recetas con foto; cada una es su propio
-          enlace, así que sin JavaScript igual se puede entrar a la primera. %>
-      <div class="plato-turno" data-turno>
-        <span class="plato-prefijo">En el fuego</span>
-        <ul class="plato-nombres">
-          <% enElFuego.forEach(function (r, i) { %>
-            <li>
-              <a class="plato-nombre<%= i === 0 ? ' activo' : '' %>" href="/recetas/<%= r.id %>" title="<%= r.nombre %>"><%= r.nombre %></a>
-            </li>
-          <% }); %>
-        </ul>
-      </div>
-    <% } else if (tallerConFoto) { %>
+    <% if (tallerConFoto) { %>
       <p class="etiqueta-plato">
         <%= tallerConFoto.estado === 'en_ejecucion' ? 'En el fuego' : 'Del archivo' %>
         · <span class="nombre-plato"><%= tallerConFoto.nombre %></span>
@@ -37,6 +24,30 @@
     </p>
   </div>
 </section>
+
+<%#
+  Cinta de recetas: pasa despacio y sin parar, como el mostrador de una
+  panadería. La pista se dibuja dos veces para que el final empalme con el
+  principio sin salto; la segunda copia queda oculta para lectores de pantalla.
+  Se detiene cuando alguien la mira o navega con el teclado, y no se mueve si
+  el sistema pide menos movimiento.
+%>
+<% if (enElFuego && enElFuego.length > 1) { %>
+<section class="cinta-recetas" aria-label="Recetas del taller">
+  <div class="cinta-pista">
+    <% [0, 1].forEach(function (pasada) { %>
+      <div class="cinta-vuelta"<%- pasada ? ' aria-hidden="true"' : '' %>>
+        <% enElFuego.forEach(function (r) { %>
+          <a class="cinta-item" href="/recetas/<%= r.id %>"<%- pasada ? ' tabindex="-1"' : '' %>>
+            <% if (r.id_imagen) { %><img src="/documentos/<%= r.id_imagen %>/ver" alt="" loading="lazy"><% } %>
+            <span><%= r.nombre %></span>
+          </a>
+        <% }); %>
+      </div>
+    <% }); %>
+  </div>
+</section>
+<% } %>
 
 <div class="tarjeta-portada">
   <div class="tarjeta-acciones">

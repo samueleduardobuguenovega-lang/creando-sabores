@@ -4,7 +4,7 @@
   <p class="rotulo">Material del taller</p>
   <h1>Documentos</h1>
   <p class="caratula-texto">
-    Las pautas, las listas de materiales y las hojas de receta que se repartieron en cada taller, en PDF para imprimir.
+    Las pautas, las listas de materiales y las hojas de receta que se repartieron en cada taller: los PDF para imprimir y las fotos del paso a paso.
   </p>
 
   <form method="get" action="/documentos" class="filtros" aria-label="Filtros">
@@ -42,19 +42,28 @@
     <a class="boton" href="/documentos">Ver todos los documentos</a>
   </div>
 <% } else { %>
-  <ul class="lista-simple">
+  <ul class="galeria-archivos">
     <% documentos.forEach(function (documento) { %>
       <% const esImagen = /^image\//.test(documento.tipo_mime || ''); %>
-      <li class="elemento-simple">
-        <div>
-          <strong><a href="<%= documento.destino %>"><%= documento.nombre %></a></strong>
-          <span class="ayuda">
-            <%- icono(esImagen ? 'imagen' : 'pdf') %><%= esImagen ? 'Imagen' : 'PDF' %> ·
-            <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB ·
-            <%= documento.taller ? documento.taller : documento.codigo + ' · ' + documento.receta %>
+      <li class="archivo">
+        <a class="archivo-enlace" href="/documentos/<%= documento.id %>/ver">
+          <span class="archivo-miniatura<%= esImagen ? '' : ' archivo-miniatura-pdf' %>">
+            <% if (esImagen) { %>
+              <%# La foto es el contenido: se muestra en vez de listar el nombre. %>
+              <img src="/documentos/<%= documento.id %>/ver" alt="" loading="lazy" decoding="async">
+            <% } else { %>
+              <%- icono('pdf') %>
+            <% } %>
           </span>
-        </div>
-        <a class="boton" href="/documentos/<%= documento.id %>/ver">Ver archivo</a>
+          <span class="archivo-pie">
+            <strong class="archivo-nombre"><%= documento.nombre %></strong>
+            <span class="ayuda">
+              <%= esImagen ? 'Imagen' : 'PDF' %> ·
+              <%= Math.max(1, Math.round(documento.tamano / 1024)) %> KB
+            </span>
+            <span class="ayuda archivo-origen"><%= documento.taller ? documento.taller : documento.codigo + ' · ' + documento.receta %></span>
+          </span>
+        </a>
       </li>
     <% }) %>
   </ul>

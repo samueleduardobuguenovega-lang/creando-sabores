@@ -6,7 +6,15 @@
   <% if (typeof detalle !== 'undefined' && detalle) { %>
     <p class="ayuda"><%= detalle %></p>
   <% } %>
-  <p><a class="boton boton-primario" href="/">Volver al inicio</a></p>
+  <%# Un error no se queda en el aviso: ofrece reintentar lo mismo que falló,
+      volver al inicio y una salida con contenido. %>
+  <div class="acciones">
+    <% if (typeof reintentar !== 'undefined' && reintentar) { %>
+      <a class="boton boton-primario" href="<%= typeof rutaActual !== 'undefined' ? rutaActual : '/' %>">Reintentar</a>
+    <% } %>
+    <a class="boton boton-secundario" href="/">Ir al inicio</a>
+    <a class="boton boton-secundario" href="/talleres">Ver talleres</a>
+  </div>
 </section>
 
 <%- include('partials/footer') %>

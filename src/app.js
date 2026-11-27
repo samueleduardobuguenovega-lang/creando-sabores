@@ -106,7 +106,7 @@ function crearApp() {
         "img-src 'self' data:",
         "style-src 'self' 'unsafe-inline'",
         "script-src 'self' 'unsafe-inline'",
-        'frame-src https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com',
+        'frame-src https://www.youtube-nocookie.com https://www.youtube.com',
         "base-uri 'self'",
         "form-action 'self'",
         "frame-ancestors 'self'",
@@ -186,6 +186,9 @@ function crearApp() {
     res.locals.usuario = (req.session && req.session.usuario) || null;
     res.locals.aviso = typeof req.query.ok === 'string' ? req.query.ok : null;
     res.locals.error = typeof req.query.error === 'string' ? req.query.error : null;
+    // El HTML no se guarda: una plantilla nueva tiene que llegar en la próxima
+    // visita, sin que el teléfono siga mostrando la cabecera anterior.
+    res.set('Cache-Control', 'no-cache');
     res.locals.terminoBusqueda = typeof req.query.q === 'string' ? req.query.q : '';
     next();
   });
@@ -214,6 +217,7 @@ function crearApp() {
       titulo: 'Algo salió mal',
       mensaje: 'El servidor no pudo completar la acción.',
       detalle: 'Vuelve a intentarlo; si sigue pasando, avisa al equipo.',
+      reintentar: true,
     });
   });
 

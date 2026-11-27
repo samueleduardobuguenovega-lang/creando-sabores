@@ -10,6 +10,17 @@
   const portada = documentos.find(function (documento) {
     return (documento.tipo_mime || '').startsWith('image/');
   });
+
+  // La foto de portada no se repite abajo como archivo del taller: ya ocupa la
+  // carátula y contarla dos veces infla la página sin agregar nada.
+  const archivos = portada
+    ? documentos.filter(function (documento) { return documento.id !== portada.id; })
+    : documentos;
+
+  // Las cuatro listas de la ficha: si ninguna tiene contenido, el teléfono
+  // muestra un solo bloque de cierre en lugar de cuatro mensajes de vacío.
+  const listasVacias = recetas.length === 0 && archivos.length === 0
+    && videos.length === 0 && ejecuciones.length === 0;
 %>
 
 <section class="caratula caratula-con-foto">
@@ -62,7 +73,7 @@
   </div>
 </section>
 
-<section class="bloque-ficha bloque-recetas" id="recetas">
+<section class="bloque-ficha bloque-recetas<%= recetas.length === 0 ? ' bloque-vacio' : '' %>" id="recetas">
   <header class="titulo-bloque">
     <span class="titulo-bloque-icono" aria-hidden="true">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
@@ -118,13 +129,13 @@
   <% } %>
 </section>
 
-<section class="bloque-ficha" id="documentos">
+<section class="bloque-ficha<%= archivos.length === 0 ? ' bloque-vacio' : '' %>" id="documentos">
   <h2>Archivos del taller</h2>
-  <% if (documentos.length === 0) { %>
+  <% if (archivos.length === 0) { %>
     <p class="ayuda">Este taller todavía no tiene archivos. Mientras tanto, puedes <a href="/documentos">ver el material de otros talleres</a>.</p>
   <% } else { %>
     <ul class="lista-archivos">
-      <% documentos.forEach(function (documento) { %>
+      <% archivos.forEach(function (documento) { %>
         <% const esImagen = (documento.tipo_mime || '').startsWith('image/'); %>
         <li class="archivo-item">
           <% if (esImagen) { %>
@@ -146,7 +157,7 @@
   <% } %>
 </section>
 
-<section class="bloque-ficha" id="videos">
+<section class="bloque-ficha<%= videos.length === 0 ? ' bloque-vacio' : '' %>" id="videos">
   <h2>Videos</h2>
   <% if (videos.length === 0) { %>
     <p class="ayuda">Este taller todavía no tiene videos. Mientras tanto, puedes <a href="/videos">ver los de otros talleres</a>.</p>
@@ -171,7 +182,7 @@
   <% } %>
 </section>
 
-<section class="bloque-ficha" id="ejecuciones">
+<section class="bloque-ficha<%= ejecuciones.length === 0 ? ' bloque-vacio' : '' %>" id="ejecuciones">
   <h2>Ejecuciones</h2>
   <% if (ejecuciones.length === 0) { %>
     <p class="ayuda">Este taller todavía no tiene ejecuciones registradas.</p>
@@ -192,6 +203,15 @@
     </ul>
   <% } %>
 </section>
+
+<% if (listasVacias) { %>
+  <%# En el teléfono los cuatro bloques vacíos no se muestran; este cierre da la
+      salida de vuelta al listado. En escritorio queda oculto. %>
+  <section class="bloque-ficha cierre-vacio solo-movil">
+    <h2>Más talleres</h2>
+    <a class="boton" href="/talleres">Ver todos los talleres</a>
+  </section>
+<% } %>
 
 <p><a class="boton" href="/talleres">Volver a talleres</a></p>
 

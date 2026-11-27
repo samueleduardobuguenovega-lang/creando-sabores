@@ -310,10 +310,10 @@ async function revisarRuta(pagina, ruta, viewport, rol) {
   const erroresPagina = [];
   const respuestasMalas = [];
   avisos.length = 0;
-  // Los reproductores embebidos de YouTube/Vimeo son de terceros: sus 404 y sus
+  // Los reproductores embebidos de YouTube son de terceros: sus 404 y sus
   // errores de CSP no dependen de esta aplicación (y sin red fallan igual). Se
   // registran como aviso para no convertir un embed caído ajeno en regresión.
-  const esTercero = (texto) => /youtube|vimeo|ytimg|googlevideo/i.test(texto);
+  const esTercero = (texto) => /youtube|ytimg|googlevideo/i.test(texto);
   const alConsola = (mensaje) => {
     if (mensaje.type() !== 'error') return;
     const texto = mensaje.text().slice(0, 200);

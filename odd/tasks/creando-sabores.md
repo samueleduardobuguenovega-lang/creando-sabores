@@ -27,7 +27,7 @@ La plataforma registra **cantidades** de participantes, nunca nombres de alumnos
 | Receta ↔ Taller en tabla intermedia (`receta_taller`) | El RF-04 dice que una receta "podrá asociarse a uno o varios talleres". El diagrama del SRS la dibuja 1:N; se implementa N:M porque el texto manda y la receta debe ser reutilizable sin duplicarse. La diferencia queda documentada en `docs/modelo-datos.md`. |
 | Sesión en PostgreSQL (`connect-pg-simple`) | Sin estado en memoria: el servidor puede reiniciarse sin botar a los usuarios. |
 | Contraseñas con bcrypt | Nunca se guarda la clave en texto plano; la prueba lo verifica. |
-| Videos por embed de YouTube/Vimeo, no alojados | Cero costo de almacenamiento; el SRS ya pide solo registrar el enlace. |
+| Videos por embed de YouTube, no alojados | Cero costo de almacenamiento; el SRS ya pide solo registrar el enlace. |
 | Archivos fuera de `public/` | Un PDF de receta no debe quedar accesible sin sesión: se sirve por una ruta que valida rol. |
 
 ### Mapa SRS → código
@@ -59,7 +59,7 @@ Cada spec se cumple o no se cumple; no hay términos medios.
 - **S6** — El panel muestra el total de talleres, el desglose por estado, los últimos talleres ejecutados y accesos a Nuevo taller, Consultar e Informe.
 - **S7** — Una receta se identifica por un código único, guarda el enlace de su PDF y se vincula a uno o varios talleres sin duplicar el registro.
 - **S8** — Un documento PDF se sube con nombre, se asocia a un taller **o** a una receta (nunca a ambos), se valida tipo y tamaño, y se visualiza dentro del navegador con sesión iniciada.
-- **S9** — Un video se registra con nombre, descripción y enlace de YouTube o Vimeo; un enlace de otro proveedor se rechaza con mensaje claro.
+- **S9** — Un video se registra con nombre, descripción y enlace de YouTube; un enlace de otro proveedor se rechaza con mensaje claro.
 - **S10** — Una ejecución guarda fecha, taller, cantidad de participantes, observaciones opcionales y video opcional; al guardarla, el panel refleja el cambio.
 - **S11** — Toda acción relevante (crear, actualizar, eliminar) deja una fila en `auditoria` con el usuario responsable, la entidad y el id.
 - **S12** — El sitio público (inicio, talleres, ejecuciones) se ve sin sesión, es usable a 390 px de ancho y no expone datos personales.
@@ -122,7 +122,7 @@ Cada tarea corta vertical (esquema → lógica → pantalla → prueba) y declar
 
 - Alta de video con nombre, descripción, enlace y asociación; validación de proveedor con `enlaceVideo()`.
 - Reproductor embebido en el detalle del taller y en la ficha de receta.
-- Hecho cuando: S9 probado (enlace de YouTube y de Vimeo aceptados; otro dominio → 400).
+- Hecho cuando: S9 probado (enlace de YouTube aceptado; otro dominio → 400).
 - Superficies: `app/routes/videos.js` (nuevo), `app/views/admin/video-*.ejs` (nuevos), `app/tests/videos.test.js` (nuevo).
 
 ### T9 · Adaptabilidad, PWA y accesibilidad — *Francisco Puelles*

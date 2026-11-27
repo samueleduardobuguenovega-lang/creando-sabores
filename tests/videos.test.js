@@ -35,13 +35,13 @@ test('el apartado de videos exige sesión y muestra el formulario', async () => 
   const respuesta = await docente.get('/admin/videos');
   assert.equal(respuesta.estado, 200);
   assert.match(respuesta.texto, /Registrar video/);
-  assert.match(respuesta.texto, /YouTube o Vimeo/);
+  assert.match(respuesta.texto, /Enlace de YouTube/);
 });
 
-test('registra enlaces de YouTube y Vimeo asociados a un taller', async () => {
+test('registra enlaces de YouTube asociados a un taller', async () => {
   for (const [nombre, enlace, proveedor] of [
     ['Video YouTube', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'youtube'],
-    ['Video Vimeo', 'https://vimeo.com/123456789', 'vimeo'],
+    ['Video YouTube corto', 'https://youtu.be/dQw4w9WgXcQ', 'youtube'],
   ]) {
     const respuesta = await docente.post('/admin/videos', {
       nombre,
@@ -64,7 +64,11 @@ test('registra enlaces de YouTube y Vimeo asociados a un taller', async () => {
 });
 
 test('rechaza proveedores no admitidos y enlaces sin identificador válido', async () => {
-  for (const enlace of ['https://example.com/video', 'https://youtube.com/watch?v=no-valido']) {
+  for (const enlace of [
+    'https://example.com/video',
+    'https://vimeo.com/123456789',
+    'https://youtube.com/watch?v=no-valido',
+  ]) {
     const respuesta = await docente.post('/admin/videos', {
       nombre: 'Video inválido',
       descripcion: '',
@@ -72,7 +76,7 @@ test('rechaza proveedores no admitidos y enlaces sin identificador válido', asy
       destino: `taller:${idTaller}`,
     });
     assert.equal(respuesta.estado, 400);
-    assert.match(respuesta.texto, /YouTube|Vimeo|identificador de video válido/);
+    assert.match(respuesta.texto, /YouTube|identificador de video válido/);
   }
 
   const { rows } = await pool.query("SELECT COUNT(*)::int AS total FROM video WHERE nombre = 'Video inválido'");
@@ -108,6 +112,5 @@ test('el detalle del taller muestra el reproductor embebido', async () => {
 
   assert.equal(respuesta.estado, 200);
   assert.match(respuesta.texto, /youtube-nocookie\.com\/embed\/dQw4w9WgXcQ/);
-  assert.match(respuesta.texto, /player\.vimeo\.com\/video\/123456789/);
   assert.match(respuesta.texto, /iframe/);
 });

@@ -68,7 +68,7 @@ function enlaceHttp(valor, { campo = 'enlace' } = {}) {
   return { ok: true, valor: limpio };
 }
 
-// Reconoce los formatos habituales de YouTube y Vimeo y devuelve el proveedor.
+// Reconoce los formatos habituales de YouTube y devuelve el proveedor.
 function enlaceVideo(valor) {
   const limpio = (valor ?? '').toString().trim();
   let url;
@@ -99,22 +99,7 @@ function enlaceVideo(valor) {
       embedUrl: `https://www.youtube-nocookie.com/embed/${id}`,
     };
   }
-  if (host === 'vimeo.com' || host === 'player.vimeo.com') {
-    const partes = url.pathname.split('/').filter(Boolean);
-    const id = host === 'player.vimeo.com'
-      ? (partes[0] === 'video' ? partes[1] : null)
-      : partes[0];
-    if (!id || !/^\d+$/.test(id)) {
-      return { ok: false, error: 'El enlace de Vimeo no contiene un identificador de video válido.' };
-    }
-    return {
-      ok: true,
-      valor: limpio,
-      proveedor: 'vimeo',
-      embedUrl: `https://player.vimeo.com/video/${id}`,
-    };
-  }
-  return { ok: false, error: 'Solo se aceptan enlaces de YouTube o Vimeo.' };
+  return { ok: false, error: 'Solo se aceptan enlaces de YouTube.' };
 }
 
 function correoNoUsado() {

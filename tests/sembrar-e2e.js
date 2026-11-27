@@ -99,7 +99,7 @@ async function sembrar() {
   const videos = [
     ['Amasado paso a paso', 'YouTube', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'youtube', ids['Pan amasado y hallullas'], null, null],
     ['VIDEO OCULTO E2E', 'Borrador', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 'youtube', ids['TALLER OCULTO E2E'], null, null],
-    ['VIDEO PAPELERA E2E', 'Descartado', 'https://vimeo.com/76979871', 'vimeo', ids['Empanadas de pino'], null, new Date()],
+    ['VIDEO PAPELERA E2E', 'Descartado', 'https://youtu.be/76979871abc', 'youtube', ids['Empanadas de pino'], null, new Date()],
   ];
   for (const [nombre, descripcion, enlace, proveedor, idTaller, idReceta, eliminado] of videos) {
     await pool.query(

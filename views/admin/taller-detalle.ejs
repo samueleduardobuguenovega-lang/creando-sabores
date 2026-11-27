@@ -133,7 +133,7 @@
   </div>
 
   <% if (videos.length === 0) { %>
-    <div class="estado-vacio"><p>Sin videos todavía. Pega el enlace de YouTube o Vimeo de la clase.</p></div>
+    <div class="estado-vacio"><p>Sin videos todavía. Pega el enlace de YouTube de la clase.</p></div>
   <% } else { %>
     <ul class="lista-simple">
       <% videos.forEach(function (video) { %>
@@ -141,7 +141,7 @@
           <div>
             <strong><%= video.nombre %></strong>
             <% if (video.enlaceValidado) { %>
-              <a class="ayuda" href="<%= video.enlaceValidado %>" target="_blank" rel="noopener noreferrer">Abrir en <%= video.proveedor === 'youtube' ? 'YouTube' : 'Vimeo' %></a>
+              <a class="ayuda" href="<%= video.enlaceValidado %>" target="_blank" rel="noopener noreferrer">Abrir en YouTube</a>
             <% } %>
             <% if (video.embedUrl) { %>
               <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"
@@ -167,7 +167,7 @@
       <input type="hidden" name="volver" value="/admin/talleres/<%= taller.id %>">
       <label for="video-nombre">Nombre del video</label>
       <input id="video-nombre" name="nombre" maxlength="160" required placeholder="Ej.: Preparación de masa madre">
-      <label for="video-enlace">Enlace de YouTube o Vimeo</label>
+      <label for="video-enlace">Enlace de YouTube</label>
       <input id="video-enlace" name="enlace" type="url" required placeholder="https://www.youtube.com/watch?v=…" data-previa-video="#previa-video-taller">
       <div class="previa-video" id="previa-video-taller" hidden></div>
       <button type="submit" class="boton">Registrar video</button>

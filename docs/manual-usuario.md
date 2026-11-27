@@ -70,7 +70,7 @@ receta se puede asociar a varios talleres: se registra una sola vez y se reutili
 - **Documentos**: se sube un PDF de hasta 10 MB, se le pone un nombre y se asocia a un taller o a una
   receta. El tipo y el contenido del archivo se validan. Se puede leer dentro del navegador, sin
   descargarlo; solo se ve con sesión iniciada.
-- **Videos**: en el apartado Videos, registra el nombre, el enlace de YouTube o Vimeo, una descripción
+- **Videos**: en el apartado Videos, registra el nombre, el enlace de YouTube, una descripción
   opcional y el taller o receta asociado. No se sube el video a la plataforma: se guarda el enlace.
   Los videos asociados aparecen en el detalle del taller con su reproductor integrado.
 

@@ -71,7 +71,13 @@ router.get('/', async (req, res, next) => {
     // visitante puede abrir: sin papelera y con al menos un taller publicado
     // si está vinculada a alguno.
     const { rows: enElFuego } = await query(
-      `SELECT r.id, r.nombre
+      `SELECT r.id, r.nombre,
+              (SELECT d.id FROM documento d
+                WHERE d.id_receta = r.id
+                  AND d.eliminado_en IS NULL
+                  AND d.tipo_mime LIKE 'image/%'
+                ORDER BY d.id
+                LIMIT 1) AS id_imagen
          FROM receta r
         WHERE r.eliminado_en IS NULL
           AND EXISTS (SELECT 1 FROM documento d
@@ -83,7 +89,7 @@ router.get('/', async (req, res, next) => {
                             JOIN taller t ON t.id = rt2.id_taller
                            WHERE rt2.id_receta = r.id AND t.publicado AND t.eliminado_en IS NULL))
         ORDER BY r.id DESC
-        LIMIT 6`
+        LIMIT 12`
     );
 
     res.render('publico/inicio', {
@@ -548,7 +554,6 @@ router.get('/videos', async (req, res, next) => {
   try {
     const busqueda = (req.query.q ?? '').toString().trim();
     const idTaller = /^\d+$/.test(req.query.taller || '') ? Number(req.query.taller) : null;
-    const proveedor = ['youtube', 'vimeo'].includes(req.query.proveedor) ? req.query.proveedor : '';
 
     const { rows: videos } = await query(
       `SELECT video.id, video.nombre, video.descripcion, video.enlace, video.id_taller, video.id_receta,
@@ -561,24 +566,20 @@ router.get('/videos', async (req, res, next) => {
           AND ${PADRE_VISIBLE.replace(/d\./g, 'video.')}
           AND ($1 = '' OR video.nombre ILIKE '%' || $1 || '%' OR video.descripcion ILIKE '%' || $1 || '%')
           AND ($2::int IS NULL OR video.id_taller = $2)
-          AND ($3 = '' OR video.proveedor = $3)
         ORDER BY video.creado_en DESC, video.id DESC`,
-      [busqueda.length >= 2 ? busqueda.replace(/[\\%_]/g, '\\$&') : '', idTaller, proveedor]
+      [busqueda.length >= 2 ? busqueda.replace(/[\\%_]/g, '\\$&') : '', idTaller]
     );
 
     const { rows: talleres } = await query(
       `SELECT id, nombre FROM taller WHERE publicado AND eliminado_en IS NULL ORDER BY nombre`
     );
 
-    const urlFiltro = creadorDeUrls('/videos', { q: busqueda, taller: idTaller, proveedor });
+    const urlFiltro = creadorDeUrls('/videos', { q: busqueda, taller: idTaller });
     const chips = [];
     if (busqueda) chips.push(chip(`Búsqueda: ${busqueda}`, urlFiltro({ q: '' })));
     if (idTaller) {
       const elegido = talleres.find((fila) => fila.id === idTaller);
       chips.push(chip(`Taller: ${elegido ? elegido.nombre : '#' + idTaller}`, urlFiltro({ taller: '' })));
-    }
-    if (proveedor) {
-      chips.push(chip(`Proveedor: ${proveedor === 'youtube' ? 'YouTube' : 'Vimeo'}`, urlFiltro({ proveedor: '' })));
     }
 
     res.render('publico/videos', {
@@ -588,7 +589,6 @@ router.get('/videos', async (req, res, next) => {
       titulo: 'Videos',
       busqueda,
       idTaller,
-      proveedor,
       talleres,
       chips,
       urlFiltro,

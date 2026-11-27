@@ -253,15 +253,10 @@
           return { proveedor: 'youtube', id: partes[1] };
         }
       }
-      if (host === 'vimeo.com' || host === 'player.vimeo.com') {
-        var trozos = direccion.pathname.split('/').filter(Boolean);
-        var numero = trozos[0] === 'video' ? trozos[1] : trozos[0];
-        if (/^\d+$/.test(numero)) return { proveedor: 'vimeo', id: numero };
-      }
+      return null;
     } catch (error) {
       return null;
     }
-    return null;
   }
 
   Array.prototype.forEach.call(document.querySelectorAll('input[data-previa-video]'), function (entrada) {
@@ -275,9 +270,7 @@
         return;
       }
       var marco = document.createElement('iframe');
-      marco.src = video.proveedor === 'youtube'
-        ? 'https://www.youtube-nocookie.com/embed/' + video.id
-        : 'https://player.vimeo.com/video/' + video.id;
+      marco.src = 'https://www.youtube-nocookie.com/embed/' + video.id;
       marco.title = 'Vista previa del video';
       marco.loading = 'lazy';
       marco.setAttribute('allowfullscreen', '');

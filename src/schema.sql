@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS video (
   nombre      VARCHAR(160) NOT NULL,
   descripcion TEXT         NOT NULL DEFAULT '',
   enlace      TEXT         NOT NULL,
-  proveedor   VARCHAR(20)  NOT NULL CHECK (proveedor IN ('youtube', 'vimeo')),
+  proveedor   VARCHAR(20)  NOT NULL CHECK (proveedor IN ('youtube')),
   id_taller   INTEGER      REFERENCES taller(id) ON DELETE CASCADE,
   id_receta   INTEGER      REFERENCES receta(id) ON DELETE CASCADE,
   id_usuario  INTEGER      NOT NULL REFERENCES usuario(id),

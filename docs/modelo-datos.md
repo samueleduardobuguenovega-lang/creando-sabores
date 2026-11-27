@@ -75,7 +75,7 @@ erDiagram
         varchar nombre
         text descripcion
         text enlace
-        varchar proveedor "youtube | vimeo"
+        varchar proveedor "youtube"
         int id_taller FK
         int id_receta FK
         int id_usuario FK

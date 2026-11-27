@@ -21,14 +21,6 @@
         <% }) %>
       </select>
     </div>
-    <div>
-      <label for="f-proveedor">Plataforma</label>
-      <select id="f-proveedor" name="proveedor">
-        <option value="">Todas</option>
-        <option value="youtube" <%= proveedor === 'youtube' ? 'selected' : '' %>>YouTube</option>
-        <option value="vimeo" <%= proveedor === 'vimeo' ? 'selected' : '' %>>Vimeo</option>
-      </select>
-    </div>
     <button type="submit" class="boton">Filtrar</button>
   </form>
 </section>
@@ -53,7 +45,7 @@
         <div class="carpeta-cuerpo">
           <p class="ayuda">
             En <a href="<%= video.destino %>"><%= video.asociado %></a>
-            <% if (video.proveedor) { %> · <%- icono('video') %><%= video.proveedor === 'youtube' ? 'YouTube' : 'Vimeo' %><% } %>
+            <% if (video.proveedor) { %> · <%- icono('video') %>YouTube<% } %>
           </p>
           <% if (video.embedUrl) { %>
             <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"

@@ -1,4 +1,4 @@
-// Registro de videos de YouTube y Vimeo (RF-05 / CU-05).
+// Registro de videos de YouTube (RF-05 / CU-05).
 const express = require('express');
 const { query } = require('../src/db');
 const { requiereSesion, requiereRol } = require('../src/auth');

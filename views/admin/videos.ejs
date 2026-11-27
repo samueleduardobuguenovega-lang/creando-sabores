@@ -9,7 +9,7 @@
 
 <section class="tarjeta">
   <h2>Registrar video</h2>
-  <p class="ayuda">Agrega enlaces de YouTube o Vimeo y asócialos a un taller o receta.</p>
+  <p class="ayuda">Agrega enlaces de YouTube y asócialos a un taller o receta.</p>
 
   <% if (errores.length > 0) { %>
     <div class="mensaje mensaje-error" role="alert">
@@ -27,7 +27,7 @@
     <label for="descripcion">Descripción</label>
     <textarea id="descripcion" name="descripcion" rows="4" maxlength="2000"><%= valores.descripcion || '' %></textarea>
 
-    <label for="enlace">Enlace de YouTube o Vimeo</label>
+    <label for="enlace">Enlace de YouTube</label>
     <input id="enlace" name="enlace" type="url" required
            placeholder="https://www.youtube.com/watch?v=..."
            value="<%= valores.enlace || '' %>">
@@ -68,7 +68,7 @@
           <span>
             <strong><%= video.nombre %></strong><br>
             <span class="ayuda"><%= video.tipo_asociacion %>: <%= video.asociado_a %> ·
-              <%= video.proveedor === 'youtube' ? 'YouTube' : 'Vimeo' %></span>
+              YouTube</span>
             <% if (video.descripcion) { %><br><span><%= video.descripcion %></span><% } %>
             <% if (video.embedUrl) { %>
               <iframe class="video-reproductor" src="<%= video.embedUrl %>" title="<%= video.nombre %>"

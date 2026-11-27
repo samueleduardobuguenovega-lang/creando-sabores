@@ -56,6 +56,29 @@ const COMANDOS = {
   },
 };
 
+// Miniatura de la galería: la tarjeta mide 165 px en un teléfono, así que con
+// 480 px de ancho alcanza y sobra para pantallas de doble densidad. WebP pesa
+// entre tres y cuatro veces menos que el mismo JPEG, y la foto guardada sigue
+// siendo el original reducido a 1600 px para la ficha y la descarga.
+const COMANDO_MINIATURA = [
+  '-',
+  '-auto-orient',
+  '-resize',
+  '480x480>',
+  '-strip',
+  '-quality',
+  '78',
+  '-define',
+  'webp:method=6',
+  'webp:-',
+];
+
+function esWebp(salida) {
+  return salida.length > 12
+    && salida.subarray(0, 4).toString('latin1') === 'RIFF'
+    && salida.subarray(8, 12).toString('latin1') === 'WEBP';
+}
+
 function ejecutar(binario, argumentos, entrada) {
   return new Promise((resolver, rechazar) => {
     const proceso = execFile(
@@ -141,6 +164,27 @@ async function optimizar(buffer, tipoMime, nombreArchivo) {
   }
 }
 
+/**
+ * Genera la miniatura WebP que usa la galería pública.
+ * Devuelve null si el archivo no es una foto o si ImageMagick no está: la
+ * galería cae entonces en el archivo completo, sin romperse.
+ * @returns {Promise<Buffer|null>}
+ */
+async function miniatura(buffer, tipoMime, nombreArchivo) {
+  const tipo = tipoDe(tipoMime, nombreArchivo);
+  if (!tipo || tipo.familia !== 'imagen') return null;
+
+  try {
+    const salida = await ejecutar(process.env.MAGICK_BIN || 'magick', COMANDO_MINIATURA, buffer);
+    if (!salida || !esWebp(salida)) return null;
+    // Si no gana peso, no vale la pena guardar una copia: se sigue usando el original.
+    if (salida.length >= buffer.length) return null;
+    return salida;
+  } catch (error) {
+    return null;
+  }
+}
+
 function porcentajeAhorro(resultado) {
   if (!resultado.comprimido || !resultado.original) return 0;
   return Math.round((1 - resultado.buffer.length / resultado.original) * 100);
@@ -156,6 +200,7 @@ module.exports = {
   TIPOS,
   contenidoValido,
   describirTamano,
+  miniatura,
   optimizar,
   porcentajeAhorro,
   tipoDe,

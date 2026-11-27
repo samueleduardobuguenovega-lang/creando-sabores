@@ -49,8 +49,14 @@
         <a class="archivo-enlace" href="/documentos/<%= documento.id %>/ver">
           <span class="archivo-miniatura<%= esImagen ? '' : ' archivo-miniatura-pdf' %>">
             <% if (esImagen) { %>
-              <%# La foto es el contenido: se muestra en vez de listar el nombre. %>
-              <img src="/documentos/<%= documento.id %>/ver" alt="" loading="lazy" decoding="async">
+              <%# La foto es el contenido: se muestra en vez de listar el nombre.
+                  La tarjeta pide la miniatura de 480 px y sólo escala a la foto
+                  completa cuando la pantalla la necesita de verdad. %>
+              <img src="/documentos/<%= documento.id %>/miniatura"
+                   srcset="/documentos/<%= documento.id %>/miniatura 480w,
+                           /documentos/<%= documento.id %>/ver 1600w"
+                   sizes="(min-width: 900px) 296px, 45vw"
+                   alt="" loading="lazy" decoding="async">
             <% } else { %>
               <%- icono('pdf') %>
             <% } %>

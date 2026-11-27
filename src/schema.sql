@@ -69,6 +69,11 @@ CREATE TABLE IF NOT EXISTS documento (
 
 ALTER TABLE documento ADD COLUMN IF NOT EXISTS contenido BYTEA;
 
+-- Copia liviana para la galería pública (WebP de 480 px). Se genera al subir y
+-- queda nula para los PDF y para las fotos subidas antes de existir la galería;
+-- en ese caso la miniatura se arma con el archivo completo.
+ALTER TABLE documento ADD COLUMN IF NOT EXISTS miniatura BYTEA;
+
 CREATE TABLE IF NOT EXISTS video (
   id          SERIAL PRIMARY KEY,
   nombre      VARCHAR(160) NOT NULL,

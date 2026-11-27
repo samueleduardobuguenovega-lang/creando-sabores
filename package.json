@@ -10,7 +10,8 @@
     "instalar": "node src/instalar.js",
     "seed": "node src/seed.js",
     "test": "node --test --test-concurrency=1 tests/*.test.js",
-    "test:e2e": "node tests/e2e-invariantes.js"
+    "test:e2e": "node tests/e2e-invariantes.js",
+    "miniaturas": "node src/miniaturas.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

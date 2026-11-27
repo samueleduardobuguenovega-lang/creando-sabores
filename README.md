@@ -42,7 +42,9 @@ servidor: no hay bundler ni framework de cliente, sólo Node, EJS y CSS propio.
   PDF y con las fotos propias de cada preparación.
 - **Panel**: alta y edición de talleres, recetas, ejecuciones, documentos y videos, con
   permisos por rol y auditoría de cambios.
-- **Archivos**: los PDF se comprimen y las fotos se orientan y reducen al subirlos.
+- **Archivos**: los PDF se comprimen y las fotos se orientan y reducen al subirlos. La
+  galería no baja la foto de 1600 px: cada tarjeta recibe un WebP de 480 px con `srcset` y
+  `loading="lazy"`, y sólo escala a la completa si la pantalla lo necesita.
 - **Videos**: sólo enlaces de **YouTube**; cualquier otro proveedor se rechaza con un mensaje
   claro en el formulario.
 - **Navegación en teléfono**: barra inferior fija con cinco destinos, sin menú hamburguesa.
@@ -167,7 +169,8 @@ src/schema.sql         esquema completo de la base
 src/instalar.js        crea o actualiza las tablas
 src/seed.js            datos y usuarios de ejemplo
 src/pdf.js             convierte la primera página del PDF en imagen
-src/archivos.js        comprime PDF y fotos al subirlos
+src/archivos.js        comprime PDF y fotos al subirlos y arma la miniatura WebP
+src/miniaturas.js      completa las miniaturas que falten (npm run miniaturas)
 routes/                rutas públicas y del panel
 views/                 plantillas EJS (publico/, admin/, partials/)
 public/css/            estilos: estilos.css (base) y cartel.css (capa final)

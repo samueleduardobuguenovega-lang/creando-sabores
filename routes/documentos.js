@@ -194,10 +194,18 @@ router.post('/admin/documentos', requiereSesion, (req, res, next) => {
             ? nombre.valor
             : `${nombre.valor} (${optimizados.length + 1})`
           : archivo.originalname.replace(/\.[^.]+$/, '').slice(0, 120);
+        // La galería pública usa una copia de 480 px en WebP; la foto completa
+        // queda para la ficha y la descarga.
+        const liviana = await archivos.miniatura(
+          optimizado.buffer,
+          optimizado.tipoMime,
+          optimizado.archivo
+        );
         optimizados.push({
           ...optimizado,
           nombre: nombreBase,
           archivo: `${crypto.randomUUID()}${optimizado.extension}`,
+          miniatura: liviana,
         });
       }
 
@@ -210,8 +218,8 @@ router.post('/admin/documentos', requiereSesion, (req, res, next) => {
         await cliente.query('BEGIN');
         for (const optimizado of optimizados) {
           const { rows } = await cliente.query(
-            `INSERT INTO documento (nombre, archivo, tipo_mime, tamano, contenido, id_taller, id_receta, id_usuario)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            `INSERT INTO documento (nombre, archivo, tipo_mime, tamano, contenido, miniatura, id_taller, id_receta, id_usuario)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
              RETURNING id`,
             [
               optimizado.nombre,
@@ -219,6 +227,7 @@ router.post('/admin/documentos', requiereSesion, (req, res, next) => {
               optimizado.tipoMime,
               optimizado.buffer.length,
               optimizado.buffer,
+              optimizado.miniatura,
               idTaller,
               idReceta,
               req.session.usuario.id,
@@ -334,6 +343,56 @@ router.get('/documentos/:id/ver', (req, res, next) => enviarPdf(req, res, next, 
 router.get('/documentos/:id/descargar', (req, res, next) =>
   enviarPdf(req, res, next, { publico: true, descarga: true })
 );
+
+// Miniatura liviana para la galería pública: WebP de 480 px generado al subir.
+// Si la foto es anterior a esa columna, se responde con el archivo completo para
+// que la tarjeta nunca quede rota. Se cachea una semana: el contenido de un
+// documento no cambia (se reemplaza por otro documento).
+router.get('/documentos/:id/miniatura', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id < 1) return next();
+
+    const { rows } = await query(
+      `SELECT d.tipo_mime, d.contenido, d.miniatura,
+              EXISTS (SELECT 1 FROM taller t
+                       WHERE t.id = d.id_taller AND t.publicado AND t.eliminado_en IS NULL)
+              OR (d.id_receta IS NOT NULL
+                  AND EXISTS (SELECT 1 FROM receta r
+                               WHERE r.id = d.id_receta AND r.eliminado_en IS NULL)
+                  AND (NOT EXISTS (SELECT 1 FROM receta_taller rt WHERE rt.id_receta = d.id_receta)
+                       OR EXISTS (SELECT 1 FROM receta_taller rt
+                                    JOIN taller t2 ON t2.id = rt.id_taller
+                                   WHERE rt.id_receta = d.id_receta
+                                     AND t2.publicado AND t2.eliminado_en IS NULL))) AS visible
+         FROM documento d
+        WHERE d.id = $1 AND d.eliminado_en IS NULL`,
+      [id]
+    );
+
+    const fila = rows[0];
+    if (!fila || !fila.visible) return next();
+
+    if (fila.miniatura) {
+      res.set({
+        'Content-Type': 'image/webp',
+        'Cache-Control': 'public, max-age=604800, immutable',
+        'X-Content-Type-Options': 'nosniff',
+      });
+      return res.send(fila.miniatura);
+    }
+
+    if (!fila.contenido || !/^image\//.test(fila.tipo_mime || '')) return next();
+    res.set({
+      'Content-Type': fila.tipo_mime,
+      'Cache-Control': 'public, max-age=3600',
+      'X-Content-Type-Options': 'nosniff',
+    });
+    return res.send(fila.contenido);
+  } catch (error) {
+    return next(error);
+  }
+});
 
 // Una página del PDF convertida en imagen: es lo que permite leer el archivo
 // dentro de la receta, porque Chrome en Android no muestra PDF incrustado.

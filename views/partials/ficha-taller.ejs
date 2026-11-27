@@ -14,7 +14,7 @@
       <p class="ficha-desc"><%= taller.descripcion %></p>
     <% } %>
     <p class="ficha-campos">
-      <span class="campo-archivo">Fecha<b><%= fecha(taller.fecha_planificada) %></b></span>
+      <span class="campo-archivo">Fecha<b><%= taller.fecha_planificada ? fecha(taller.fecha_planificada) : 'Sin fecha' %></b></span>
       <span class="campo-archivo">Participantes<b><%= taller.participantes ? taller.participantes : (taller.estado === 'planificado' ? 'por definir' : '0') %></b></span>
       <span class="campo-archivo">Ejecuciones<b><%= taller.ejecuciones %></b></span>
       <span class="campo-archivo">Recetas<b><%= taller.recetas %></b></span>

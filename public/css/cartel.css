@@ -2662,3 +2662,145 @@ p,
 @keyframes girar {
   to { transform: rotate(360deg); }
 }
+
+/* =====================================================================
+   Modo simple de teléfono — 2026-11-27
+   La app la usan niños con capacidades diferentes en el taller. En pantalla
+   chica manda una idea por bloque: foto, nombre, cuándo y estado. Todo lo
+   que es explicación de escritorio se retira, y lo que queda se agranda.
+   ===================================================================== */
+
+@media (max-width: 720px) {
+  /* Base más grande: todo lo que sigue crece con esto. */
+  html {
+    font-size: 18px;
+  }
+
+  /* Antes de la primera ficha había cinco bloques (cinta, rótulo, entrada de
+     tres líneas, chips, contador). Quedan el título y los filtros. */
+  .cinta,
+  .caratula .rotulo,
+  .caratula .caratula-texto,
+  .contador-resultados,
+  .carpeta-tab {
+    display: none;
+  }
+
+  /* Buscar es una tarea de adulto con teclado; en el teléfono estorba. */
+  .cabecera .busqueda {
+    display: none;
+  }
+
+  .caratula,
+  .caratula-corta {
+    min-height: 0;
+    padding-block: 20px 12px;
+  }
+
+  .caratula h1 {
+    font-size: clamp(2.5rem, 13vw, 3.25rem);
+    line-height: 0.95;
+    letter-spacing: 0;
+  }
+
+  .chips {
+    gap: 8px;
+    padding-block: 4px;
+  }
+
+  .chip {
+    min-height: 48px;
+    font-size: 0.95rem;
+  }
+
+  .fichas-archivo {
+    gap: 20px;
+  }
+
+  /* La ficha queda en tres cosas: foto grande, nombre grande, cuándo. */
+  .ficha-archivo .foto-hueco,
+  .ficha-archivo img.foto-real {
+    aspect-ratio: 16 / 9;
+  }
+
+  .ficha-texto h3 {
+    font-size: 1.45rem;
+    line-height: 1.15;
+  }
+
+  .ficha-desc {
+    display: none;
+  }
+
+  .ficha-campos .campo-archivo:nth-child(n + 2) {
+    display: none;
+  }
+
+  .ficha-campos .campo-archivo b {
+    font-size: 1.05rem;
+  }
+
+  /* El sello de estado se queda sobre la foto, con fondo sólido para que se
+     lea sin depender del brillo del teléfono. */
+  .ficha-archivo .sello-archivo {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    background: #fff;
+    font-size: 0.95rem;
+    padding: 6px 12px;
+  }
+
+  /* Un solo botón grande por ficha, del ancho de la pantalla. */
+  .ficha-archivo .ficha-abrir {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 56px;
+    margin: 12px 16px 16px;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: var(--primario);
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  /* El nombre de la ficha es el objetivo más grande de la tarjeta. */
+  .ficha-archivo .enlace-ficha {
+    display: block;
+    min-height: 44px;
+  }
+
+  .boton {
+    min-height: 56px;
+    padding-inline: 20px;
+    font-size: 1.1rem;
+  }
+
+  /* En las fichas de detalle el cuerpo de texto se lee más suelto. */
+  .contenido-principal p,
+  .contenido-principal li,
+  .ficha dd,
+  .ficha dt {
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+
+  /* Portada: la foto manda, el párrafo de presentación y la etiqueta que gira
+     se retiran en el teléfono; quedan el título y los dos botones. */
+  .cierre-texto p,
+  .cierre-texto .plato-turno {
+    display: none;
+  }
+
+  .banda-negra .lista-tematicas li,
+  .banda-negra .lista-tematicas a {
+    min-height: 48px;
+  }
+
+  .pie {
+    padding-bottom: 24px;
+  }
+}

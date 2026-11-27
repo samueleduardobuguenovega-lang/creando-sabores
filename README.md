@@ -11,17 +11,27 @@ servidor: no hay bundler ni framework de cliente, sólo Node, EJS y CSS propio.
 
 **Escritorio**
 
-![Portada](docs/capturas/inicio-escritorio.webp)
-![Talleres](docs/capturas/talleres-escritorio.webp)
-![Recetario](docs/capturas/recetas-escritorio.webp)
-![Ficha de taller](docs/capturas/taller-detalle-escritorio.webp)
+<table>
+  <tr>
+    <td width="50%"><img src="docs/capturas/inicio-escritorio.webp" alt="Portada"></td>
+    <td width="50%"><img src="docs/capturas/talleres-escritorio.webp" alt="Talleres"></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/capturas/recetas-escritorio.webp" alt="Recetario"></td>
+    <td width="50%"><img src="docs/capturas/taller-detalle-escritorio.webp" alt="Ficha de taller"></td>
+  </tr>
+</table>
 
 **Teléfono** (390 × 844, navegación inferior fija de cinco destinos)
 
-![Portada en teléfono](docs/capturas/inicio-movil.webp)
-![Talleres en teléfono](docs/capturas/talleres-movil.webp)
-![Ficha de taller en teléfono](docs/capturas/taller-detalle-movil.webp)
-![Archivos en teléfono](docs/capturas/archivos-movil.webp)
+<table>
+  <tr>
+    <td width="25%"><img src="docs/capturas/inicio-movil.webp" alt="Portada en teléfono"></td>
+    <td width="25%"><img src="docs/capturas/talleres-movil.webp" alt="Talleres en teléfono"></td>
+    <td width="25%"><img src="docs/capturas/taller-detalle-movil.webp" alt="Ficha de taller en teléfono"></td>
+    <td width="25%"><img src="docs/capturas/archivos-movil.webp" alt="Archivos en teléfono"></td>
+  </tr>
+</table>
 
 ## Qué incluye
 
